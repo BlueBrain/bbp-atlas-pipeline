@@ -7,4 +7,5 @@ This pipeline is in charge of the orchestration of all the modules involved in t
 - Brain region meshes (OBJ)
 - Cell position and orientation file (HDF5)
 
+
 This atlas relies on Allen Mouse CCF v2 and v3 dataset.
