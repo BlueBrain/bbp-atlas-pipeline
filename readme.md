@@ -1,3 +1,22 @@
+# Installation
+The pipeline is orchestrated by [SnakeMake](https://snakemake.readthedocs.io) and the *snakefile* in the root folder of this repository. This means SnakeMake must be installed:
+```
+pip install snakemake
+```
+Note: this uses **Python 3.6** or more recent.
+
+# Configuration
+The configuration of the pipeline is written in the file `config.yaml`.  
+Before running the pipeline, make sure you modify:
+- `WORKING_DIR` with a directory of your choice (will contain all the files, temporary or not)
+- `NEXUS_TOKEN_FILE` with a local text file of yours that contains the token
+- optionally `NEXUS_IDS_FILE` if the @ids have changed or if you are using a different Nexus environment
+
+If you do not want to modify the config file, you can still overload the config settings when running the pipeline in command line using the `--config` flag:
+```
+snakemake --config RESOLUTION="10" --forcerun some_rule
+```
+
 # Launch the pipeline
 In a terminal, first `cd` the *workflow* folder:
 ```
@@ -19,9 +38,3 @@ Then to launch the pipeline up to a certain task:
 snakemake --forcerun some_rule
 ```
 where `some_rule` is the actual name of a rule, such as `combine`
-
-# configuration
-The `workflow/config.yaml` file contains a default config but all the arguments can be overloaded with the `--config` flag:
-```
-snakemake --config RESOLUTION="10" snakemake --forcerun some_rule
-```

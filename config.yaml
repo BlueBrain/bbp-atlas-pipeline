@@ -4,3 +4,4 @@ NEXUS_ORG: "bbp"
 NEXUS_PROJ: "atlas"
 NEXUS_TOKEN_FILE: "/Users/lurie/Documents/BBP/data/pipeline_working_dir/token.txt"
 RESOLUTION: "25"
+NEXUS_IDS_FILE: ./nexus_ids.json

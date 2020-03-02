@@ -1,5 +1,6 @@
 import os
 import subprocess
+import json
 
 # loading the config
 configfile: "config.yaml"
@@ -10,6 +11,7 @@ NEXUS_ENV = config["NEXUS_ENV"]
 NEXUS_ORG = config["NEXUS_ORG"]
 NEXUS_PROJ = config["NEXUS_PROJ"]
 NEXUS_TOKEN_FILE = config["NEXUS_TOKEN_FILE"]
+NEXUS_IDS_FILE = config["NEXUS_IDS_FILE"]
 RESOLUTION = str(config["RESOLUTION"])
 LOG_FILE = os.path.join(WORKING_DIR, "log.log")
 VERSION_FILE = os.path.join(WORKING_DIR, "versions.txt")
@@ -33,26 +35,8 @@ for app in APPS:
     version_file.write("\n")
 version_file.close()
 
-# defining some Nexus file @id mapping
-NEXUS_IDS = {
-
-    "hierarchy": "https://bbp.epfl.ch/neurosciencegraph/data/10856ee4-5426-4386-91eb-4f1c7e77d86d",
-
-    # resolution 10 microns
-    "10": {
-        "brain_parcellation_ccfv2" : "https://bbp.epfl.ch/neurosciencegraph/data/7f85cd66-d212-4799-bb4c-0732b8534442",
-        "brain_parcellation_ccfv3" : "https://bbp.epfl.ch/neurosciencegraph/data/e238a1f6-0b30-48df-ac8b-6185efe10a59",
-        "fiber_parcellation_ccfv2" : "https://bbp.epfl.ch/neurosciencegraph/data/2f26c63b-6d01-4540-bf8b-b0a2a7c59597"
-    },
-
-    # resolution 25 microns
-    "25": {
-        "brain_parcellation_ccfv2" : "https://bbp.epfl.ch/neurosciencegraph/data/7b4b36ad-911c-4758-8686-2bf7943e10fb",
-        "brain_parcellation_ccfv3" : "https://bbp.epfl.ch/neurosciencegraph/data/025eef5f-2a9a-4119-b53f-338452c72f2a",
-        "fiber_parcellation_ccfv2" : "https://bbp.epfl.ch/neurosciencegraph/data/a4552116-607b-469e-ad2a-50bba00c23d8"
-    }
-}
-
+# Reading some Nexus file @id mapping
+NEXUS_IDS = json.loads(open(NEXUS_IDS_FILE, 'r').read().strip())
 
 # fetch the hierarchy file, originally called 1.json
 rule fetch_ccf_brain_region_hierarchy:
@@ -61,7 +45,7 @@ rule fetch_ccf_brain_region_hierarchy:
     output:
         "{}/hierarchy.json".format(WORKING_DIR)
     params:
-        nexus_id=NEXUS_IDS["hierarchy"],
+        nexus_id=NEXUS_IDS["brain_region_hierarchies"]["allen_mouse_ccf"],
         app=APPS["bba-datafetch"]
     log:
         LOG_FILE
@@ -86,7 +70,7 @@ rule fetch_brain_parcellation_ccfv2:
     output:
         "{}/brain_parcellation_ccfv2.nrrd".format(WORKING_DIR)
     params:
-        nexus_id=NEXUS_IDS[RESOLUTION]["brain_parcellation_ccfv2"],
+        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["parcellations"]["brain_ccfv2"],
         app=APPS["bba-datafetch"]
     log:
         LOG_FILE
@@ -110,7 +94,7 @@ rule fetch_fiber_parcellation_ccfv2:
     output:
         "{}/fiber_parcellation_ccfv2.nrrd".format(WORKING_DIR)
     params:
-        nexus_id=NEXUS_IDS[RESOLUTION]["fiber_parcellation_ccfv2"],
+        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["parcellations"]["fiber_ccfv2"],
         app=APPS["bba-datafetch"]
     log:
         LOG_FILE
@@ -133,7 +117,7 @@ rule fetch_brain_parcellation_ccfv3:
     output:
         "{}/brain_parcellation_ccfv3.nrrd".format(WORKING_DIR)
     params:
-        nexus_id=NEXUS_IDS[RESOLUTION]["brain_parcellation_ccfv3"],
+        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["parcellations"]["brain_ccfv3"],
         app=APPS["bba-datafetch"]
     log:
         LOG_FILE
@@ -149,7 +133,6 @@ rule fetch_brain_parcellation_ccfv3:
             2>&1 | tee -a {log}
         """
 
-
 # combine the volumes
 rule combine:
     input:
@@ -162,4 +145,165 @@ rule combine:
     shell:
         """
         echo "this is the fake combine task" > {output}
+        """
+
+# fetch the gene expression volume for gene aldh1l1
+rule fetch_gene_aldh1l1:
+    input:
+        token=NEXUS_TOKEN_FILE
+    output:
+        "{}/gene_aldh1l1.nrrd".format(WORKING_DIR)
+    params:
+        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["aldh1l1"],
+        app=APPS["bba-datafetch"]
+    log:
+        LOG_FILE
+    shell:
+        """
+        {params.app} --nexus-env {NEXUS_ENV} \
+            --nexus-token-file {input.token} \
+            --nexus-org {NEXUS_ORG} \
+            --nexus-proj {NEXUS_PROJ} \
+            --out {output} \
+            --nexus-id {params.nexus_id} \
+            --verbose \
+            2>&1 | tee -a {log}
+        """
+
+# fetch the gene expression volume for gene cnp
+rule fetch_gene_cnp:
+    input:
+        token=NEXUS_TOKEN_FILE
+    output:
+        "{}/gene_cnp.nrrd".format(WORKING_DIR)
+    params:
+        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["cnp"],
+        app=APPS["bba-datafetch"]
+    log:
+        LOG_FILE
+    shell:
+        """
+        {params.app} --nexus-env {NEXUS_ENV} \
+            --nexus-token-file {input.token} \
+            --nexus-org {NEXUS_ORG} \
+            --nexus-proj {NEXUS_PROJ} \
+            --out {output} \
+            --nexus-id {params.nexus_id} \
+            --verbose \
+            2>&1 | tee -a {log}
+        """
+
+# fetch the gene expression volume for gene gad
+rule fetch_gene_gad:
+    input:
+        token=NEXUS_TOKEN_FILE
+    output:
+        "{}/gene_gad.nrrd".format(WORKING_DIR)
+    params:
+        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["gad"],
+        app=APPS["bba-datafetch"]
+    log:
+        LOG_FILE
+    shell:
+        """
+        {params.app} --nexus-env {NEXUS_ENV} \
+            --nexus-token-file {input.token} \
+            --nexus-org {NEXUS_ORG} \
+            --nexus-proj {NEXUS_PROJ} \
+            --out {output} \
+            --nexus-id {params.nexus_id} \
+            --verbose \
+            2>&1 | tee -a {log}
+        """
+
+# fetch the gene expression volume for gene gfap
+rule fetch_gene_gfap:
+    input:
+        token=NEXUS_TOKEN_FILE
+    output:
+        "{}/gene_gfap.nrrd".format(WORKING_DIR)
+    params:
+        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["gfap"],
+        app=APPS["bba-datafetch"]
+    log:
+        LOG_FILE
+    shell:
+        """
+        {params.app} --nexus-env {NEXUS_ENV} \
+            --nexus-token-file {input.token} \
+            --nexus-org {NEXUS_ORG} \
+            --nexus-proj {NEXUS_PROJ} \
+            --out {output} \
+            --nexus-id {params.nexus_id} \
+            --verbose \
+            2>&1 | tee -a {log}
+        """
+
+# fetch the gene expression volume for gene nrn1
+rule fetch_gene_nrn1:
+    input:
+        token=NEXUS_TOKEN_FILE
+    output:
+        "{}/gene_nrn1.nrrd".format(WORKING_DIR)
+    params:
+        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["nrn1"],
+        app=APPS["bba-datafetch"]
+    log:
+        LOG_FILE
+    shell:
+        """
+        {params.app} --nexus-env {NEXUS_ENV} \
+            --nexus-token-file {input.token} \
+            --nexus-org {NEXUS_ORG} \
+            --nexus-proj {NEXUS_PROJ} \
+            --out {output} \
+            --nexus-id {params.nexus_id} \
+            --verbose \
+            2>&1 | tee -a {log}
+        """
+
+# fetch the gene expression volume for gene s100b
+rule fetch_gene_s100b:
+    input:
+        token=NEXUS_TOKEN_FILE
+    output:
+        "{}/gene_s100b.nrrd".format(WORKING_DIR)
+    params:
+        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["s100b"],
+        app=APPS["bba-datafetch"]
+    log:
+        LOG_FILE
+    shell:
+        """
+        {params.app} --nexus-env {NEXUS_ENV} \
+            --nexus-token-file {input.token} \
+            --nexus-org {NEXUS_ORG} \
+            --nexus-proj {NEXUS_PROJ} \
+            --out {output} \
+            --nexus-id {params.nexus_id} \
+            --verbose \
+            2>&1 | tee -a {log}
+        """
+
+# fetch the gene expression volume for gene tmem119
+rule fetch_gene_tmem119:
+    input:
+        token=NEXUS_TOKEN_FILE
+    output:
+        "{}/gene_tmem119.nrrd".format(WORKING_DIR)
+    params:
+        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["tmem119"],
+        app=APPS["bba-datafetch"]
+    log:
+        LOG_FILE
+    shell:
+        """
+        {params.app} --nexus-env {NEXUS_ENV} \
+            --nexus-token-file {input.token} \
+            --nexus-org {NEXUS_ORG} \
+            --nexus-proj {NEXUS_PROJ} \
+            --out {output} \
+            --nexus-id {params.nexus_id} \
+            --verbose \
+            2>&1 | tee -a {log}
         """
