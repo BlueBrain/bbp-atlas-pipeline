@@ -1,6 +1,6 @@
 {
   "brain_region_hierarchies": {
-    "allen_mouse_ccf": "https://bbp.epfl.ch/neurosciencegraph/data/10856ee4-5426-4386-91eb-4f1c7e77d86d"
+    "allen_mouse_ccf": "http://bbp.epfl.ch/neurosciencegraph/ontologies/mba"
   },
 
   "volumes": {

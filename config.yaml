@@ -1,7 +1,7 @@
-WORKING_DIR: "/Users/lurie/Documents/BBP/data/pipeline_working_dir"
+WORKING_DIR: "/Users/lurie/Documents/BBP/data/pipeline_working_dir2"
 NEXUS_ENV: "https://bbp.epfl.ch/nexus/v1/"
 NEXUS_ORG: "bbp"
 NEXUS_PROJ: "atlas"
-NEXUS_TOKEN_FILE: "/Users/lurie/Documents/BBP/data/pipeline_working_dir/token.txt"
+NEXUS_TOKEN_FILE: "/Users/lurie/Documents/BBP/data/pipeline_working_dir2/token.txt"
 RESOLUTION: "25"
 NEXUS_IDS_FILE: ./nexus_ids.json

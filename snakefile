@@ -20,7 +20,8 @@ VERSION_FILE = os.path.join(WORKING_DIR, "versions.txt")
 # All the apps must be listed here so that we can fetch all the versions
 APPS = {
     "bba-datafetch": "bba-datafetch",
-    "parcellation2mesh": "parcellation2mesh"
+    "parcellation2mesh": "parcellation2mesh",
+    "atlas-building-tools annotations-combinator": "atlas-building-tools annotations-combinator"
 }
 
 # delete the log of app versions
@@ -32,12 +33,17 @@ except OSError:
 # fetch version of each app and write it down in a file
 version_file = open(VERSION_FILE,"a")
 for app in APPS:
+
+    app_name_fixed = app.split()[0]
+
+    print(shutil.which(app_name_fixed))
+    
     # first, we need to check if each CLI is in PATH, if not we abort with exit code 1
-    if shutil.which(app) is None:
-        raise Exception("The CLI {} is not installed or not in PATH. Pipeline cannot execute.".format(app))
+    if shutil.which(app_name_fixed) is None:
+        raise Exception("The CLI {} is not installed or not in PATH. Pipeline cannot execute.".format(app_name_fixed))
         exit(1)
 
-    app_version = subprocess.check_output("{} --version".format(app), shell=True).decode('ascii').rstrip("\n\r")
+    app_version = subprocess.check_output("{} --version".format(app_name_fixed), shell=True).decode('ascii').rstrip("\n\r")
     version_file.write(app_version)
     version_file.write("\n")
 version_file.close()
@@ -60,9 +66,8 @@ rule fetch_ccf_brain_region_hierarchy:
         """
         {params.app} --nexus-env {NEXUS_ENV} \
             --nexus-token-file {input.token} \
-            --nexus-org {NEXUS_ORG} \
-            --nexus-proj {NEXUS_PROJ} \
-            --payload \
+            --nexus-org neurosciencegraph \
+            --nexus-proj datamodels \
             --out {output} \
             --nexus-id {params.nexus_id} \
             --verbose \
@@ -141,7 +146,6 @@ rule fetch_brain_parcellation_ccfv3:
         """
 
 
-# /!\ FAKE TASK FOR TESTING
 # combine the volumes
 rule combine:
     input:
@@ -150,10 +154,16 @@ rule combine:
         fiber_ccfv2=rules.fetch_fiber_parcellation_ccfv2.output,
         brain_ccfv3=rules.fetch_brain_parcellation_ccfv3.output
     output:
-        "{}/annotation_hybrid.FAKE".format(WORKING_DIR)
+        "{}/annotation_hybrid.nrrd".format(WORKING_DIR)
+    params:
+        app=APPS["atlas-building-tools annotations-combinator"]
     shell:
         """
-        echo "this is the fake combine task" > {output}
+        {params.app} --hierarchy {input.hierarchy} \
+            --brain-annotation-ccfv2 {input.brain_ccfv2} \
+            --fiber-annotation-ccfv2 {input.fiber_ccfv2} \
+            --brain-annotation-ccfv3 {input.brain_ccfv3} \
+            --output-path {output}
         """
 
 # fetch the gene expression volume for gene aldh1l1
@@ -338,4 +348,23 @@ rule brain_region_meshes_generator:
         {params.app} --hierarchy {input.hierarchy} \
             --parcellation-volume {input.parcellation_volume} \
             --out-dir {output}
+        """
+
+
+
+ATLAS_FOLDER = "/Users/lurie/Desktop/some_folder"
+
+rule create_file:
+    output: "{}/hello.txt".format(ATLAS_FOLDER)
+    shell:
+        """
+        echo "hello there" > {ATLAS_FOLDER}/hello.txt
+        """
+
+rule the_bonjour_rule:
+    input: rules.create_file.output
+    output: "{}/bonjour.txt".format(ATLAS_FOLDER)
+    shell:
+        """
+        echo $(cat {ATLAS_FOLDER}/hello.txt) "\nbonjour" > {ATLAS_FOLDER}/bonjour.txt
         """
