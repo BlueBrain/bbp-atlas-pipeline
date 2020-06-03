@@ -1,9 +1,14 @@
 # Installation
+## Scheduler core
 The pipeline is orchestrated by [SnakeMake](https://snakemake.readthedocs.io) and the *snakefile* in the root folder of this repository. This means SnakeMake must be installed:
 ```
 pip install snakemake
 ```
 Note: this uses **Python 3.6** or more recent.
+
+## Other dependencies
+Each module to run as part of the pipeline can be seen as a dependency of this pipeline. Then each module may come with it's own dependencies (if installed with Conda or Pip) or, on some case, module-level dependencies will have to be installed manually.  
+We will do our best to keep the following list as up to date as possible. Please contact `bbp-ou-dke@epfl.ch` to raise an issue and visit [the documentation page](https://bbpteam.epfl.ch/project/spaces/display/BBKG/Atlas+Pipeline) to get more information.
 
 # Configuration
 The configuration of the pipeline is written in the file `config.yaml`.  
