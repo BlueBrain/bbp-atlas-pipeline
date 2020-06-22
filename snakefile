@@ -21,7 +21,9 @@ VERSION_FILE = os.path.join(WORKING_DIR, "versions.txt")
 APPS = {
     "bba-datafetch": "bba-datafetch",
     "parcellation2mesh": "parcellation2mesh",
-    "atlas-building-tools annotations-combinator": "atlas-building-tools annotations-combinator"
+    "atlas-building-tools annotations-combinator": "atlas-building-tools annotations-combinator",
+    "atlas-building-tools direction-vectors isocortex": "atlas-building-tools direction-vectors isocortex",
+    "atlas-building-tools direction-vectors cerebellum": "atlas-building-tools direction-vectors cerebellum",
 }
 
 # delete the log of app versions
@@ -36,7 +38,7 @@ for app in APPS:
 
     app_name_fixed = app.split()[0]
 
-    print(shutil.which(app_name_fixed))
+    print(app, " [executable at] ", shutil.which(app_name_fixed))
     
     # first, we need to check if each CLI is in PATH, if not we abort with exit code 1
     if shutil.which(app_name_fixed) is None:
@@ -44,19 +46,20 @@ for app in APPS:
         exit(1)
 
     app_version = subprocess.check_output("{} --version".format(app_name_fixed), shell=True).decode('ascii').rstrip("\n\r")
-    version_file.write(app_version)
+    version_file.write(f"{app} - {app_version}")
     version_file.write("\n")
 version_file.close()
 
 # Reading some Nexus file @id mapping
 NEXUS_IDS = json.loads(open(NEXUS_IDS_FILE, 'r').read().strip())
 
+
 # fetch the hierarchy file, originally called 1.json
 rule fetch_ccf_brain_region_hierarchy:
     input:
         token=NEXUS_TOKEN_FILE
     output:
-        "{}/hierarchy.json".format(WORKING_DIR)
+        f"{WORKING_DIR}/hierarchy.json"
     params:
         nexus_id=NEXUS_IDS["brain_region_hierarchies"]["allen_mouse_ccf"],
         app=APPS["bba-datafetch"]
@@ -80,7 +83,7 @@ rule fetch_brain_parcellation_ccfv2:
     input:
         token=NEXUS_TOKEN_FILE
     output:
-        "{}/brain_parcellation_ccfv2.nrrd".format(WORKING_DIR)
+        f"{WORKING_DIR}/brain_parcellation_ccfv2.nrrd"
     params:
         nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["parcellations"]["brain_ccfv2"],
         app=APPS["bba-datafetch"]
@@ -104,7 +107,7 @@ rule fetch_fiber_parcellation_ccfv2:
     input:
         token=NEXUS_TOKEN_FILE
     output:
-        "{}/fiber_parcellation_ccfv2.nrrd".format(WORKING_DIR)
+        f"{WORKING_DIR}/fiber_parcellation_ccfv2.nrrd"
     params:
         nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["parcellations"]["fiber_ccfv2"],
         app=APPS["bba-datafetch"]
@@ -127,7 +130,7 @@ rule fetch_brain_parcellation_ccfv3:
     input:
         token=NEXUS_TOKEN_FILE
     output:
-        "{}/brain_parcellation_ccfv3.nrrd".format(WORKING_DIR)
+        f"{WORKING_DIR}/brain_parcellation_ccfv3.nrrd"
     params:
         nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["parcellations"]["brain_ccfv3"],
         app=APPS["bba-datafetch"]
@@ -154,7 +157,7 @@ rule combine:
         fiber_ccfv2=rules.fetch_fiber_parcellation_ccfv2.output,
         brain_ccfv3=rules.fetch_brain_parcellation_ccfv3.output
     output:
-        "{}/annotation_hybrid.nrrd".format(WORKING_DIR)
+        f"{WORKING_DIR}/annotation_hybrid.nrrd"
     params:
         app=APPS["atlas-building-tools annotations-combinator"]
     shell:
@@ -171,7 +174,7 @@ rule fetch_gene_aldh1l1:
     input:
         token=NEXUS_TOKEN_FILE
     output:
-        "{}/gene_aldh1l1.nrrd".format(WORKING_DIR)
+        f"{WORKING_DIR}/gene_aldh1l1.nrrd"
     params:
         nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["aldh1l1"],
         app=APPS["bba-datafetch"]
@@ -194,7 +197,7 @@ rule fetch_gene_cnp:
     input:
         token=NEXUS_TOKEN_FILE
     output:
-        "{}/gene_cnp.nrrd".format(WORKING_DIR)
+        f"{WORKING_DIR}/gene_cnp.nrrd"
     params:
         nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["cnp"],
         app=APPS["bba-datafetch"]
@@ -217,7 +220,7 @@ rule fetch_gene_gad:
     input:
         token=NEXUS_TOKEN_FILE
     output:
-        "{}/gene_gad.nrrd".format(WORKING_DIR)
+        f"{WORKING_DIR}/gene_gad.nrrd"
     params:
         nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["gad"],
         app=APPS["bba-datafetch"]
@@ -240,7 +243,7 @@ rule fetch_gene_gfap:
     input:
         token=NEXUS_TOKEN_FILE
     output:
-        "{}/gene_gfap.nrrd".format(WORKING_DIR)
+        f"{WORKING_DIR}/gene_gfap.nrrd"
     params:
         nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["gfap"],
         app=APPS["bba-datafetch"]
@@ -263,7 +266,7 @@ rule fetch_gene_nrn1:
     input:
         token=NEXUS_TOKEN_FILE
     output:
-        "{}/gene_nrn1.nrrd".format(WORKING_DIR)
+        f"{WORKING_DIR}/gene_nrn1.nrrd"
     params:
         nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["nrn1"],
         app=APPS["bba-datafetch"]
@@ -286,7 +289,7 @@ rule fetch_gene_s100b:
     input:
         token=NEXUS_TOKEN_FILE
     output:
-        "{}/gene_s100b.nrrd".format(WORKING_DIR)
+        f"{WORKING_DIR}/gene_s100b.nrrd"
     params:
         nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["s100b"],
         app=APPS["bba-datafetch"]
@@ -309,7 +312,7 @@ rule fetch_gene_tmem119:
     input:
         token=NEXUS_TOKEN_FILE
     output:
-        "{}/gene_tmem119.nrrd".format(WORKING_DIR)
+        f"{WORKING_DIR}/gene_tmem119.nrrd"
     params:
         nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["tmem119"],
         app=APPS["bba-datafetch"]
@@ -336,7 +339,7 @@ rule brain_region_meshes_generator:
         hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
         parcellation_volume=rules.combine.output
     output:
-        "{}/brain_region_meshes/".format(WORKING_DIR)
+        f"{WORKING_DIR}/brain_region_meshes/"
     params:
         app=APPS["parcellation2mesh"]
     log:
@@ -346,4 +349,44 @@ rule brain_region_meshes_generator:
         {params.app} --hierarchy {input.hierarchy} \
             --parcellation-volume {input.parcellation_volume} \
             --out-dir {output}
+        """
+
+
+# Compute a volume with 3 elements per voxel that are the direction in 
+# Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood.
+# The output is only for the top regions of the isocortex.
+rule direction_vector_isocortex:
+    input:
+        parcellation_volume=rules.combine.output,
+        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output
+    output:
+        f"{WORKING_DIR}/direction_vectors_isocortex.nrrd"
+    params:
+        app=APPS["atlas-building-tools direction-vectors isocortex"]
+    log:
+        LOG_FILE
+    shell:
+        """
+        {params.app} --annotation-path {input.parcellation_volume} \
+            --hierarchy-path {input.hierarchy} \
+            --output-path {output}
+        """
+
+
+# Compute a volume with 3 elements per voxel that are the direction in 
+# Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood.
+# The output is only for some regions of the cerebellum.
+rule direction_vector_cerebellum:
+    input:
+        parcellation_volume=rules.combine.output
+    output:
+        f"{WORKING_DIR}/direction_vectors_cerebellum.nrrd"
+    params:
+        app=APPS["atlas-building-tools direction-vectors cerebellum"]
+    log:
+        LOG_FILE
+    shell:
+        """
+        {params.app} --annotation-path {input.parcellation_volume} \
+            --output-path {output}
         """
