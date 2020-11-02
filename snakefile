@@ -13,6 +13,7 @@ NEXUS_ORG = config["NEXUS_ORG"]
 NEXUS_PROJ = config["NEXUS_PROJ"]
 NEXUS_TOKEN_FILE = config["NEXUS_TOKEN_FILE"]
 NEXUS_IDS_FILE = config["NEXUS_IDS_FILE"]
+#MARKERS_CONFIG_FILE = config["MARKERS_CONFIG_FILE"]
 RESOLUTION = str(config["RESOLUTION"])
 LOG_FILE = os.path.join(WORKING_DIR, "log.log")
 VERSION_FILE = os.path.join(WORKING_DIR, "versions.txt")
@@ -21,9 +22,18 @@ VERSION_FILE = os.path.join(WORKING_DIR, "versions.txt")
 APPS = {
     "bba-datafetch": "bba-datafetch",
     "parcellation2mesh": "parcellation2mesh",
-    "atlas-building-tools annotations-combinator": "atlas-building-tools annotations-combinator",
+    "atlas-building-tools combination combine-annotations": "atlas-building-tools combination combine-annotations",
+    #"atlas-building-tools combination combine-markers": "atlas-building-tools combination combine-markers",
     "atlas-building-tools direction-vectors isocortex": "atlas-building-tools direction-vectors isocortex",
     "atlas-building-tools direction-vectors cerebellum": "atlas-building-tools direction-vectors cerebellum",
+   # ca1 is not a region handled by direction-vectors right now
+   #"atlas-building-tools placement-hints ca1": "atlas-building-tools placement-hints ca1",
+    "atlas-building-tools placement-hints isocortex": "atlas-building-tools placement-hints isocortex",
+    "atlas-building-tools region-splitter split-isocortex-layer-23": "atlas-building-tools region-splitter split-isocortex-layer-23",
+    "atlas-building-tools orientation-field": "atlas-building-tools orientation-field",
+   # "atlas-building-tools cell-detection split-isocortex-layer-23": "atlas-building-tools region-splitter split-isocortex-layer-23",
+   # "atlas-building-tools cell-densities split-isocortex-layer-23": "atlas-building-tools cell-densities split-isocortex-layer-23",
+    "atlas-building-tools cell-positions cmd": "atlas-building-tools cell-positions cmd",
 }
 
 # delete the log of app versions
@@ -52,6 +62,8 @@ version_file.close()
 
 # Reading some Nexus file @id mapping
 NEXUS_IDS = json.loads(open(NEXUS_IDS_FILE, 'r').read().strip())
+
+# Reading gene config file
 
 
 # fetch the hierarchy file, originally called 1.json
@@ -149,8 +161,8 @@ rule fetch_brain_parcellation_ccfv3:
         """
 
 
-# combine the volumes
-rule combine:
+# Generate and save the combined annotation file
+rule combine_annotations:
     input:
         hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
         brain_ccfv2=rules.fetch_brain_parcellation_ccfv2.output,
@@ -159,7 +171,7 @@ rule combine:
     output:
         f"{WORKING_DIR}/annotation_hybrid.nrrd"
     params:
-        app=APPS["atlas-building-tools annotations-combinator"]
+        app=APPS["atlas-building-tools combination combine-annotations"]
     shell:
         """
         {params.app} --hierarchy {input.hierarchy} \
@@ -169,7 +181,7 @@ rule combine:
             --output-path {output}
         """
 
-# fetch the gene expression volume for gene aldh1l1
+# fetch the gene expression volume corresponding to the genetic marker aldh1l1
 rule fetch_gene_aldh1l1:
     input:
         token=NEXUS_TOKEN_FILE
@@ -192,7 +204,7 @@ rule fetch_gene_aldh1l1:
             2>&1 | tee -a {log}
         """
 
-# fetch the gene expression volume for gene cnp
+# fetch the gene expression volume corresponding to the genetic marker cnp
 rule fetch_gene_cnp:
     input:
         token=NEXUS_TOKEN_FILE
@@ -215,7 +227,7 @@ rule fetch_gene_cnp:
             2>&1 | tee -a {log}
         """
 
-# fetch the gene expression volume for gene gad
+# fetch the gene expression volume corresponding to the genetic marker gad
 rule fetch_gene_gad:
     input:
         token=NEXUS_TOKEN_FILE
@@ -238,7 +250,7 @@ rule fetch_gene_gad:
             2>&1 | tee -a {log}
         """
 
-# fetch the gene expression volume for gene gfap
+# fetch the gene expression volume corresponding to the genetic marker gfap
 rule fetch_gene_gfap:
     input:
         token=NEXUS_TOKEN_FILE
@@ -261,7 +273,7 @@ rule fetch_gene_gfap:
             2>&1 | tee -a {log}
         """
 
-# fetch the gene expression volume for gene nrn1
+# fetch the gene expression volume corresponding to the genetic marker nrn1
 rule fetch_gene_nrn1:
     input:
         token=NEXUS_TOKEN_FILE
@@ -284,7 +296,7 @@ rule fetch_gene_nrn1:
             2>&1 | tee -a {log}
         """
 
-# fetch the gene expression volume for gene s100b
+# fetch the gene expression volume corresponding to the genetic marker s100b
 rule fetch_gene_s100b:
     input:
         token=NEXUS_TOKEN_FILE
@@ -307,7 +319,7 @@ rule fetch_gene_s100b:
             2>&1 | tee -a {log}
         """
 
-# fetch the gene expression volume for gene tmem119
+# fetch the gene expression volume corresponding to the genetic marker tmem119
 rule fetch_gene_tmem119:
     input:
         token=NEXUS_TOKEN_FILE
@@ -330,14 +342,31 @@ rule fetch_gene_tmem119:
             2>&1 | tee -a {log}
         """
 
+# Generate and save the combined glia files and the global celltype scaling factors
+rule combine_markers:
+#    input:
+#        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
+#        parcellation_volume=rules.combine_annotations.output,
+#         markers_config_file = MARKERS_CONFIG_FILE
+#    output:
+#       
+#    params:
+#       app=APPS["atlas-building-tools combination combine-markers"]
+#    shell:
+#        """
+#        {params.app} --hierarchy {input.hierarchy} \
+#            --brain-annotation {input.brain_ccfv2} \
+#            --config {input.markers_config_file}
+#        """
+        
 # export a mesh for every brain region available in the parcellation volume
 # generated by the rule combine (still in development)
 # Note: not only the leaf regions are exported but also the above regions
-# that are combinaisons of leeaves
+# that are combinaisons of leaves
 rule brain_region_meshes_generator:
     input:
         hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
-        parcellation_volume=rules.combine.output
+        parcellation_volume=rules.combine_annotations.output
     output:
         f"{WORKING_DIR}/brain_region_meshes/"
     params:
@@ -351,13 +380,12 @@ rule brain_region_meshes_generator:
             --out-dir {output}
         """
 
-
 # Compute a volume with 3 elements per voxel that are the direction in 
 # Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood.
 # The output is only for the top regions of the isocortex.
 rule direction_vector_isocortex:
     input:
-        parcellation_volume=rules.combine.output,
+        parcellation_volume=rules.combine_annotations.output,
         hierarchy=rules.fetch_ccf_brain_region_hierarchy.output
     output:
         f"{WORKING_DIR}/direction_vectors_isocortex.nrrd"
@@ -372,13 +400,12 @@ rule direction_vector_isocortex:
             --output-path {output}
         """
 
-
 # Compute a volume with 3 elements per voxel that are the direction in 
 # Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood.
 # The output is only for some regions of the cerebellum.
 rule direction_vector_cerebellum:
     input:
-        parcellation_volume=rules.combine.output
+        parcellation_volume=rules.fetch_brain_parcellation_ccfv2.output
     output:
         f"{WORKING_DIR}/direction_vectors_cerebellum.nrrd"
     params:
@@ -388,5 +415,73 @@ rule direction_vector_cerebellum:
     shell:
         """
         {params.app} --annotation-path {input.parcellation_volume} \
+            --output-path {output}
+        """  
+        
+# Turn direction vectors into quaternions interpreted as 3D orientations
+rule orientation_field:
+    input:
+        direction_vectors=rules.direction_vector_isocortex.output,
+    output:
+        f"{WORKING_DIR}/orientation_field.nrrd"
+    params:
+        app=APPS["atlas-building-tools orientation-field"]
+    shell:
+        """
+        {params.app} --direction-vectors-path {input.direction_vectors} \
+            --output-path {output} \
+        """ 
+ 
+# Refine annotations by splitting brain regions 
+rule split_isocortex_layer_23:
+    input:
+        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
+        parcellation_volume=rules.combine_annotations.output,
+        direction_vectors=rules.direction_vector_isocortex.output
+    output:
+        hierarchy_l23split=f"{WORKING_DIR}/hierarchy_l23split.json",
+        annotation_l23split=f"{WORKING_DIR}/annotation_l23split.nrrd"
+    params:
+        app=APPS["atlas-building-tools region-splitter split-isocortex-layer-23"]
+    shell:
+        """
+        {params.app} --hierarchy-path {input.hierarchy} \
+            --annotation-path {input.parcellation_volume} \
+            --direction-vectors-path {input.direction_vectors} \
+            --output-hierarchy-path {output.hierarchy_l23split} \
+            --output-annotation-path {output.annotation_l23split}
+        """
+        
+# Generate and save the placement hints of different regions of the AIBS mouse brain
+rule placement_hints_isocortex:
+    input:
+        parcellation_volume=rules.combine_annotations.output,
+        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
+        direction_vectors=rules.direction_vector_isocortex.output
+    output:
+        directory(f"{WORKING_DIR}/placement_hints")
+    params:
+        app=APPS["atlas-building-tools placement-hints isocortex"]
+    shell:
+        """
+        {params.app} --annotation-path {input.parcellation_volume} \
+            --hierarchy-path {input.hierarchy} \
+            --direction-vectors-path {input.direction_vectors} \
+            --output-dir {output}
+        """
+        
+# Generate 3D cell positions for the whole mouse brain
+rule cell_positions:
+    input:
+        markers_config=rules.fetch_ccf_brain_region_hierarchy.output,
+        parcellation_volume=rules.combine_annotations.output
+    output:
+        f"{WORKING_DIR}/cell_positions.h5"
+    params:
+        app=APPS["atlas-building-tools cell-positions cmd"]
+    shell:
+        """
+        {params.app} --annotation-path {input.parcellation_volume} \
+            --config {input.markers_config} \
             --output-path {output}
         """
