@@ -5,8 +5,8 @@ cellType:
 - inhibitory_neuron
 - excitatory_neuron
 inputDensityVolumePath:
-  oligodendrocyte: "{WORKING_DIR}/cell_densities/oligodendrocyte_density.nrrd"
-  astrocyte: "{WORKING_DIR}/cell_densities/astrocyte_density.nrrd"
-  microglia: "{WORKING_DIR}/cell_densities/microglia_density.nrrd"
-  inhibitory_neuron: "{WORKING_DIR}/neuron_densities/inhibitory_neuron_density.nrrd"
-  excitatory_neuron: "{WORKING_DIR}/neuron_densities/excitatory_neuron_density.nrrd"
+  oligodendrocyte: {WORKING_DIR}/cell_densities/oligodendrocyte_density.nrrd
+  astrocyte: {WORKING_DIR}/cell_densities/astrocyte_density.nrrd
+  microglia: {WORKING_DIR}/cell_densities/microglia_density.nrrd
+  inhibitory_neuron: {WORKING_DIR}/neuron_densities/inhibitory_neuron_density.nrrd
+  excitatory_neuron: {WORKING_DIR}/neuron_densities/excitatory_neuron_density.nrrd

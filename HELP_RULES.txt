@@ -1,0 +1,52 @@
+
+Snakemake - Cell Atlas Pipeline
+
+nabil.alibou@epfl.ch
+jonathan.lurie@epfl.ch
+
+>help : prints help comments for Snakefile
+>fetch_ccf_brain_region_hierarchy : fetch the hierarchy file, originally called 1.json
+>fetch_brain_parcellation_ccfv2 :  fetch the CCF v2 brain parcellation volume in the given resolution
+>fetch_fiber_parcellation_ccfv2 : fetch the CCF v2 fiber parcellation volume in the given resolution
+>fetch_brain_parcellation_ccfv3 : fetch the CCF v3 brain parcellation volume in the given resolution
+>fetch_nissl_stained_volume : fetch the CCF nissl stained volume in the given resolution
+>fetch_annotation_stack_ccfv2_coronal : fetch the CCFv2 annotation coronal image stack stack
+>fetch_nissl_stack_ccfv2_coronal : fetch the CCFv2 nissl coronal image stack stack
+>combine_annotations : Generate and save the combined annotation file
+>fetch_gene_gad : fetch the gene expression volume corresponding to the genetic marker gad
+>fetch_gene_nrn1 : fetch the gene expression volume corresponding to the genetic marker nrn1
+>fetch_gene_aldh1l1 : fetch the gene expression volume corresponding to the genetic marker aldh1l1
+>fetch_gene_cnp : fetch the gene expression volume corresponding to the genetic marker cnp
+>fetch_gene_mbp : fetch the gene expression volume corresponding to the genetic marker mbp
+>fetch_gene_gfap : fetch the gene expression volume corresponding to the genetic marker gfap
+>fetch_gene_s100b : fetch the gene expression volume corresponding to the genetic marker s100b
+>fetch_gene_tmem119 : fetch the gene expression volume corresponding to the genetic marker tmem119
+>combine_markers : Generate and save the combined glia files and the global celltype scaling factors
+>extract_color_map : Extract the mapping of colors to structure ids
+>svg_to_png : Convert svg files into png files
+>compute_average_soma_radius : Compute the overall mouse brain cell density
+>cell_density : Compute the overall mouse brain cell density
+>glia_cell_densities : Compute and save the glia cell densities
+>inhibitory_excitatory_neuron_densities : Compute the inhibitory and excitatory neuron densities
+>direction_vector_isocortex : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood. The output is only for the top regions of the isocortex.
+>direction_vector_cerebellum : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood. The output is only for some regions of the cerebellum.
+>split_isocortex_layer_23 : Refine annotations by splitting brain regions 
+>cell_density_split : Compute the overall mouse brain cell density (volume split)
+>glia_cell_densities_split : Compute and save the glia cell densities (volume split)
+>inhibitory_excitatory_neuron_densities_split : Compute the inhibitory and excitatory neuron densities (volume split)
+>brain_region_meshes_hybrid : export a mesh for every brain region available in the hybrid brain parcellation volume. Note: not only the leaf regions are exported but also the above regions that are combinaisons of leaves
+>brain_region_meshes_l23split : export a mesh for every brain region available in the hybrid brain parcellation volume with layer 2-3 split. Note: not only the leaf regions are exported but also the above regions that are combinaisons of leaves
+>orientation_field : Turn direction vectors into quaternions interpreted as 3D orientations
+>cell_positions : Generate 3D cell positions for the whole mouse brain and save them with the orientations and the region_ID in an hdf5 file
+>cell_positions_split : Generate 3D cell positions for the whole mouse brain and save them with the orientations and the region_ID in an hdf5 file (volume split)
+>placement_hints_isocortex : Generate and save the placement hints of different regions of the AIBS mouse brain
+>check_volumetric_nrrd_dataset : Check the integrity of the generated .nrrd volumetric datasets
+>check_annotation_l23split_dataset : Check the integrity of the generated annotation_l23split dataset
+>check_meshes_obj_dataset_split : Check the integrity of the generated .obj meshes datasets
+>check_hdf5_dataset : Check the integrity of the generated .h5 hdf5 dataset
+>verify_all_report : Verify that the report.txt contained in data_check_report do not contain any issues before starting to push datasets into Nexus
+>push_volumetric_dataset : Create a VolumetricDataLayer resource and push it along with the volumetric files into Nexus
+>push_mesh_dataset : Create a Mesh resource and push it along with the mesh files into Nexus
+>all : global rule with the aim of triggering the generation of datasets
+>generate_volumetric_datasets : global rule with the aim of triggering the generation and verification of volumetric datasets
+>generate_annotation_l23split : global rule with the aim of triggering the generation and verification of annotation_l23split dataset

@@ -1,8 +1,11 @@
-WORKING_DIR: ../pipeline_working_dir
-NEXUS_ENV: "https://bbp.epfl.ch/nexus/v1/"
+WORKING_DIR: ../output_data
+NEXUS_ENV: "https://bbp.epfl.ch/nexus/v1"
 NEXUS_ORG: "bbp"
 NEXUS_PROJ: "atlas"
-NEXUS_TOKEN_FILE: ../nexus/token.txt
-RESOLUTION: "25"
+NEXUS_TOKEN_FILE: ../Data/token.txt
 NEXUS_IDS_FILE: ./nexus_ids.json
+FORGE_CONFIG: ../blue_brain_atlas_nexus_push/tests/configuration/forge_config-file.yml
 RULES_CONFIG_DIR_TEMPLATES: ./rules_config_dir_templates
+RESOLUTION: "25"
+MODULES_VERBOSE: False
+DISPLAY_HELP: False

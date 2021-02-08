@@ -32,9 +32,8 @@
       },
       "image_stack": {
         "nissl_stack_ccfv2_coronal": "https://bbp.epfl.ch/neurosciencegraph/data/ae8cbd28-e17b-4c1e-967a-a5084b7ad335",
-        "annotation_stack_ccfv2_coronal": "https://bbp.epfl.ch/neurosciencegraph/data/310eb07f-ead2-46e3-ab23-64c5f6c0429a"
-    }
+        "annotation_stack_ccfv2_coronal": "https://bbp.epfl.ch/neurosciencegraph/data/d45f1a66-e663-4991-bda9-3ee8bc447061"
+      }
     }
   }
 }
-
