@@ -1,11 +1,18 @@
 WORKING_DIR: ../output_data
-NEXUS_ENV: "https://bbp.epfl.ch/nexus/v1"
-NEXUS_ORG: "bbp"
-NEXUS_PROJ: "atlas"
 NEXUS_TOKEN_FILE: ../Data/token.txt
 NEXUS_IDS_FILE: ./nexus_ids.json
-FORGE_CONFIG: ../blue_brain_atlas_nexus_push/tests/configuration/forge_config-file.yml
+FORGE_CONFIG: ../blue_brain_atlas_nexus_push/forge_configuration/forge_config.yml
 RULES_CONFIG_DIR_TEMPLATES: ./rules_config_dir_templates
 RESOLUTION: "25"
 MODULES_VERBOSE: False
 DISPLAY_HELP: False
+
+# The pipeline will fetch the necessary datasets from:
+NEXUS_ATLAS_ENV: "https://bbp.epfl.ch/nexus/v1"
+NEXUS_ATLAS_ORG: "bbp"
+NEXUS_ATLAS_PROJ: "atlas"
+
+# The pipeline will push the generated datasets into:
+NEXUS_DESTINATION_ENV: "https://staging.nexus.ocp.bbp.epfl.ch/v1"
+NEXUS_DESTINATION_ORG: "bbp_test"
+NEXUS_DESTINATION_PROJ: "Test_push"

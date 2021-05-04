@@ -1,29 +1,29 @@
-generatedHierarchyJson:
+HierarchyJson:
 - hierarchy
 - hierarchy_l23split
 generatedDatasetType:
 - VolumetricFile
 - MeshFile
-- CellPositionFile
+- CellRecordsFile
 generatedDataset:
-- annotation_hybrid
+- annotation_v2v3_hybrid
 - annotation_l23split
 - cell_densities
 - neuron_densities
-- brain_region_meshes_hybrid
+- brain_region_meshes_v2v3_hybrid
 - brain_region_meshes_l23split
-- cell_positions
-GeneratedHierarchyJson:
+- cell_records_sonata
+HierarchyJson:
   hierarchy: {WORKING_DIR}/hierarchy.json
   hierarchy_l23split: {WORKING_DIR}/hierarchy_l23split.json
 GeneratedDatasetPath:
   VolumetricFile:
-    annotation_hybrid: {WORKING_DIR}/annotation_hybrid.nrrd
+    annotation_hybrid: {WORKING_DIR}/annotation_v2v3_hybrid.nrrd
     annotation_l23split: {WORKING_DIR}/annotation_l23split.nrrd
     cell_densities: {WORKING_DIR}/cell_densities
     neuron_densities: {WORKING_DIR}/neuron_densities
   MeshFile:
-    brain_region_meshes_hybrid: {WORKING_DIR}/brain_region_meshes_hybrid
+    brain_region_meshes_hybrid: {WORKING_DIR}/brain_region_meshes_v2v3_hybrid
     brain_region_meshes_l23split: {WORKING_DIR}/brain_region_meshes_l23split
-  CellPositionFile:
-    cell_positions: {WORKING_DIR}/cell_positions.h5
+  CellRecordsFile:
+    cell_records_sonata: {WORKING_DIR}/cell_records_sonata.h5  
