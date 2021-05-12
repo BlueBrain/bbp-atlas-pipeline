@@ -312,9 +312,9 @@ rule fetch_annotation_stack_ccfv2_coronal:
             --nexus-proj {NEXUS_ATLAS_PROJ} \
             --out {output}.tar.gz \
             --nexus-id {params.nexus_id} \
-            --verbose \
-            mkdir {output} \
-            tar xf {WORKING_DIR}/annotation_stack_ccfv2_coronal.tar.gz --directory={output} --strip-components=1 \
+            --verbose ;
+            mkdir {output} ;
+            tar xf {WORKING_DIR}/annotation_stack_ccfv2_coronal.tar.gz --directory={output} --strip-components=1 ;
             rm {WORKING_DIR}/annotation_stack_ccfv2_coronal.tar.gz \
             2>&1 | tee {log}
         """
@@ -338,9 +338,9 @@ rule fetch_nissl_stack_ccfv2_coronal:
             --nexus-proj {NEXUS_ATLAS_PROJ} \
             --out {output}.tar.gz \
             --nexus-id {params.nexus_id} \
-            --verbose \
-            mkdir {output} \
-            tar xf {WORKING_DIR}/nissl_stack_ccfv2_coronal.tar.gz --directory={output} --strip-components=1 \
+            --verbose ;
+            mkdir {output} ;
+            tar xf {WORKING_DIR}/nissl_stack_ccfv2_coronal.tar.gz --directory={output} --strip-components=1 ;
             rm {WORKING_DIR}/nissl_stack_ccfv2_coronal.tar.gz \
             2>&1 | tee {log}
         """
