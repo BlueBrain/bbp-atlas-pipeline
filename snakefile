@@ -14,14 +14,19 @@ import json
 import yaml
 import re
 import logging
+import threading
+import getpass
 from snakemake.logging import logger as L
+from blue_brain_token_fetch.Token_refresher import TokenFetcher
 
 # loading the config
 configfile: "config.yaml"
 
+#Launch the automatic token refreshing
+myTokenFetcher = TokenFetcher()
+
 # placing the config values into local variable
 WORKING_DIR = config["WORKING_DIR"]
-NEXUS_TOKEN_FILE = config["NEXUS_TOKEN_FILE"]
 NEXUS_IDS_FILE = config["NEXUS_IDS_FILE"]
 FORGE_CONFIG = config["FORGE_CONFIG"]
 RULES_CONFIG_DIR_TEMPLATES = config["RULES_CONFIG_DIR_TEMPLATES"]
@@ -179,19 +184,18 @@ rule help:
 
 ##>fetch_ccf_brain_region_hierarchy : fetch the hierarchy file, originally called 1.json
 rule fetch_ccf_brain_region_hierarchy:
-    input:
-        token=NEXUS_TOKEN_FILE
     output:
         f"{PUSH_DATASET_CONFIG_FILE['HierarchyJson']['hierarchy']}",
     params:
         nexus_id=NEXUS_IDS["brain_region_hierarchies"]["allen_mouse_ccf"],
-        app=APPS["bba-datafetch"]
+        app=APPS["bba-datafetch"],
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_ccf_brain_region_hierarchy.log"
     shell:
         """
         {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token-file {input.token} \
+            --nexus-token {params.token} \
             --nexus-org neurosciencegraph \
             --nexus-proj datamodels \
             --out {output} \
@@ -203,19 +207,18 @@ rule fetch_ccf_brain_region_hierarchy:
 
 ##>fetch_brain_parcellation_ccfv2 :  fetch the CCF v2 brain parcellation volume in the given resolution
 rule fetch_brain_parcellation_ccfv2:
-    input:
-        token=NEXUS_TOKEN_FILE
     output:
         f"{WORKING_DIR}/brain_parcellation_ccfv2.nrrd"
     params:
         nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["parcellations"]["brain_ccfv2"],
-        app=APPS["bba-datafetch"]
+        app=APPS["bba-datafetch"],
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_brain_parcellation_ccfv2.log"
     shell:
         """
         {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token-file {input.token} \
+            --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
             --out {output} \
@@ -226,19 +229,18 @@ rule fetch_brain_parcellation_ccfv2:
 
 ##>fetch_fiber_parcellation_ccfv2 : fetch the CCF v2 fiber parcellation volume in the given resolution
 rule fetch_fiber_parcellation_ccfv2:
-    input:
-        token=NEXUS_TOKEN_FILE
     output:
         f"{WORKING_DIR}/fiber_parcellation_ccfv2.nrrd"
     params:
         nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["parcellations"]["fiber_ccfv2"],
-        app=APPS["bba-datafetch"]
+        app=APPS["bba-datafetch"],
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_fiber_parcellation_ccfv2.log"
     shell:
         """
         {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token-file {input.token} \
+            --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
             --out {output} \
@@ -249,19 +251,18 @@ rule fetch_fiber_parcellation_ccfv2:
 
 ##>fetch_brain_parcellation_ccfv3 : fetch the CCF v3 brain parcellation volume in the given resolution
 rule fetch_brain_parcellation_ccfv3:
-    input:
-        token=NEXUS_TOKEN_FILE
     output:
         f"{WORKING_DIR}/brain_parcellation_ccfv3.nrrd"
     params:
         nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["parcellations"]["brain_ccfv3"],
-        app=APPS["bba-datafetch"]
+        app=APPS["bba-datafetch"],
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_brain_parcellation_ccfv3.log"
     shell:
         """
         {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token-file {input.token} \
+            --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
             --out {output} \
@@ -272,19 +273,18 @@ rule fetch_brain_parcellation_ccfv3:
 
 ##>fetch_nissl_stained_volume : fetch the CCF nissl stained volume in the given resolution
 rule fetch_nissl_stained_volume:
-    input:
-        token=NEXUS_TOKEN_FILE
     output:
         f"{WORKING_DIR}/nissl_stained_volume.nrrd"
     params:
         nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["parcellations"]["ara_nissl"],
-        app=APPS["bba-datafetch"]
+        app=APPS["bba-datafetch"],
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_nissl_stained_volume.log"
     shell:
         """
         {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token-file {input.token} \
+            --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
             --out {output} \
@@ -295,19 +295,18 @@ rule fetch_nissl_stained_volume:
 
 ##>fetch_annotation_stack_ccfv2_coronal : fetch the CCFv2 annotation coronal image stack stack
 rule fetch_annotation_stack_ccfv2_coronal:
-    input:
-        token=NEXUS_TOKEN_FILE
     output:
         directory(f"{WORKING_DIR}/annotation_stack_ccfv2_coronal")
     params:
         nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["image_stack"]["annotation_stack_ccfv2_coronal"],
-        app=APPS["bba-datafetch"]
+        app=APPS["bba-datafetch"],
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_annotation_stack_ccfv2_coronal.log"
     shell:
         """
         {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token-file {input.token} \
+            --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
             --out {output}.tar.gz \
@@ -315,25 +314,24 @@ rule fetch_annotation_stack_ccfv2_coronal:
             --verbose ;
             mkdir {output} ;
             tar xf {WORKING_DIR}/annotation_stack_ccfv2_coronal.tar.gz --directory={output} --strip-components=1 ;
-            rm {WORKING_DIR}/annotation_stack_ccfv2_coronal.tar.gz \
+            rm {WORKING_DIR}/annotation_stack_ccfv2_coronal.tar.gz ;
             2>&1 | tee {log}
         """
 
 ##>fetch_nissl_stack_ccfv2_coronal : fetch the CCFv2 nissl coronal image stack stack
 rule fetch_nissl_stack_ccfv2_coronal:
-    input:
-        token=NEXUS_TOKEN_FILE
     output:
         directory(f"{WORKING_DIR}/nissl_stack_ccfv2_coronal")
     params:
         nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["image_stack"]["nissl_stack_ccfv2_coronal"],
-        app=APPS["bba-datafetch"]
+        app=APPS["bba-datafetch"],
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_nissl_stack_ccfv2_coronal.log"
     shell:
         """
         {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token-file {input.token} \
+            --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
             --out {output}.tar.gz \
@@ -370,19 +368,18 @@ rule combine_annotations:
 
 ##>fetch_gene_gad : fetch the gene expression volume corresponding to the genetic marker gad
 rule fetch_gene_gad:
-    input:
-        token=NEXUS_TOKEN_FILE
     output:
         f"{WORKING_DIR}/gene_gad.nrrd"
     params:
         nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["gad"],
-        app=APPS["bba-datafetch"]
+        app=APPS["bba-datafetch"],
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_gene_gad.log"
     shell:
         """
         {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token-file {input.token} \
+            --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
             --out {output} \
@@ -393,19 +390,18 @@ rule fetch_gene_gad:
 
 ##>fetch_gene_nrn1 : fetch the gene expression volume corresponding to the genetic marker nrn1
 rule fetch_gene_nrn1:
-    input:
-        token=NEXUS_TOKEN_FILE
     output:
         f"{WORKING_DIR}/gene_nrn1.nrrd"
     params:
         nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["nrn1"],
-        app=APPS["bba-datafetch"]
+        app=APPS["bba-datafetch"],
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_gene_nrn1.log"
     shell:
         """
         {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token-file {input.token} \
+            --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
             --out {output} \
@@ -416,19 +412,18 @@ rule fetch_gene_nrn1:
 
 ##>fetch_gene_aldh1l1 : fetch the gene expression volume corresponding to the genetic marker aldh1l1
 rule fetch_gene_aldh1l1:
-    input:
-        token=NEXUS_TOKEN_FILE
     output:
         f"{COMBINE_MARKERS_CONFIG_FILE['inputGeneVolumePath']['aldh1l1']}"
     params:
         nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["aldh1l1"],
-        app=APPS["bba-datafetch"]
+        app=APPS["bba-datafetch"],
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_gene_aldh1l1.log"
     shell:
         """
         {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token-file {input.token} \
+            --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
             --out {output} \
@@ -439,19 +434,18 @@ rule fetch_gene_aldh1l1:
 
 ##>fetch_gene_cnp : fetch the gene expression volume corresponding to the genetic marker cnp
 rule fetch_gene_cnp:
-    input:
-        token=NEXUS_TOKEN_FILE
     output:
         f"{COMBINE_MARKERS_CONFIG_FILE['inputGeneVolumePath']['cnp']}"
     params:
         nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["cnp"],
-        app=APPS["bba-datafetch"]
+        app=APPS["bba-datafetch"],
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_gene_cnp.log"
     shell:
         """
         {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token-file {input.token} \
+            --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
             --out {output} \
@@ -462,19 +456,18 @@ rule fetch_gene_cnp:
 
 ##>fetch_gene_mbp : fetch the gene expression volume corresponding to the genetic marker mbp
 rule fetch_gene_mbp:
-    input:
-        token=NEXUS_TOKEN_FILE
     output:
         f"{COMBINE_MARKERS_CONFIG_FILE['inputGeneVolumePath']['mbp']}"
     params:
         nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["mbp"],
-        app=APPS["bba-datafetch"]
+        app=APPS["bba-datafetch"],
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_gene_mbp.log"
     shell:
         """
         {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token-file {input.token} \
+            --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
             --out {output} \
@@ -485,19 +478,18 @@ rule fetch_gene_mbp:
 
 ##>fetch_gene_gfap : fetch the gene expression volume corresponding to the genetic marker gfap
 rule fetch_gene_gfap:
-    input:
-        token=NEXUS_TOKEN_FILE
     output:
         f"{COMBINE_MARKERS_CONFIG_FILE['inputGeneVolumePath']['gfap']}"
     params:
         nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["gfap"],
-        app=APPS["bba-datafetch"]
+        app=APPS["bba-datafetch"],
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_gene_gfap.log"
     shell:
         """
         {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token-file {input.token} \
+            --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
             --out {output} \
@@ -508,19 +500,18 @@ rule fetch_gene_gfap:
 
 ##>fetch_gene_s100b : fetch the gene expression volume corresponding to the genetic marker s100b
 rule fetch_gene_s100b:
-    input:
-        token=NEXUS_TOKEN_FILE
     output:
         f"{COMBINE_MARKERS_CONFIG_FILE['inputGeneVolumePath']['s100b']}"
     params:
         nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["s100b"],
-        app=APPS["bba-datafetch"]
+        app=APPS["bba-datafetch"],
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_gene_s100b.log"
     shell:
         """
         {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token-file {input.token} \
+            --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
             --out {output} \
@@ -531,19 +522,18 @@ rule fetch_gene_s100b:
 
 ##>fetch_gene_tmem119 : fetch the gene expression volume corresponding to the genetic marker tmem119
 rule fetch_gene_tmem119:
-    input:
-        token=NEXUS_TOKEN_FILE
     output:
         f"{COMBINE_MARKERS_CONFIG_FILE['inputGeneVolumePath']['tmem119']}"
     params:
         nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["tmem119"],
-        app=APPS["bba-datafetch"]
+        app=APPS["bba-datafetch"],
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_gene_tmem119.log"
     shell:
         """
         {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token-file {input.token} \
+            --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
             --out {output} \
@@ -1185,21 +1175,22 @@ rule push_hybrid_v2v3_annotation:
         touch(f"{WORKING_DIR}/push_hybrid_v2v3_annotation_success.txt")
     params:
         app=APPS["bba-data-push push-volumetric"].split(),
-        provenance = f"atlas-building-tools combination combine-annotations:{applications['applications']['atlas-building-tools combination combine-annotations']}"
+        provenance = f"atlas-building-tools combination combine-annotations:{applications['applications']['atlas-building-tools combination combine-annotations']}",
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/push_hybrid_v2v3_annotation.log"
     shell:
         """
-        {params.app[0]} --forge_config_file {FORGE_CONFIG} \
-            --nexus_env {NEXUS_DESTINATION_ENV} \
-            --nexus_org {NEXUS_DESTINATION_ORG} \
-            --nexus_proj {NEXUS_DESTINATION_PROJ} \
-            --nexus_token_file {NEXUS_TOKEN_FILE} \
+        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
             --verbose \
-        {params.app[1]} --dataset_path {input.annotation_hybrid} \
+        {params.app[1]} --dataset-path {input.annotation_hybrid} \
             --provenances "{params.provenance}" \
             --config {rule_config_dir}/push_dataset_config.yaml \
-            --voxels_resolution {RESOLUTION} \
+            --voxels-resolution {RESOLUTION} \
             2>&1 | tee {log}
         """
         
@@ -1212,20 +1203,21 @@ rule push_l23split_annotation:
         touch(f"{WORKING_DIR}/push_l23split_annotation_success.txt")
     params:
         app=APPS["bba-data-push push-volumetric"].split(),
-        provenance = f"atlas-building-tools region-splitter split-isocortex-layer-23:{applications['applications']['atlas-building-tools region-splitter split-isocortex-layer-23']}"
+        provenance = f"atlas-building-tools region-splitter split-isocortex-layer-23:{applications['applications']['atlas-building-tools region-splitter split-isocortex-layer-23']}",
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/push_l23split_annotation.log"
     shell:
         """
-        {params.app[0]} --forge_config_file {FORGE_CONFIG} \
-            --nexus_env {NEXUS_DESTINATION_ENV} \
-            --nexus_org {NEXUS_DESTINATION_ORG} \
-            --nexus_proj {NEXUS_DESTINATION_PROJ} \
-            --nexus_token_file {NEXUS_TOKEN_FILE} \
+        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
         {params.app[1]} --dataset_path {input.annotation_l23split} \
             --provenances "{params.provenance}" \
             --config {rule_config_dir}/push_dataset_config.yaml \
-            --voxels_resolution {RESOLUTION} \
+            --voxels-resolution {RESOLUTION} \
             2>&1 | tee {log}
         """
 
@@ -1238,20 +1230,21 @@ rule push_cell_densities:
         touch(f"{WORKING_DIR}/push_cell_densities_success.txt")
     params:
         app=APPS["bba-data-push push-volumetric"].split(),
-        provenance = f"atlas-building-tools cell-densities glia-cell-densities:{applications['applications']['atlas-building-tools cell-densities glia-cell-densities']}"
+        provenance = f"atlas-building-tools cell-densities glia-cell-densities:{applications['applications']['atlas-building-tools cell-densities glia-cell-densities']}",
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/push_cell_densities.log"
     shell:
         """
-        {params.app[0]} --forge_config_file {FORGE_CONFIG} \
-            --nexus_env {NEXUS_DESTINATION_ENV} \
-            --nexus_org {NEXUS_DESTINATION_ORG} \
-            --nexus_proj {NEXUS_DESTINATION_PROJ} \
-            --nexus_token_file {NEXUS_TOKEN_FILE} \
+        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
         {params.app[1]} --dataset_path {input.cell_densities} \
             --provenances "{params.provenance}" \
             --config {rule_config_dir}/push_dataset_config.yaml \
-            --voxels_resolution {RESOLUTION} \
+            --voxels-resolution {RESOLUTION} \
             2>&1 | tee {log}
         """
         
@@ -1264,17 +1257,18 @@ rule push_neuron_densities:
         touch(f"{WORKING_DIR}/push_neuron_densities_success.txt")
     params:
         app=APPS["bba-data-push push-volumetric"].split(),
-        provenance = f"atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities:{applications['applications']['atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities']}"
+        provenance = f"atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities:{applications['applications']['atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities']}",
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/push_neuron_densities.log"
     shell:
         """
-        {params.app[0]} --forge_config_file {FORGE_CONFIG} \
-            --nexus_env {NEXUS_DESTINATION_ENV} \
-            --nexus_org {NEXUS_DESTINATION_ORG} \
-            --nexus_proj {NEXUS_DESTINATION_PROJ} \
-            --nexus_token_file {NEXUS_TOKEN_FILE} \
-        {params.app[1]} --dataset_path {input.neuron_densities} \
+        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app[1]} --dataset-path {input.neuron_densities} \
             --provenances "{params.provenance}" \
             --config {rule_config_dir}/push_dataset_config.yaml \
             --voxels_resolution {RESOLUTION} \
@@ -1294,24 +1288,25 @@ rule push_hybrid_v2v3_volumetric_nrrd_datasets:
         app=APPS["bba-data-push push-volumetric"].split(),
         provenance_hybrid = f"atlas-building-tools combination combine-annotations:{applications['applications']['atlas-building-tools combination combine-annotations']}",
         provenance_cell_densities = f"atlas-building-tools cell-densities glia-cell-densities:{applications['applications']['atlas-building-tools cell-densities glia-cell-densities']}",
-        provenance_neuron_densities = f"atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities:{applications['applications']['atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities']}"
+        provenance_neuron_densities = f"atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities:{applications['applications']['atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities']}",
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/push_hybrid_v2v3_volumetric_nrrd_datasets.log"
     shell:
         """
-        {params.app[0]} --forge_config_file {FORGE_CONFIG} \
-            --nexus_env {NEXUS_DESTINATION_ENV} \
-            --nexus_org {NEXUS_DESTINATION_ORG} \
-            --nexus_proj {NEXUS_DESTINATION_PROJ} \
-            --nexus_token_file {NEXUS_TOKEN_FILE} \
+        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
         {params.app[1]} --dataset_path {input.annotation_hybrid} \
-            --dataset_path {input.cell_densities} \
-            --dataset_path {input.neuron_densities} \
+            --dataset-path {input.cell_densities} \
+            --dataset-path {input.neuron_densities} \
             --provenances "{params.provenance_hybrid}" \
             --provenances "{params.provenance_cell_densities}" \
             --provenances "{params.provenance_neuron_densities}" \
             --config {rule_config_dir}/push_dataset_config.yaml \
-            --voxels_resolution {RESOLUTION} \
+            --voxels-resolution {RESOLUTION} \
             2>&1 | tee {log}
         """
 
@@ -1328,24 +1323,25 @@ rule push_l23split_volumetric_nrrd_datasets:
         app=APPS["bba-data-push push-volumetric"].split(),
         provenance_l23split = f"atlas-building-tools region-splitter split-isocortex-layer-23:{applications['applications']['atlas-building-tools region-splitter split-isocortex-layer-23']}",
         provenance_cell_densities = f"atlas-building-tools cell-densities glia-cell-densities:{applications['applications']['atlas-building-tools cell-densities glia-cell-densities']}",
-        provenance_neuron_densities = f"atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities:{applications['applications']['atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities']}"
+        provenance_neuron_densities = f"atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities:{applications['applications']['atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities']}",
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/push_l23split_volumetric_nrrd_datasets.log"
     shell:
         """
-        {params.app[0]} --forge_config_file {FORGE_CONFIG} \
-            --nexus_env {NEXUS_DESTINATION_ENV} \
-            --nexus_org {NEXUS_DESTINATION_ORG} \
-            --nexus_proj {NEXUS_DESTINATION_PROJ} \
-            --nexus_token_file {NEXUS_TOKEN_FILE} \
+        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
         {params.app[1]} --dataset_path {input.annotation_l23split} \
-            --dataset_path {input.cell_densities} \
-            --dataset_path {input.neuron_densities} \
+            --dataset-path {input.cell_densities} \
+            --dataset-path {input.neuron_densities} \
             --provenances "{params.provenance_l23split}" \
             --provenances "{params.provenance_cell_densities}" \
             --provenances "{params.provenance_neuron_densities}" \
             --config {rule_config_dir}/push_dataset_config.yaml \
-            --voxels_resolution {RESOLUTION} \
+            --voxels-resolution {RESOLUTION} \
             2>&1 | tee {log}
         """
 
@@ -1364,26 +1360,27 @@ rule push_all_volumetric_nrrd_datasets:
         provenance_hybrid = f"atlas-building-tools combination combine-annotations:{applications['applications']['atlas-building-tools combination combine-annotations']}",
         provenance_l23split = f"atlas-building-tools region-splitter split-isocortex-layer-23:{applications['applications']['atlas-building-tools region-splitter split-isocortex-layer-23']}",
         provenance_cell_densities = f"atlas-building-tools cell-densities glia-cell-densities:{applications['applications']['atlas-building-tools cell-densities glia-cell-densities']}",
-        provenance_neuron_densities = f"atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities:{applications['applications']['atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities']}"
+        provenance_neuron_densities = f"atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities:{applications['applications']['atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities']}",
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/push_all_volumetric_nrrd_datasets.log"
     shell:
         """
-        {params.app[0]} --forge_config_file {FORGE_CONFIG} \
-            --nexus_env {NEXUS_DESTINATION_ENV} \
-            --nexus_org {NEXUS_DESTINATION_ORG} \
-            --nexus_proj {NEXUS_DESTINATION_PROJ} \
-            --nexus_token_file {NEXUS_TOKEN_FILE} \
+        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
         {params.app[1]} --dataset_path {input.annotation_hybrid} \
-            --dataset_path {input.annotation_l23split} \
-            --dataset_path {input.cell_densities} \
-            --dataset_path {input.neuron_densities} \
+            --dataset-path {input.annotation_l23split} \
+            --dataset-path {input.cell_densities} \
+            --dataset-path {input.neuron_densities} \
             --provenances "{params.provenance_hybrid}" \
             --provenances "{params.provenance_l23split}" \
             --provenances "{params.provenance_cell_densities}" \
             --provenances "{params.provenance_neuron_densities}" \
             --config {rule_config_dir}/push_dataset_config.yaml \
-            --voxels_resolution {RESOLUTION} \
+            --voxels-resolution {RESOLUTION} \
             2>&1 | tee {log}
         """
 
@@ -1397,17 +1394,18 @@ rule push_hybrid_v2v3_meshes_obj:
         temp(touch(f"{WORKING_DIR}/push_hybrid_v2v3_meshes_obj_success.txt"))
     params:
         app=APPS["bba-data-push push-meshes"].split(),
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/push_hybrid_v2v3_meshes_obj.log"
     shell:
         """
-        {params.app[0]} --forge_config_file {FORGE_CONFIG} \
-            --nexus_env {NEXUS_DESTINATION_ENV} \
-            --nexus_org {NEXUS_DESTINATION_ORG} \
-            --nexus_proj {NEXUS_DESTINATION_PROJ} \
-            --nexus_token_file {NEXUS_TOKEN_FILE} \
-        {params.app[1]} --dataset_path {input.mesh_hybrid} \
-            --hierarchy_path {input.hierarchy} \
+        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app[1]} --dataset-path {input.mesh_hybrid} \
+            --hierarchy-path {input.hierarchy} \
             --config {rule_config_dir}/push_dataset_config.yaml \
             2>&1 | tee {log}
         """
@@ -1422,17 +1420,18 @@ rule push_l23split_meshes_obj:
         temp(touch(f"{WORKING_DIR}/push_l23split_meshes_obj_success.txt"))
     params:
         app=APPS["bba-data-push push-meshes"].split(),
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/push_l23split_meshes_obj.log"
     shell:
         """
-        {params.app[0]} --forge_config_file {FORGE_CONFIG} \
-            --nexus_env {NEXUS_DESTINATION_ENV} \
-            --nexus_org {NEXUS_DESTINATION_ORG} \
-            --nexus_proj {NEXUS_DESTINATION_PROJ} \
-            --nexus_token_file {NEXUS_TOKEN_FILE} \
-        {params.app[1]} --dataset_path {input.mesh_l23split} \
-            --hierarchy_path {input.hierarchy_split} \
+        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app[1]} --dataset-path {input.mesh_l23split} \
+            --hierarchy-path {input.hierarchy_split} \
             --config {rule_config_dir}/push_dataset_config.yaml \
             2>&1 | tee {log}
         """
@@ -1449,19 +1448,20 @@ rule push_all_meshes_obj_datasets:
         temp(touch(f"{WORKING_DIR}/push_all_meshes_obj_datasets_success.txt"))
     params:
         app=APPS["bba-data-push push-meshes"].split(),
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/push_all_meshes_obj_datasets.log"
     shell:
         """
-        {params.app[0]} --forge_config_file {FORGE_CONFIG} \
-            --nexus_env {NEXUS_DESTINATION_ENV} \
-            --nexus_org {NEXUS_DESTINATION_ORG} \
-            --nexus_proj {NEXUS_DESTINATION_PROJ} \
-            --nexus_token_file {NEXUS_TOKEN_FILE} \
-        {params.app[1]} --dataset_path {input.mesh_hybrid} \
-            --dataset_path {input.mesh_l23split} \
-            --hierarchy_path {input.hierarchy} \
-            --hierarchy_path {input.hierarchy_split} \
+        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app[1]} --dataset-path {input.mesh_hybrid} \
+            --dataset-path {input.mesh_l23split} \
+            --hierarchy-path {input.hierarchy} \
+            --hierarchy-path {input.hierarchy_split} \
             --config {rule_config_dir}/push_dataset_config.yaml \
             2>&1 | tee {log}
         """
@@ -1475,20 +1475,21 @@ rule push_sonata_cellrecords:
         touch(f"{WORKING_DIR}/push_sonata_cellrecords_success.txt")
     params:
         app=APPS["bba-data-push push-cellrecords"].split(),
-        provenance = f"brainbuilder cells positions-and-orientations:{applications['applications']['brainbuilder cells positions-and-orientations']}"
+        provenance = f"brainbuilder cells positions-and-orientations:{applications['applications']['brainbuilder cells positions-and-orientations']}",
+        token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/push_sonata_cellrecords.log"
     shell:
         """
-        {params.app[0]} --forge_config_file {FORGE_CONFIG} \
-            --nexus_env {NEXUS_DESTINATION_ENV} \
-            --nexus_org {NEXUS_DESTINATION_ORG} \
-            --nexus_proj {NEXUS_DESTINATION_PROJ} \
-            --nexus_token_file {NEXUS_TOKEN_FILE} \
-        {params.app[1]} --dataset_path {input.cell_records} \
+        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app[1]} --dataset-path {input.cell_records} \
             --provenances "{params.provenance}" \
             --config {rule_config_dir}/push_dataset_config.yaml \
-            --voxels_resolution {RESOLUTION} \
+            --voxels-resolution {RESOLUTION} \
             2>&1 | tee {log}
         """
 

@@ -1,4 +1,4 @@
-HierarchyJson:
+hierarchyJson:
 - hierarchy
 - hierarchy_l23split
 generatedDatasetType:
@@ -26,4 +26,4 @@ GeneratedDatasetPath:
     brain_region_meshes_hybrid: {WORKING_DIR}/brain_region_meshes_v2v3_hybrid
     brain_region_meshes_l23split: {WORKING_DIR}/brain_region_meshes_l23split
   CellRecordsFile:
-    cell_records_sonata: {WORKING_DIR}/cell_records_sonata.h5  
+    cell_records_sonata: {WORKING_DIR}/cell_records_sonata.h5

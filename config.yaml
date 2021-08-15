@@ -1,5 +1,4 @@
 WORKING_DIR: ../output_data
-NEXUS_TOKEN_FILE: ../Data/token.txt
 NEXUS_IDS_FILE: ./nexus_ids.json
 FORGE_CONFIG: ../blue_brain_atlas_nexus_push/forge_configuration/forge_config.yml
 RULES_CONFIG_DIR_TEMPLATES: ./rules_config_dir_templates
