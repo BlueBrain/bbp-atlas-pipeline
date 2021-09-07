@@ -51,14 +51,14 @@ if not os.path.exists(LOG_DIR):
     try:
         os.mkdir(LOG_DIR)
         L.info("folder '{LOG_DIR}' created")
-        if not os.path.exists(snakemake_run_logs):
-            try:
-                os.mkdir(snakemake_run_logs)
-                L.info("folder '{snakemake_run_logs}' created")
-            except OSError:
-                L.error(f"creation of the directory {snakemake_run_logs} failed")
     except OSError:
         L.error(f"creation of the directory {LOG_DIR} failed")
+if not os.path.exists(snakemake_run_logs):
+    try:
+        os.mkdir(snakemake_run_logs)
+        L.info("folder '{snakemake_run_logs}' created")
+    except OSError:
+        L.error(f"creation of the directory {snakemake_run_logs} failed")
 
 # Pipeline logs
 logfile = os.path.abspath(
@@ -886,7 +886,7 @@ rule check_hybrid_v2v3_annotation:
         f"{LOG_DIR}/check_hybrid_v2v3_annotation.log"
     shell:
         """
-        {params.app} --input_dataset {input.annotation_hybrid} \
+        {params.app} --input-dataset {input.annotation_hybrid} \
             --report_path {output} \
             2>&1 | tee {log}
         """
@@ -903,8 +903,8 @@ rule check_l23split_annotation:
         f"{LOG_DIR}/check_l23split_annotation.log"
     shell:
         """
-        {params.app} --input_dataset {input.annotation_l23split} \
-            --report_path {output} \
+        {params.app} --input-dataset {input.annotation_l23split} \
+            --report-path {output} \
             2>&1 | tee {log}
         """
 
@@ -920,8 +920,8 @@ rule check_cell_densities:
         f"{LOG_DIR}/check_cell_densities.log"
     shell:
         """
-        {params.app} --input_dataset {input.cell_densities} \
-            --report_path {output} \
+        {params.app} --input-dataset {input.cell_densities} \
+            --report-path {output} \
             2>&1 | tee {log}
         """
 
@@ -937,8 +937,8 @@ rule check_neuron_densities:
         f"{LOG_DIR}/check_neuron_densities.log"
     shell:
         """
-        {params.app} --input_dataset {input.neuron_densities} \
-            --report_path {output} \
+        {params.app} --input-dataset {input.neuron_densities} \
+            --report-path {output} \
             2>&1 | tee {log}
         """
 
@@ -956,11 +956,11 @@ rule check_hybrid_v2v3_volumetric_nrrd_datasets:
         f"{LOG_DIR}/check_hybrid_v2v3_volumetric_nrrd_datasets.log"
     shell:
         """
-        {params.app} --input_dataset {input.annotation_hybrid} \
-            --input_dataset {input.annotation_l23split} \
-            --input_dataset {input.cell_densities} \
-            --input_dataset {input.neuron_densities} \
-            --report_path {output} \
+        {params.app} --input-dataset {input.annotation_hybrid} \
+            --input-dataset {input.annotation_l23split} \
+            --input-dataset {input.cell_densities} \
+            --input-dataset {input.neuron_densities} \
+            --report-path {output} \
             2>&1 | tee {log}
         """
 
@@ -978,10 +978,10 @@ rule check_l23split_volumetric_nrrd_datasets:
         f"{LOG_DIR}/check_l23split_volumetric_nrrd_datasets.log"
     shell:
         """
-        {params.app}  --input_dataset {input.annotation_l23split} \
-            --input_dataset {input.cell_densities} \
-            --input_dataset {input.neuron_densities} \
-            --report_path {output} \
+        {params.app}  --input-dataset {input.annotation_l23split} \
+            --input-dataset {input.cell_densities} \
+            --input-dataset {input.neuron_densities} \
+            --report-path {output} \
             2>&1 | tee {log}
         """
 
@@ -1000,11 +1000,11 @@ rule check_all_volumetric_nrrd_datasets:
         f"{LOG_DIR}/check_all_volumetric_nrrd_datasets.log"
     shell:
         """
-        {params.app} --input_dataset {input.annotation_hybrid} \
-            --input_dataset {input.annotation_l23split} \
-            --input_dataset {input.cell_densities} \
-            --input_dataset {input.neuron_densities} \
-            --report_path {output} \
+        {params.app} --input-dataset {input.annotation_hybrid} \
+            --input-dataset {input.annotation_l23split} \
+            --input-dataset {input.cell_densities} \
+            --input-dataset {input.neuron_densities} \
+            --report-path {output} \
             2>&1 | tee {log}
         """
 
@@ -1020,8 +1020,8 @@ rule check_hybrid_v2v3_meshes_obj:
         f"{LOG_DIR}/check_hybrid_v2v3_meshes_obj.log"
     shell:
         """
-        {params.app} --input_dataset {input.mesh_hybrid} \
-            --report_path {output} \
+        {params.app} --input-dataset {input.mesh_hybrid} \
+            --report-path {output} \
             2>&1 | tee {log}
         """
 
@@ -1037,8 +1037,8 @@ rule check_l23split_meshes_obj:
         f"{LOG_DIR}/check_l23split_meshes_obj.log"
     shell:
         """
-        {params.app} --input_dataset {input.mesh_l23split} \
-            --report_path {output} \
+        {params.app} --input-dataset {input.mesh_l23split} \
+            --report-path {output} \
             2>&1 | tee {log}
         """
 
@@ -1055,9 +1055,9 @@ rule check_all_meshes_obj_datasets:
         f"{LOG_DIR}/check_all_meshes_obj_datasets.log"
     shell:
         """
-        {params.app} --input_dataset {input.mesh_hybrid} \
-            --input_dataset {input.mesh_l23split} \
-            --report_path {output} \
+        {params.app} --input-dataset {input.mesh_hybrid} \
+            --input-dataset {input.mesh_l23split} \
+            --report-path {output} \
             2>&1 | tee {log}
         """
 
@@ -1073,8 +1073,8 @@ rule check_sonata_cellrecords:
         f"{LOG_DIR}/check_sonata_cellrecords.log"
     shell:
         """
-        {params.app} --input_dataset {input.cell_records_file} \
-            --report_path {output} \
+        {params.app} --input-dataset {input.cell_records_file} \
+            --report-path {output} \
             2>&1 | tee {log}
         """
 
