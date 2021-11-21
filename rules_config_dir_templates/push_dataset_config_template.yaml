@@ -7,11 +7,34 @@ generatedDatasetType:
 - CellRecordsFile
 generatedDataset:
 - annotation_v2v3_hybrid
-- annotation_l23split
-- cell_densities
-- neuron_densities
-- brain_region_meshes_v2v3_hybrid
-- brain_region_meshes_l23split
+- annotation_ccfv3_l23split
+- annotation_hybrid_l23split
+- annotation_realigned_l23split
+- cell_orientations_hybrid
+- cell_orientations_realigned
+- cell_orientations_ccfv3
+- placement_hints_ccfv3_l23split
+- placement_hints_hybrid_l23split
+- placement_hints_realigned_l23split
+- overall_cell_density_ccfv2_correctednissl
+- cell_densities_hybrid
+- cell_densities_realigned
+- cell_densities_ccfv2
+- cell_densities_ccfv2_correctednissl
+- neuron_densities_hybrid
+- neuron_densities_realigned
+- neuron_densities_ccfv2
+- neuron_densities_ccfv2_correctednissl
+- inhibitory_neuron_densities_linprog_ccfv2_correctednissl
+- inhibitory_neuron_densities_preserveprop_ccfv2_correctednissl
+- mtypes_densities_profile_ccfv2_correctednissl
+- mtypes_densities_probability_map_ccfv2_correctednissl
+- brain_region_mask_ccfv3_l23split
+- brain_region_mask_hybrid
+- brain_region_mask_hybrid_l23split
+- brain_region_meshes_hybrid
+- brain_region_meshes_hybrid_l23split
+- brain_region_meshes_ccfv3_l23split
 - cell_records_sonata
 HierarchyJson:
   hierarchy: {WORKING_DIR}/hierarchy.json
@@ -19,11 +42,34 @@ HierarchyJson:
 GeneratedDatasetPath:
   VolumetricFile:
     annotation_hybrid: {WORKING_DIR}/annotation_v2v3_hybrid.nrrd
-    annotation_l23split: {WORKING_DIR}/annotation_l23split.nrrd
-    cell_densities: {WORKING_DIR}/cell_densities
-    neuron_densities: {WORKING_DIR}/neuron_densities
+    annotation_ccfv3_l23split: {WORKING_DIR}/annotation_ccfv3_l23split.nrrd
+    annotation_hybrid_l23split: {WORKING_DIR}/annotation_hybrid_l23split.nrrd
+    annotation_realigned_l23split: {WORKING_DIR}/annotation_realigned_l23split.nrrd
+    cell_orientations_hybrid: {WORKING_DIR}/cell_orientations_hybrid.nrrd
+    cell_orientations_realigned: {WORKING_DIR}/cell_orientations_realigned.nrrd
+    cell_orientations_ccfv3: {WORKING_DIR}/cell_orientations_ccfv3.nrrd
+    placement_hints_ccfv3_l23split: {WORKING_DIR}/placement_hints_ccfv3_l23split
+    placement_hints_hybrid_l23split: {WORKING_DIR}/placement_hints_hybrid_l23split
+    placement_hints_realigned_l23split: {WORKING_DIR}/placement_hints_realigned_l23split
+    overall_cell_density_ccfv2_correctednissl: {WORKING_DIR}/overall_cell_density_ccfv2_correctednissl.nrrd
+    cell_densities_hybrid: {WORKING_DIR}/cell_densities_hybrid
+    cell_densities_realigned: {WORKING_DIR}/cell_densities_realigned
+    cell_densities_ccfv2: {WORKING_DIR}/cell_densities_ccfv2
+    cell_densities_ccfv2_correctednissl: {WORKING_DIR}/cell_densities_ccfv2_correctednissl
+    neuron_densities_hybrid: {WORKING_DIR}/neuron_densities_hybrid
+    neuron_densities_realigned: {WORKING_DIR}/neuron_densities_realigned
+    neuron_densities_ccfv2: {WORKING_DIR}/neuron_densities_ccfv2
+    neuron_densities_ccfv2_correctednissl: {WORKING_DIR}/neuron_densities_ccfv2_correctednissl
+    inhibitory_neuron_densities_linprog_ccfv2_correctednissl: {WORKING_DIR}/inhibitory_neuron_densities_preserveprop_ccfv2_correctednissl
+    inhibitory_neuron_densities_preserveprop_ccfv2_correctednissl: {WORKING_DIR}/inhibitory_neuron_densities_preserveprop_ccfv2_correctednissl
+    mtypes_densities_profile_ccfv2_correctednissl: {WORKING_DIR}/mtypes_densities_profile_ccfv2_correctednissl
+    mtypes_densities_probability_map_ccfv2_correctednissl: {WORKING_DIR}/mtypes_densities_probability_map_ccfv2_correctednissl
+    brain_region_mask_ccfv3_l23split: {WORKING_DIR}/brain_region_mask_ccfv3_l23split
+    brain_region_mask_hybrid: {WORKING_DIR}/brain_region_mask_hybrid
+    brain_region_mask_hybrid_l23split: {WORKING_DIR}/brain_region_mask_hybrid_l23split
   MeshFile:
     brain_region_meshes_hybrid: {WORKING_DIR}/brain_region_meshes_v2v3_hybrid
-    brain_region_meshes_l23split: {WORKING_DIR}/brain_region_meshes_l23split
+    brain_region_meshes_hybrid_l23split: {WORKING_DIR}/brain_region_meshes_hybrid_l23split
+    brain_region_meshes_ccfv3_l23split: {WORKING_DIR}/brain_region_meshes_ccfv3_l23split
   CellRecordsFile:
     cell_records_sonata: {WORKING_DIR}/cell_records_sonata.h5

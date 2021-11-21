@@ -1,0 +1,12 @@
+inputGeneVolumePath:
+    pv: {WORKING_DIR}/gene_pv.nrrd
+    sst: {WORKING_DIR}/gene_sst.nrrd
+    vip: {WORKING_DIR}/gene_vip.nrrd
+    gad67: {WORKING_DIR}/gene_gad67.nrrd
+sectionDataSetID:
+    pv: "868"
+    sst: "1001"
+    vip: "77371835"
+    gad67: "479"
+realignedSlicesPath: {WORKING_DIR}/rules_config_dir/realigned_slices.json
+cellDensityStandardDeviationsPath: {WORKING_DIR}/rules_config_dir/std_cells.json
