@@ -102,7 +102,8 @@ APPS = {
     "bba-data-integrity-check atlas-sonata-integrity": "bba-data-integrity-check atlas-sonata-integrity",
     "bba-data-push push-volumetric": "bba-data-push push-volumetric",
     "bba-data-push push-meshes": "bba-data-push push-meshes",
-    "bba-data-push push-cellrecords": "bba-data-push push-cellrecords"
+    "bba-data-push push-cellrecords": "bba-data-push push-cellrecords",
+    "bba-data-push push-regionsummary": "bba-data-push push-regionsummary"
 }
 #"gene-expression-volume create-volumes": "gene-expression-volume create-volumes",
 
@@ -149,25 +150,41 @@ repository = "rules_config_dir_templates"
 files = os.listdir(repository)
 pattern = "*_template.yaml"
 files_list = fnmatch.filter(files, pattern)
-try:
-    for file in files_list:
+for file in files_list:
+    try:
         rule_config_file_template = open(f"{RULES_CONFIG_DIR_TEMPLATES}/{file}", "r")
         rule_config_file_name = file.replace('_template', '')
         rule_config_file = open(f"{rules_config_dir}/{rule_config_file_name}", "w+")
         rule_config_file.write(re.sub("{WORKING_DIR}", WORKING_DIR, rule_config_file_template.read()))
         rule_config_file_template.close()
         rule_config_file.seek(0)
-except FileExistsError:
-    rule_config_file = open(f"{rules_config_dir}/{rule_config_file_name}", "r")
+    except FileExistsError:
+        pass
 
-COMBINE_MARKERS_HYBRID_CONFIG_FILE = yaml.safe_load(open(f"{rules_config_dir}/combine_markers_hybrid_config.yaml", "r").read().strip())
-COMBINE_MARKERS_REALIGNED_CONFIG_FILE = yaml.safe_load(open(f"{rules_config_dir}/combine_markers_realigned_config.yaml", "r").read().strip())
-COMBINE_MARKERS_CCFV2_CONFIG_FILE = yaml.safe_load(open(f"{rules_config_dir}/combine_markers_ccfv2_config.yaml", "r").read().strip())
-CELL_POSITIONS_HYBRID_CONFIG_FILE = yaml.safe_load(open(f"{rules_config_dir}/cell_positions_hybrid_config.yaml", "r").read().strip())
-CELL_POSITIONS_REALIGNED_CONFIG_FILE = yaml.safe_load(open(f"{rules_config_dir}/cell_positions_realigned_config.yaml", "r").read().strip())
-CELL_POSITIONS_CCFV2_CONFIG_FILE = yaml.safe_load(open(f"{rules_config_dir}/cell_positions_ccfv2_config.yaml", "r").read().strip())
-CELL_POSITIONS_CCFV2_CORRECTEDNISSL_CONFIG_FILE = yaml.safe_load(open(f"{rules_config_dir}/cell_positions_ccfv2_correctednissl_config.yaml", "r").read().strip())
-PUSH_DATASET_CONFIG_FILE = yaml.safe_load(open(f"{rules_config_dir}/push_dataset_config.yaml", "r").read().strip())
+with open(f"{rules_config_dir}/combine_markers_hybrid_config.yaml", "r") as file:
+    COMBINE_MARKERS_HYBRID_CONFIG_FILE = yaml.safe_load(file.read().strip())
+
+with open(f"{rules_config_dir}/combine_markers_realigned_config.yaml", "r") as file:
+    COMBINE_MARKERS_REALIGNED_CONFIG_FILE = yaml.safe_load(file.read().strip())
+
+with open(f"{rules_config_dir}/combine_markers_ccfv2_config.yaml", "r") as file:
+    COMBINE_MARKERS_CCFV2_CONFIG_FILE = yaml.safe_load(file.read().strip())
+
+with open(f"{rules_config_dir}/cell_positions_hybrid_config.yaml", "r") as file:
+    CELL_POSITIONS_HYBRID_CONFIG_FILE = yaml.safe_load(file.read().strip())
+
+with open(f"{rules_config_dir}/cell_positions_realigned_config.yaml", "r") as file:
+    CELL_POSITIONS_REALIGNED_CONFIG_FILE = yaml.safe_load(file.read().strip())
+
+with open(f"{rules_config_dir}/cell_positions_ccfv2_config.yaml", "r") as file:
+    CELL_POSITIONS_CCFV2_CONFIG_FILE = yaml.safe_load(file.read().strip())
+
+with open(f"{rules_config_dir}/cell_positions_ccfv2_correctednissl_config.yaml", "r") as file:
+    CELL_POSITIONS_CCFV2_CORRECTEDNISSL_CONFIG_FILE = yaml.safe_load(file.read().strip())
+
+with open(f"{rules_config_dir}/push_dataset_config.yaml", "r") as file:
+    PUSH_DATASET_CONFIG_FILE = yaml.safe_load(file.read().strip())
+
 AVERAGE_DENSITIES_CONFIG_FILE = f"{rules_config_dir}/fit_average_densities_config.yaml"
 AVERAGE_DENSITIES_CORRECTEDNISSL_CONFIG_FILE = f"{rules_config_dir}/fit_average_densities_correctednissl_config.yaml"
 MTYPES_PROFILE_REALIGNED_CONFIG_ = f"{rules_config_dir}/mtypes_profile_realigned_config.yaml"
@@ -2556,8 +2573,8 @@ rule push_hybrid_v2v3_volumetric_nrrd_datasets:
             2>&1 | tee {log}
         """
 
-##>push__hybrid_l23split_volumetric_nrrd_datasets : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
-rule push__hybrid_l23split_volumetric_nrrd_datasets:
+##>push_hybrid_l23split_volumetric_nrrd_datasets : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
+rule push_hybrid_l23split_volumetric_nrrd_datasets:
     input:
         annotation_l23split=rules.split_isocortex_layer_23_hybrid.output.annotation_l23split,
         cell_densities=rules.glia_cell_densities_hybrid.output,
@@ -2565,7 +2582,7 @@ rule push__hybrid_l23split_volumetric_nrrd_datasets:
         push_dataset_config = f"{PUSH_DATASET_CONFIG_FILE}",
         check_nrrd = rules.check_l23split_volumetric_nrrd_datasets.output
     output:
-        touch(f"{WORKING_DIR}/push__hybrid_l23split_volumetric_nrrd_datasets_success.txt")
+        touch(f"{WORKING_DIR}/push_hybrid_l23split_volumetric_nrrd_datasets_success.txt")
     params:
         app=APPS["bba-data-push push-volumetric"].split(),
         provenance_l23split = f"atlas-building-tools region-splitter split-isocortex-layer-23:{applications['applications']['atlas-building-tools region-splitter split-isocortex-layer-23']}",
@@ -2573,7 +2590,7 @@ rule push__hybrid_l23split_volumetric_nrrd_datasets:
         provenance_neuron_densities = f"atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities:{applications['applications']['atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities']}",
         token = myTokenFetcher.getAccessToken()
     log:
-        f"{LOG_DIR}/push__hybrid_l23split_volumetric_nrrd_datasets.log"
+        f"{LOG_DIR}/push_hybrid_l23split_volumetric_nrrd_datasets.log"
     shell:
         """
         {params.app[0]} --forge-config-file {FORGE_CONFIG} \
@@ -2745,7 +2762,60 @@ rule push_sonata_cellrecords:
             2>&1 | tee {log}
         """
 
-
+##>push_ccfv3_mesh_mask : Create a Mesh, a Mask and a RegionSummary resource and push it along with their respective files into Nexus
+rule push_ccfv3_mesh_mask:
+    input:
+        hierarchy=rules.split_isocortex_layer_23_ccfv3.output.hierarchy_l23split,
+         mask=rules.export_brain_region_ccfv3_l23split.output.mask_dir,
+        mesh=rules.export_brain_region_ccfv3_l23split.output.mesh_dir,
+        metadata=rules.export_brain_region_ccfv3_l23split.output.json_metadata_parcellations,
+        push_dataset_config = f"{PUSH_DATASET_CONFIG_FILE}",
+        #check_obj_meshes = rules.check_hybrid_v2v3_meshes_obj.output
+    output:
+        link_regions = f"{WORKING_DIR}/link_regions.json"
+        temp(touch(f"{WORKING_DIR}/push_hybrid_v2v3_meshes_obj_success.txt"))
+    params:
+        app1=APPS["bba-data-push push-volumetric"].split(),
+        app2=APPS["bba-data-push push-meshes"].split(),
+        app3=APPS["bba-data-push push-regionsummary"].split(),
+        token = myTokenFetcher.getAccessToken()
+    log:
+        f"{LOG_DIR}/push_ccfv3_mesh_mask.log"
+    shell:
+        """
+        {params.app1[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app1[1]} --dataset-path {input.mesh_hybrid} \
+            --hierarchy-path {input.hierarchy} \
+            --config-path {input.push_dataset_config} \
+            --link-regions-path {output.link_regions} \
+            --voxels-resolution {RESOLUTION} \
+            2>&1 | tee {log} \
+        {params.app2[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app2[1]} --dataset-path {input.mesh_hybrid} \
+            --hierarchy-path {input.hierarchy} \
+            --config-path {input.push_dataset_config} \
+            --link-regions-path {output.link_regions} \
+            --voxels-resolution {RESOLUTION} \
+            2>&1 | tee {log} \
+        {params.app3[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app3[1]} --dataset-path {input.mesh_hybrid} \
+            --hierarchy-path {input.hierarchy} \
+            --config-path{input.push_dataset_config} \
+            --link-regions-path {output.link_regions} \
+            2>&1 | tee {log}
+        """
 ##========================== User Rules ==========================
 
 ##>generate_hybrid_v2v3_annotation : global rule with the aim of triggering the generation and verification of annotation_l23split dataset
