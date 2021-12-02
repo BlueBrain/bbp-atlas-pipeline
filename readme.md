@@ -34,7 +34,7 @@ Its workflow consists of 4 steps :
 This workflow is illustrated on the following diagram containing the directed acyclic graph (DAG) of the [Snakemake](https://snakemake.readthedocs.io/en/stable/) rules of the BBAP:
 
 
-![](https://github.com/alibou/blue_brain_atlas_pipeline/blob/develop/sources/figures/README_annotation_pipeline_DAG.png?raw=true)
+![README_annotation_pipeline_DAG](doc/source/figures/README_annotation_pipeline_DAG.png)
 
 
 
