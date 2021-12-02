@@ -1,3 +1,5 @@
+# Blue Brain Atlas Pipeline
+
 ## Introduction
 
 The Atlas Pipeline is a set of processing modules that generate new data such as:
@@ -32,7 +34,7 @@ Its workflow consists of 4 steps :
 This workflow is illustrated on the following diagram containing the directed acyclic graph (DAG) of the [Snakemake](https://snakemake.readthedocs.io/en/stable/) rules of the BBAP:
 
 
-![](doc/Annotation_pipeline_DAG.png)
+![](https://github.com/alibou/blue_brain_atlas_pipeline/blob/develop/sources/figures/README_annotation_pipeline_DAG.png?raw=true)
 
 
 
@@ -43,13 +45,11 @@ You can find more informations on rules in the SnakeMake [documentation](https:/
 ***
 
 
-***
 **Additional informations**  
 To see more information about The Blue Brain Atlas Pipeline (BBAP) you can check its [confluence documentation](https://bbpteam.epfl.ch/project/spaces/display/BBKG/Atlas+Pipeline).  
 This space contains several documentation pages describing:  
-The Allen Mouse CCF Compatible Data : https://bbpteam.epfl.ch/project/spaces/display/BBKG/Allen+Mouse+CCF+Compatible+Data  
-The Atlas Modules : https://bbpteam.epfl.ch/project/spaces/display/BBKG/Atlas+Modules
-***
+The Allen Mouse CCF Compatible Data : [https://bbpteam.epfl.ch/project/spaces/display/BBKG/Allen+Mouse+CCF+Compatible+Data](https://bbpteam.epfl.ch/project/spaces/display/BBKG/Allen+Mouse+CCF+Compatible+Data)   
+The Atlas Modules : [https://bbpteam.epfl.ch/project/spaces/display/BBKG/Atlas+Modules](https://bbpteam.epfl.ch/project/spaces/display/BBKG/Atlas+Modules)
 
 
 ## Installation
@@ -169,8 +169,8 @@ Every Snakemake CL arguments are listed and described in the Snakemake official 
 
 ## Authors and Contributors :
 
-* Nabil Alibou: nabil.alibou@epfl.ch
-* Jonathan Lurie: jonathan.lurie@epfl.ch
+* Nabil Alibou: <nabil.alibou@epfl.ch>
+* Jonathan Lurie: <jonathan.lurie@epfl.ch>
 
 The BBAP is currently maintained by the BlueBrain DKE team: <bbp-ou-dke@groupes.epfl.ch>.
 If you face any issue using the BBAP, please send a mail to one of the contributors.

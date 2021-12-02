@@ -1501,6 +1501,29 @@ rule split_isocortex_layer_23_realigned:
             --output-annotation-path {output.annotation_l23split} \
             2>&1 | tee {log}
         """
+        
+##>split_isocortex_layer_23_ccfv2 : Refine annotations by splitting brain regions 
+rule split_isocortex_layer_23_ccfv2:
+    input:
+        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
+        parcellation_volume=rules.fetch_brain_parcellation_ccfv2.output,
+        direction_vectors=rules.interpolate_direction_vectors_isocortex_ccfv2.output
+    output:
+        hierarchy_l23split=f"{PUSH_DATASET_CONFIG_FILE['HierarchyJson']['hierarchy_l23split']}",
+        annotation_l23split=f"annotation_ccfv2_l23split.nrrd"
+    params:
+        app=APPS["atlas-building-tools region-splitter split-isocortex-layer-23"]
+    log:
+        f"{LOG_DIR}/split_isocortex_layer_23_ccfv2.log"
+    shell:
+        """
+        {params.app} --hierarchy-path {input.hierarchy} \
+            --annotation-path {input.parcellation_volume} \
+            --direction-vectors-path {input.direction_vectors} \
+            --output-hierarchy-path {output.hierarchy_l23split} \
+            --output-annotation-path {output.annotation_l23split} \
+            2>&1 | tee {log}
+        """
 
 ##>orientation_field_ccfv3 : Turn direction vectors into quaternions interpreted as 3D orientations
 rule orientation_field_ccfv3:
@@ -2323,7 +2346,7 @@ rule push_hybrid_v2v3_annotation:
     input:
         annotation_hybrid=rules.combine_annotations.output,
         check_nrrd = rules.check_hybrid_v2v3_annotation.output,
-        push_dataset_config = f"{PUSH_DATASET_CONFIG_FILE}"
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml"
     output:
         touch(f"{WORKING_DIR}/push_hybrid_v2v3_annotation_success.txt")
     params:
@@ -2352,7 +2375,7 @@ rule push_hybrid_l23split_annotation:
     input:
         annotation_l23split=rules.split_isocortex_layer_23_hybrid.output.annotation_l23split,
         check_nrrd = rules.check_hybrid_l23split_annotation.output,
-        push_dataset_config = f"{PUSH_DATASET_CONFIG_FILE}",
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
     output:
         touch(f"{WORKING_DIR}/push_hybrid_l23split_annotation_success.txt")
     params:
@@ -2379,7 +2402,7 @@ rule push_hybrid_l23split_annotation:
 rule push_realigned_l23split_annotation:
     input:
         annotation_l23split=rules.split_isocortex_layer_23_realigned.output.annotation_l23split,
-        push_dataset_config = f"{PUSH_DATASET_CONFIG_FILE}",
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
         #check_nrrd = rules.check_hybrid_l23split_annotation.output
     output:
         touch(f"{WORKING_DIR}/push_realigned_l23split_annotation_success.txt")
@@ -2406,7 +2429,7 @@ rule push_realigned_l23split_atlasrelease:
     input:
         annotation_l23split=rules.split_isocortex_layer_23_realigned.output.annotation_l23split,
         hierarchy_file=rules.split_isocortex_layer_23_realigned.output.hierarchy_l23split,
-        push_dataset_config = f"{PUSH_DATASET_CONFIG_FILE}",
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
         #check_nrrd = rules.check_hybrid_l23split_annotation.output
     output:
         touch(f"{WORKING_DIR}/push_realigned_l23split_annotation_success.txt")
@@ -2433,7 +2456,7 @@ rule push_realigned_l23split_atlasrelease:
 rule push_realigned_orientations:
     input:
         realigned_orientations=rules.orientation_field_realigned.output,
-        push_dataset_config = f"{PUSH_DATASET_CONFIG_FILE}",
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
         #check_nrrd = rules.check_hybrid_l23split_annotation.output
     output:
         touch(f"{WORKING_DIR}/push_realigned_orientations_success.txt")
@@ -2459,7 +2482,7 @@ rule push_realigned_orientations:
 rule push_realigned_placement_hints:
     input:
         placement_hints=rules.placement_hints_isocortex_realigned_l23split.output,
-        push_dataset_config = f"{PUSH_DATASET_CONFIG_FILE}",
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
         #check_nrrd = rules.check_hybrid_l23split_annotation.output
     output:
         touch(f"{WORKING_DIR}/push_realigned_placement_hints_success.txt")
@@ -2485,7 +2508,7 @@ rule push_realigned_placement_hints:
 rule push_cell_densities:
     input:
         cell_densities=rules.combine_annotations.output,
-        push_dataset_config = f"{PUSH_DATASET_CONFIG_FILE}",
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
         check_nrrd = rules.check_cell_densities.output
     output:
         touch(f"{WORKING_DIR}/push_cell_densities_success.txt")
@@ -2513,7 +2536,7 @@ rule push_cell_densities:
 rule push_neuron_densities:
     input:
         neuron_densities=rules.combine_annotations.output,
-        push_dataset_config = f"{PUSH_DATASET_CONFIG_FILE}",
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
         check_nrrd = rules.check_neuron_densities.output
     output:
         touch(f"{WORKING_DIR}/push_neuron_densities_success.txt")
@@ -2543,7 +2566,7 @@ rule push_hybrid_v2v3_volumetric_nrrd_datasets:
         annotation_hybrid=rules.combine_annotations.output,
         cell_densities=rules.glia_cell_densities_hybrid.output,
         neuron_densities=rules.combine_annotations.output,
-        push_dataset_config = f"{PUSH_DATASET_CONFIG_FILE}",
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
         check_nrrd = rules.check_hybrid_v2v3_volumetric_nrrd_datasets.output
     output:
         touch(f"{WORKING_DIR}/push_hybrid_v2v3_volumetric_nrrd_datasets_success.txt")
@@ -2579,7 +2602,7 @@ rule push_hybrid_l23split_volumetric_nrrd_datasets:
         annotation_l23split=rules.split_isocortex_layer_23_hybrid.output.annotation_l23split,
         cell_densities=rules.glia_cell_densities_hybrid.output,
         neuron_densities=rules.combine_annotations.output,
-        push_dataset_config = f"{PUSH_DATASET_CONFIG_FILE}",
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
         check_nrrd = rules.check_l23split_volumetric_nrrd_datasets.output
     output:
         touch(f"{WORKING_DIR}/push_hybrid_l23split_volumetric_nrrd_datasets_success.txt")
@@ -2616,7 +2639,7 @@ rule push_all_volumetric_nrrd_datasets:
         annotation_l23split=rules.split_isocortex_layer_23_hybrid.output.annotation_l23split,
         cell_densities=rules.glia_cell_densities_hybrid.output,
         neuron_densities=rules.combine_annotations.output,
-        push_dataset_config = f"{PUSH_DATASET_CONFIG_FILE}",
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
         check_nrrd = rules.check_all_volumetric_nrrd_datasets.output
     output:
         touch(f"{WORKING_DIR}/push_all_volumetric_nrrd_datasets_success.txt")
@@ -2654,7 +2677,7 @@ rule push_hybrid_v2v3_meshes_obj:
     input:
         mesh_hybrid=rules.export_brain_region_hybrid.output,
         hierarchy = rules.fetch_ccf_brain_region_hierarchy.output,
-        push_dataset_config = f"{PUSH_DATASET_CONFIG_FILE}",
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
         check_obj_meshes = rules.check_hybrid_v2v3_meshes_obj.output
     output:
         temp(touch(f"{WORKING_DIR}/push_hybrid_v2v3_meshes_obj_success.txt"))
@@ -2681,7 +2704,7 @@ rule push_hybrid_l23split_meshes_obj:
     input:
         mesh_l23split=rules.export_brain_region_hybrid_l23split.output,
         hierarchy_split = rules.split_isocortex_layer_23_hybrid.output.hierarchy_l23split,
-        push_dataset_config = f"{PUSH_DATASET_CONFIG_FILE}",
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
         check_obj_meshes = rules.check_hybrid_l23split_meshes_obj.output
     output:
         temp(touch(f"{WORKING_DIR}/push_l23split_meshes_obj_success.txt"))
@@ -2738,7 +2761,7 @@ rule push_all_meshes_obj_datasets:
 rule push_sonata_cellrecords:
     input:
         cell_records=rules.cell_records.output,
-        push_dataset_config = f"{PUSH_DATASET_CONFIG_FILE}",
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
         check_sonata = rules.check_sonata_cellrecords.output
     output:
         touch(f"{WORKING_DIR}/push_sonata_cellrecords_success.txt")
@@ -2762,18 +2785,20 @@ rule push_sonata_cellrecords:
             2>&1 | tee {log}
         """
 
+##========================== Annotation Pipeline Rules ==========================
+
 ##>push_ccfv3_mesh_mask : Create a Mesh, a Mask and a RegionSummary resource and push it along with their respective files into Nexus
 rule push_ccfv3_mesh_mask:
     input:
         hierarchy=rules.split_isocortex_layer_23_ccfv3.output.hierarchy_l23split,
-         mask=rules.export_brain_region_ccfv3_l23split.output.mask_dir,
+        mask=rules.export_brain_region_ccfv3_l23split.output.mask_dir,
         mesh=rules.export_brain_region_ccfv3_l23split.output.mesh_dir,
         metadata=rules.export_brain_region_ccfv3_l23split.output.json_metadata_parcellations,
-        push_dataset_config = f"{PUSH_DATASET_CONFIG_FILE}",
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
         #check_obj_meshes = rules.check_hybrid_v2v3_meshes_obj.output
     output:
-        link_regions = f"{WORKING_DIR}/link_regions.json"
-        temp(touch(f"{WORKING_DIR}/push_hybrid_v2v3_meshes_obj_success.txt"))
+        link_regions = f"{WORKING_DIR}/link_regions.json",
+        touch = temp(touch(f"{WORKING_DIR}/push_hybrid_v2v3_meshes_obj_success.txt"))
     params:
         app1=APPS["bba-data-push push-volumetric"].split(),
         app2=APPS["bba-data-push push-meshes"].split(),
@@ -2788,7 +2813,7 @@ rule push_ccfv3_mesh_mask:
             --nexus-org {NEXUS_DESTINATION_ORG} \
             --nexus-proj {NEXUS_DESTINATION_PROJ} \
             --nexus-token {params.token} \
-        {params.app1[1]} --dataset-path {input.mesh_hybrid} \
+        {params.app1[1]} --dataset-path {input.mask} \
             --hierarchy-path {input.hierarchy} \
             --config-path {input.push_dataset_config} \
             --link-regions-path {output.link_regions} \
@@ -2799,7 +2824,7 @@ rule push_ccfv3_mesh_mask:
             --nexus-org {NEXUS_DESTINATION_ORG} \
             --nexus-proj {NEXUS_DESTINATION_PROJ} \
             --nexus-token {params.token} \
-        {params.app2[1]} --dataset-path {input.mesh_hybrid} \
+        {params.app2[1]} --dataset-path {input.mesh} \
             --hierarchy-path {input.hierarchy} \
             --config-path {input.push_dataset_config} \
             --link-regions-path {output.link_regions} \
@@ -2810,12 +2835,176 @@ rule push_ccfv3_mesh_mask:
             --nexus-org {NEXUS_DESTINATION_ORG} \
             --nexus-proj {NEXUS_DESTINATION_PROJ} \
             --nexus-token {params.token} \
-        {params.app3[1]} --dataset-path {input.mesh_hybrid} \
+        {params.app3[1]} --dataset-path {input.metadata} \
             --hierarchy-path {input.hierarchy} \
             --config-path{input.push_dataset_config} \
             --link-regions-path {output.link_regions} \
             2>&1 | tee {log}
         """
+
+
+##>check_annotation_pipeline_volume_datasets : Check the integrity of the .nrrd volumetric datasets generated by the annotation pipeline
+rule check_annotation_pipeline_volume_datasets:
+    input:
+        annotation_ccfv3_split=rules.split_isocortex_layer_23_ccfv3.output.annotation_l23split,
+        orientation_ccfv3=rules.orientation_field_ccfv3.output,
+        placement_hints_ccfv3_split=rules.placement_hints_isocortex_ccfv3_l23split.output,
+        mask_ccfv3_split=rules.export_brain_region_ccfv3_l23split.output.mask_dir
+    output:
+        f"{WORKING_DIR}/data_check_report/report_volumetric_nrrd.json"
+    params:
+        app=APPS["bba-data-integrity-check nrrd-integrity"]
+    log:
+        f"{LOG_DIR}/check_annotation_pipeline_volume_datasets.log"
+    shell:
+        """
+        {params.app} --input-dataset {input.annotation_ccfv3_split} \
+            --input-dataset {input.orientation_ccfv3} \
+            --input-dataset {input.placement_hints_ccfv3_split} \
+            --input-dataset {input.mask_ccfv3_split} \
+            --report-path {output} \
+            2>&1 | tee {log}
+        """
+
+
+##>check_annotation_pipeline_mesh_datasets : Check the integrity of the annotation pipeline mesh datasets
+rule check_annotation_pipeline_mesh_datasets:
+    input:
+        mesh_ccfv3_split=rules.export_brain_region_ccfv3_l23split.output.mesh_dir
+    output:
+        f"{WORKING_DIR}/data_check_report/report_obj_brain_meshes.json"
+    params:
+        app=APPS["bba-data-integrity-check meshes-obj-integrity"]
+    log:
+        f"{LOG_DIR}/check_annotation_pipeline_mesh_datasets.log"
+    shell:
+        """
+        {params.app} --input-dataset {input.mesh_ccfv3_split} \
+            --report-path {output} \
+            2>&1 | tee {log}
+        """
+
+
+##>check_annotation_pipeline : Verify that the report files generated by the module verifying the annotation pipeline datasets integrity do not contain any issues before starting to push datasets into Nexus. These are contained in the folder data_check_report.
+rule check_annotation_pipeline:
+    priority: 10
+    input:
+        nrrd_report = rules.check_annotation_pipeline_volume_datasets.output,
+        obj_report = rules.check_annotation_pipeline_mesh_datasets.output,
+    output:
+        touch(f"{WORKING_DIR}/data_check_report/report_valid.txt")
+    log:
+        f"{LOG_DIR}/check_annotation_pipeline.log"
+    run:
+        with open(log[0], "w") as logfile:
+            report_files = input
+            for f in report_files:
+                report_file = open(f,'r')
+                report_json = json.load(report_file)
+                for k in report_json.keys():
+                    if not report_json[k]['success'] == 'true':
+                        logfile.write(f"The report file contains errors: \n{report_json}\n "\ 
+                                      "All the data_check_report need to show valid dataset or else those "\
+                                      "will not be pushed in Nexus.")
+                        L.error(f"The report file contains errors: \n'{report_json}")
+                        exit(1)
+                report_file.close()
+            logfile.write(f"All report files show successful datasets integrity check.\nUpdating '{output}'")
+
+
+##>generate_annotation_pipeline_datasets : Global rule to generate and check the integrity of every products of the annotation pipeline
+rule generate_annotation_pipeline_datasets:
+    input:
+        all_datasets = rules.check_annotation_pipeline.output,
+
+
+##>push_annotation_pipeline_volume_datasets : Create VolumetricDataLayer resource payloads and push them along with the pipeline volumetric datasets (verified beforehand) into Nexus.
+rule push_annotation_pipeline_volume_datasets:
+    input:
+        hierarchy=rules.split_isocortex_layer_23_ccfv3.output.hierarchy_l23split,
+        annotation_ccfv3_split=rules.split_isocortex_layer_23_ccfv3.output.annotation_l23split,
+        orientation_ccfv3=rules.orientation_field_ccfv3.output,
+        placement_hints_ccfv3_split=rules.placement_hints_isocortex_ccfv3_l23split.output,
+        mask_ccfv3_split=rules.export_brain_region_ccfv3_l23split.output.mask_dir,
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
+        check_nrrd = rules.check_annotation_pipeline_volume_datasets.output
+    output:
+        link_regions = f"{WORKING_DIR}/link_regions.json",
+        touch = touch(f"{WORKING_DIR}/push_annotation_pipeline_volume_datasets_success.txt")
+    params:
+        app=APPS["bba-data-push push-volumetric"].split(),
+        token = myTokenFetcher.getAccessToken()
+    log:
+        f"{LOG_DIR}/push_annotation_pipeline_volume_datasets.log"
+    shell:
+        """
+        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app[1]} --dataset-path {input.annotation_ccfv3_split} \
+            --dataset-path {input.orientation_ccfv3} \
+            --dataset-path {input.placement_hints_ccfv3_split} \
+            --dataset-path {input.mask_ccfv3_split} \
+            --hierarchy-path {input.hierarchy} \
+            --config-path {input.push_dataset_config} \
+            --link-regions-path {output.link_regions} \
+            --voxels-resolution {RESOLUTION} \
+            2>&1 | tee {log}
+        """
+
+
+##>push_annotation_pipeline_mesh_datasets : Create Mesh resource payloads and push them along with the pipeline mesh datasets (verified beforehand) into Nexus.
+rule push_annotation_pipeline_mesh_datasets:
+    input:
+        hierarchy=rules.split_isocortex_layer_23_ccfv3.output.hierarchy_l23split,
+        mesh=rules.export_brain_region_ccfv3_l23split.output.mesh_dir,
+        metadata=rules.export_brain_region_ccfv3_l23split.output.json_metadata_parcellations,
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
+        check_obj_meshes = rules.check_annotation_pipeline_mesh_datasets.output
+    output:
+        link_regions = f"{WORKING_DIR}/link_regions.json",
+        touch = temp(touch(f"{WORKING_DIR}/push_annotation_pipeline_mesh_datasets_success.txt"))
+    params:
+        app1=APPS["bba-data-push push-meshes"].split(),
+        app2=APPS["bba-data-push push-regionsummary"].split(),
+        token = myTokenFetcher.getAccessToken()
+    log:
+        f"{LOG_DIR}/push_annotation_pipeline_mesh_datasets.log"
+    shell:
+        """
+        {params.app1[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app1[1]} --dataset-path {input.mesh} \
+            --hierarchy-path {input.hierarchy} \
+            --config-path {input.push_dataset_config} \
+            --link-regions-path {output.link_regions} \
+            --voxels-resolution {RESOLUTION} \
+            2>&1 | tee {log} \
+        {params.app2[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app2[1]} --dataset-path {input.metadata} \
+            --hierarchy-path {input.hierarchy} \
+            --config-path{input.push_dataset_config} \
+            --link-regions-path {output.link_regions} \
+            2>&1 | tee {log}
+        """
+
+
+##>push_annotation_pipeline_datasets : Global rule to generate, check and push into Nexus every products of the annotation pipeline.
+rule push_annotation_pipeline_datasets:
+    input:
+        push_volumes = rules.push_annotation_pipeline_volume_datasets.output,
+        push_meshes = rules.push_annotation_pipeline_mesh_datasets.output,
+        check_all = rules.check_annotation_pipeline.output,
+
 ##========================== User Rules ==========================
 
 ##>generate_hybrid_v2v3_annotation : global rule with the aim of triggering the generation and verification of annotation_l23split dataset
@@ -2862,7 +3051,6 @@ rule generate_hybrid_v2v3_datasets:
 rule generate_l23split_datasets:
     input:
         l23split_dataset = rules.check_l23split_report.output
-        
 
 ##>all : global rule with the aim of triggering the generation of datasets
 rule all:
