@@ -9,7 +9,9 @@ jonathan.lurie@epfl.ch
 >fetch_brain_parcellation_ccfv2 :  fetch the CCF v2 brain parcellation volume in the given resolution
 >fetch_fiber_parcellation_ccfv2 : fetch the CCF v2 fiber parcellation volume in the given resolution
 >fetch_brain_parcellation_ccfv3 : fetch the CCF v3 brain parcellation volume in the given resolution
+>fetch_brain_parcellation_realigned : fetch the brain parcellation volume realigned from ccfv2 to ccfv3 in the given resolution
 >fetch_nissl_stained_volume : fetch the CCF nissl stained volume in the given resolution
+>fetch_corrected_nissl_stained_volume : fetch the corrected nissl stained volume in the given resolution
 >fetch_annotation_stack_ccfv2_coronal : fetch the CCFv2 annotation coronal image stack stack
 >fetch_nissl_stack_ccfv2_coronal : fetch the CCFv2 nissl coronal image stack stack
 >combine_annotations : Generate and save the combined annotation file
@@ -21,31 +23,77 @@ jonathan.lurie@epfl.ch
 >fetch_gene_gfap : fetch the gene expression volume corresponding to the genetic marker gfap
 >fetch_gene_s100b : fetch the gene expression volume corresponding to the genetic marker s100b
 >fetch_gene_tmem119 : fetch the gene expression volume corresponding to the genetic marker tmem119
->combine_markers : Generate and save the combined glia files and the global celltype scaling factors
+>fetch_gene_pv : fetch the gene expression volume corresponding to the genetic marker pv
+>fetch_gene_pv_correctednissl : fetch the gene expression volume corresponding to the genetic marker pv
+>fetch_gene_sst : fetch the gene expression volume corresponding to the genetic marker sst
+>fetch_gene_sst_correctednissl : fetch the gene expression volume corresponding to the genetic marker sst
+>fetch_gene_vip : fetch the gene expression volume corresponding to the genetic marker vip
+>fetch_gene_vip_correctednissl : fetch the gene expression volume corresponding to the genetic marker vip
+>fetch_gene_gad67 : fetch the gene expression volume corresponding to the genetic marker gad67
+>fetch_gene_gad67_correctednissl : fetch the gene expression volume corresponding to the genetic marker gad67
+>combine_markers_hybrid : Generate and save the combined glia files and the global celltype scaling factors
+>combine_markers_realigned : Generate and save the combined glia files and the global celltype scaling factors
+>combine_markers_ccfv2 : Generate and save the combined glia files and the global celltype scaling factors
 >extract_color_map : Extract the mapping of colors to structure ids
 >svg_to_png : Convert svg files into png files
 >compute_average_soma_radius : Compute the overall mouse brain cell density
->cell_density : Compute the overall mouse brain cell density
->glia_cell_densities : Compute and save the glia cell densities
->inhibitory_excitatory_neuron_densities : Compute the inhibitory and excitatory neuron densities
->direction_vector_isocortex : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood. The output is only for the top regions of the isocortex.
->direction_vector_cerebellum : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood. The output is only for some regions of the cerebellum.
->split_isocortex_layer_23 : Refine annotations by splitting brain regions 
->brain_region_meshes_hybrid : export a mesh for every brain region available in the hybrid brain parcellation volume. Note: not only the leaf regions are exported but also the above regions that are combinaisons of leaves
->brain_region_meshes_l23split : export a mesh for every brain region available in the hybrid brain parcellation volume with layer 2-3 split. Note: not only the leaf regions are exported but also the above regions that are combinaisons of leaves
->orientation_field : Turn direction vectors into quaternions interpreted as 3D orientations
+>cell_density_hybrid : Compute the overall mouse brain cell density
+>cell_density_realigned : Compute the overall mouse brain cell density
+>cell_density_ccfv2 : Compute the overall mouse brain cell density
+>cell_density_ccfv2_correctednissl : Compute the overall mouse brain cell density
+>glia_cell_densities_hybrid : Compute and save the glia cell densities
+>glia_cell_densities_realigned : Compute and save the glia cell densities
+>glia_cell_densities_ccfv2 : Compute and save the glia cell densities
+>glia_cell_densities_ccfv2_correctednissl : Compute and save the glia cell densities
+>inhibitory_excitatory_neuron_densities_hybrid : Compute the inhibitory and excitatory neuron densities
+>inhibitory_excitatory_neuron_densities_realigned : Compute the inhibitory and excitatory neuron densities
+>inhibitory_excitatory_neuron_densities_ccfv2 : Compute the inhibitory and excitatory neuron densities
+>inhibitory_excitatory_neuron_densities_ccfv2_correctednissl : Compute the inhibitory and excitatory neuron densities
+====================================================
+>direction_vectors_isocortex_ccfv2 : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood. The output is only for the top regions of the isocortex.
+>direction_vectors_isocortex_ccfv3 : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood. The output is only for the top regions of the isocortex.
+>direction_vectors_isocortex_hybrid : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood. The output is only for the top regions of the isocortex.
+>direction_vectors_isocortex_realigned : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood. The output is only for the top regions of the isocortex.
+>direction_vectors_cerebellum : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood. The output is only for some regions of the cerebellum.
+>interpolate_direction_vectors_isocortex_ccfv2 : Interpolate the [NaN, NaN, NaN] direction vectors by non-[NaN, NaN, NaN] ones.
+>interpolate_direction_vectors_isocortex_realigned : Interpolate the [NaN, NaN, NaN] direction vectors by non-[NaN, NaN, NaN] ones.
+>split_isocortex_layer_23_ccfv3 : Refine annotations by splitting brain regions 
+>split_isocortex_layer_23_hybrid : Refine annotations by splitting brain regions 
+>split_isocortex_layer_23_realigned : Refine annotations by splitting brain regions 
+>orientation_field_ccfv3 : Turn direction vectors into quaternions interpreted as 3D orientations
+>orientation_field_hybrid : Turn direction vectors into quaternions interpreted as 3D orientations
+>orientation_field_realigned : Turn direction vectors into quaternions interpreted as 3D orientations
+>placement_hints_isocortex_ccfv3_l23split : Generate and save the placement hints of different regions of the AIBS mouse brain
+>placement_hints_isocortex_hybrid_l23split : Generate and save the placement hints of different regions of the AIBS mouse brain
+>placement_hints_isocortex_realigned_l23split : Generate and save the placement hints of different regions of the AIBS mouse brain
+======== Optimized inhibitory neuron densities and mtypes ========
+>compile_densities_measurements : Compile the cell density related measurements of mmc3.xlsx and `gaba_papers.xsls` into a CSV file.
+>average_densities_realigned : Compute cell densities based on measurements and AIBS region volumes.
+>average_densities_ccfv2 : Compute cell densities based on measurements and AIBS region volumes.
+>average_densities_ccfv2_correctednissl : Compute cell densities based on measurements and AIBS region volumes.
+>fit_average_densities_realigned : Estimate average cell densities of brain regions.
+>fit_average_densities_ccfv2 : Estimate average cell densities of brain regions.
+>fit_average_densities_ccfv2_correctednissl : Estimate average cell densities of brain regions.
+>inhibitory_neuron_densities_linprog_ccfv2_correctednissl : Estimate average cell densities of brain regions.
+>inhibitory_neuron_densities_preserveprop_ccfv2_correctednissl : Estimate average cell densities of brain regions.
+>create_mtypes_densities_from_profile_ccfv2_correctednissl : Create neuron density nrrd files for the mtypes listed in the mapping tsv file.
+>create_mtypes_densities_from_probability_map_ccfv2_correctednissl : Create neuron density nrrd files for the mtypes listed in the probability mapping csv file.
+=================================================
+>export_brain_region_ccfv3_l23split : export a mesh, a volumetric mask and a region summary json file for every brain region available in the ccfv3 isocortex layer 2-3 split brain parcellation volume. Note: not only the leaf regions are exported but also the above regions that are combinaisons of leaves
+>export_brain_region_hybrid : export a mesh, a volumetric mask and a region summary json file for every brain region available in the hybrid brain parcellation volume. Note: not only the leaf regions are exported but also the above regions that are combinaisons of leaves
+>export_brain_region_hybrid_l23split : export a mesh, a volumetric mask and a region summary json file for every brain region available in the hybrid isocortex layer 2-3 split brain parcellation volume. Note: not only the leaf regions are exported but also the above regions that are combinaisons of leaves
 >cell_records : Generate 3D cell records for the whole mouse brain and save them with the orientations and the region_ID in an hdf5 file
->placement_hints_isocortex : Generate and save the placement hints of different regions of the AIBS mouse brain
 ========================== Check Rules ==========================
 >check_hybrid_v2v3_annotation : Check the integrity of the generated annotation hybrid .nrrd volumetric dataset
->check_l23split_annotation : Check the integrity of the generated annotation with layer23 split .nrrd volumetric dataset
+>check_hybrid_l23split_annotation : Check the integrity of the generated annotation with layer23 split .nrrd volumetric dataset
 >check_hybrid_v2v3_nrrd_dataset : Check the integrity of the generated cell densities folder containing .nrrd volumetric dataset
 >check_neuron_densities : Check the integrity of the generated neuron densities folder containing .nrrd volumetric dataset
 >check_hybrid_v2v3_volumetric_nrrd_datasets : Check the integrity of the hybrid .nrrd volumetric datasets that can be generated by the pipeline
 >check_l23split_volumetric_nrrd_datasets : Check the integrity of the hybrid with layer 2,3 split .nrrd volumetric datasets that can be generated by the pipeline
+>check_realigned_volumetric_nrrd_datasets : Check the integrity of the realigned ccfv2-to-ccfv3 with layer 2,3 split .nrrd volumetric datasets that can be generated by the pipeline
 >check_all_volumetric_nrrd_datasets : Check the integrity of every .nrrd volumetric datasets that can be generated by the pipeline
 >check_hybrid_v2v3_meshes_obj : Check the integrity of the generated .obj meshes of the hybrid ccfv2-ccfv3 annotation 
->check_l23split_meshes_obj : Check the integrity of the generated .obj meshes of the hybrid ccfv2-ccfv3 with layer 2,3 split annotation
+>check_hybrid_l23split_meshes_obj : Check the integrity of the generated .obj meshes of the hybrid ccfv2-ccfv3 with layer 2,3 split annotation
 >check_meshes_obj_dataset : Check the integrity of all the generated .obj meshes datasets that can be generated by the pipeline
 >check_sonata_cellrecords : Check the integrity of the generated sonata .h5 containing the cell records
 >check_hybrid_v2v3_report : Verify that the report files generated by the module verifying the hybrid datasets integrity do not contain any issues before starting to push datasets into Nexus. These are contained in the folder data_check_report.
@@ -53,14 +101,18 @@ jonathan.lurie@epfl.ch
 >check_alldatasets_report : Verify that the report files generated by the module verifying all the dataset integrity do not contain any issues before starting to push datasets into Nexus. These are contained in the folder data_check_report.
 ========================== Push Rules ==========================
 >push_hybrid_v2v3_annotation : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
->push_l23split_annotation : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
+>push_hybrid_l23split_annotation : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
+>push_realigned_l23split_annotation : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
+>push_realigned_l23split_atlasrelease : Create a VolumetricDataLayer resource payload and an atlasRelease resource before pushing them along the volumetric files and the hierarchy file into Nexus
+>push_realigned_orientations : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
+>push_realigned_placement_hints : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
 >push_cell_densities : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
 >push_neuron_densities : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
 >push_hybrid_v2v3_volumetric_nrrd_datasets : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
->push_l23split_volumetric_nrrd_datasets : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
+>push__hybrid_l23split_volumetric_nrrd_datasets : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
 >push_all_volumetric_nrrd_datasets : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
 >push_hybrid_v2v3_meshes_obj : Create a Mesh resource and push it along with the mesh files into Nexus
->push_l23split_meshes_obj : Create a Mesh resource and push it along with the mesh files into Nexus
+>push_hybrid_l23split_meshes_obj : Create a Mesh resource and push it along with the mesh files into Nexus
 >push_all_meshes_obj_datasets : Create a Mesh resource and push it along with the mesh files into Nexus
 >push_sonata_cellrecords : Create a CellRecordSerie resource and push it along with the Sonata .h5 file into Nexus
 ========================== User Rules ==========================

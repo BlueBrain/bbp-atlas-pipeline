@@ -1,0 +1,5 @@
+mtypeToProfileMapPath: {WORKING_DIR}/rules_config_dir/mtypes/density_profiles/meta/mapping.tsv
+layerSlicesPath: {WORKING_DIR}rules_config_dir//mtypes/density_profiles/meta/layers.tsv
+densityProfilesDirPath: {WORKING_DIR}rules_config_dir//mtypes/density_profiles/profiles
+excitatoryNeuronDensityPath: {WORKING_DIR}/neuron_densities_ccfv2/excitatory_neuron_density.nrrd
+inhibitoryNeuronDensityPath: {WORKING_DIR}/neuron_densities_ccfv2/inhibitory_neuron_density.nrrd

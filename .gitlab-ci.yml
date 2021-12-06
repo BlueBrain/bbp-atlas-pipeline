@@ -1,0 +1,7 @@
+stages:
+  - first
+
+build-code-job:
+  stage: first
+  script:
+    - echo "No CI/CD yet"

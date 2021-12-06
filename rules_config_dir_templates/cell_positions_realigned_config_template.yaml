@@ -1,0 +1,12 @@
+cellType:
+- oligodendrocyte
+- astrocyte
+- microglia
+- inhibitory_neuron
+- excitatory_neuron
+inputDensityVolumePath:
+  oligodendrocyte: {WORKING_DIR}/cell_densities_realigned/oligodendrocyte_density.nrrd
+  astrocyte: {WORKING_DIR}/cell_densities_realigned/astrocyte_density.nrrd
+  microglia: {WORKING_DIR}/cell_densities_realigned/microglia_density.nrrd
+  inhibitory_neuron: {WORKING_DIR}/neuron_densities_realigned/inhibitory_neuron_density.nrrd
+  excitatory_neuron: {WORKING_DIR}/neuron_densities_realigned/excitatory_neuron_density.nrrd

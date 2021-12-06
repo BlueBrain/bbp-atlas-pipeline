@@ -1,0 +1,6 @@
+probabilityMapPath: {WORKING_DIR}/rules_config_dir/mtypes/probability_map/probability_map.csv
+molecularTypeDensityPaths:
+    gad67: {WORKING_DIR}/gene_gad67_correctednissl.nrrd
+    pv: {WORKING_DIR}/gene_pv_correctednissl.nrrd
+    sst: {WORKING_DIR}/gene_sst_correctednissl.nrrd
+    vip: {WORKING_DIR}/gene_vip_correctednissl.nrrd
