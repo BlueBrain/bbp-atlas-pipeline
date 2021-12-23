@@ -1,7 +1,19 @@
-stages:
-  - first
+include:
+  - project: dke/apps/templates/generate-deploy-docs-template
+    #file: .gitlab-ci.yml
 
-build-code-job:
-  stage: first
+image: "python:3.6"
+
+stages:
+  - generate-documentation
+
+before_script:
+  - pip install -r requirements.txt
+
+generate_documentation:
+  stage: generate
+  extends: generate-documentation
   script:
-    - echo "No CI/CD yet"
+    - pip install .[docs]
+    - sphinx-build -T --keep-going -b html -d _build/doctrees -c ./docs/source -D language=en ./docs/source generated/html
+
