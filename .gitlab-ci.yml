@@ -5,13 +5,13 @@ include:
 image: "python:3.6"
 
 stages:
-  - generate-documentation
+  - generate-doc
 
 before_script:
   - pip install -r requirements.txt
 
 generate_documentation:
-  stage: generate
+  stage: generate-doc
   extends: generate-documentation
   script:
     - sphinx-build -T --keep-going -b html -d _build/doctrees -c ./docs/source -D language=en ./docs/source generated/html
