@@ -12,7 +12,7 @@ before_script:
 
 generate_documentation:
   stage: generate-doc
-  extends: generate-documentation
+  extends: generate
   script:
     - sphinx-build -T --keep-going -b html -d _build/doctrees -c ./docs/source -D language=en ./docs/source generated/html
 
