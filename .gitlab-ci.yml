@@ -1,18 +1,26 @@
-include:
-  - project: dke/apps/templates/generate-deploy-docs-template
-    file: .gitlab-ci.yml
-
 image: "python:3.6"
 
 stages:
-  - generate-doc
+  - generate
 
 before_script:
   - pip install -r requirements.txt
 
-generate_documentation:
-  stage: generate-doc
-  extends: generate-documentation
-  script:
-    - sphinx-build -T --keep-going -b html -d _build/doctrees -c ./docs/source -D language=en ./docs/source generated/html
+# GENERATE STAGE
+
+# Generate documentation and stores the artifact under /generated/html
+generate-documentation:
+  stage: generate
+  image: python
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: on_success
+  script: sphinx-build -T --keep-going -b html -d _build/doctrees -c ./docs/source -D language=en ./docs/source generated/html
+  artifacts:
+    paths:
+      - generated/html
+  variables:
+    KUBERNETES_MEMORY_LIMIT: 4Gi
+    KUBERNETES_MEMORY_REQUEST: 4Gi
+
 
