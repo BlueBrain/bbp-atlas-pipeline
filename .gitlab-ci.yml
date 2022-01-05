@@ -18,7 +18,7 @@ generate-documentation:
       - if: $CI_MERGE_REQUEST_IID
         when: on_success
       - if: $CI_COMMIT_MESSAGE =~ /DRAFT$/
-  script: sphinx-build -T --keep-going -b html -d _build/doctrees -c ./docs/source -D language=en ./docs/source generated/html
+  script: sphinx-build -T --keep-going -b html -d _build/doctrees -c ./doc/source -D language=en ./doc/source generated/html
   artifacts:
     paths:
       - generated/html
