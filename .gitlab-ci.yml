@@ -13,8 +13,11 @@ generate-documentation:
   stage: generate
   image: python
   rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-      when: on_success
+      - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop"
+        when: on_success
+      - if: $CI_MERGE_REQUEST_IID
+        when: on_success
+      - if: $CI_COMMIT_MESSAGE =~ /DRAFT$/
   script: sphinx-build -T --keep-going -b html -d _build/doctrees -c ./docs/source -D language=en ./docs/source generated/html
   artifacts:
     paths:
