@@ -8,11 +8,6 @@ stages:
   - generate
   - deploy
 
-before_script:
-  - pip install -r requirements.txt
-
-# GENERATE STAGE
-
 # Generate documentation and stores the artifact under /generated/html
 generate-documentation:
   stage: generate
@@ -24,6 +19,8 @@ generate-documentation:
         when: on_success
       - if: $CI_COMMIT_MESSAGE =~ /DRAFT$/
   script: sphinx-build -T --keep-going -b html -c ./doc/source -D language=en ./doc/source generated/html
+  before_script:
+    - pip install -r requirements.txt
   artifacts:
     paths:
       - generated/html
@@ -33,7 +30,7 @@ generate-documentation:
 
 
 # Executes deployment of project documentation to bbp-dke-staging Openshift
-deploy-sphinx-documentation-in-staging-openshift:
+deploy-documentation-in-staging-openshift:
   stage: deploy
   extends: .build-image-using-kaniko
   dependencies:
