@@ -1,7 +1,12 @@
 image: "python:3.6"
 
+include:
+  - project: cs/gitlabci-templates
+    file: /build-image-using-kaniko.yml
+
 stages:
   - generate
+  - deploy
 
 before_script:
   - pip install -r requirements.txt
@@ -25,5 +30,27 @@ generate-documentation:
   variables:
     KUBERNETES_MEMORY_LIMIT: 4Gi
     KUBERNETES_MEMORY_REQUEST: 4Gi
+
+
+# Executes deployment of project documentation to bbp-dke-staging Openshift
+deploy-sphinx-documentation-in-staging-openshift:
+  stage: deploy
+  extends: .build-image-using-kaniko
+  dependencies:
+    - generate-documentation
+  rules:
+      - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop"
+        when: on_success
+      - if: $CI_MERGE_REQUEST_IID
+        when: on_success
+      - if: $CI_COMMIT_MESSAGE =~ /DRAFT$/
+  variables:
+    KANIKO_EXTRA_ARGS: "--build-arg GENERATED_DOCS_PATH=generated/html"
+    CI_REGISTRY_IMAGE: "docker-registry-default.ocp.bbp.epfl.ch/bbp-dke-staging/bba-pipeline-documentation"
+    CI_REGISTRY_USER: $CI_REGISTRY_USER_STAGING
+    CI_REGISTRY_PASSWORD: $CI_REGISTRY_PASSWORD_STAGING
+    KUBERNETES_MEMORY_LIMIT: 4Gi
+    KUBERNETES_MEMORY_REQUEST: 4Gi
+
 
 
