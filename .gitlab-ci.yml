@@ -46,9 +46,23 @@ deploy-documentation-in-staging-openshift:
     CI_REGISTRY_IMAGE: "docker-registry-default.ocp.bbp.epfl.ch/bbp-dke-staging/bba-pipeline-documentation"
     CI_REGISTRY_USER: $CI_REGISTRY_USER_STAGING
     CI_REGISTRY_PASSWORD: $CI_REGISTRY_PASSWORD_STAGING
-    CI_REGISTRY: docker-registry-default.ocp.bbp.epfl.ch
     KUBERNETES_MEMORY_LIMIT: 4Gi
     KUBERNETES_MEMORY_REQUEST: 4Gi
 
 
-
+# Executes deployment of project documentation to bbp-dke-staging Openshift
+deploy-documentation-in-production-openshift:
+  stage: deploy
+  extends: .build-image-using-kaniko
+  dependencies:
+    - generate-documentation
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: on_success
+  variables:
+    KANIKO_EXTRA_ARGS: "--build-arg GENERATED_DOCS_PATH=generated/html"
+    CI_REGISTRY_IMAGE: "docker-registry-default.ocp.bbp.epfl.ch/bbp-dke-production/bba-pipeline-documentation"
+    CI_REGISTRY_USER: $CI_REGISTRY_USER_PRODUCTION
+    CI_REGISTRY_PASSWORD: $CI_REGISTRY_PASSWORD_PRODUCTION
+    KUBERNETES_MEMORY_LIMIT: 4Gi
+    KUBERNETES_MEMORY_REQUEST: 4Gi
