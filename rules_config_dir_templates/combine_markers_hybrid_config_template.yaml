@@ -33,29 +33,29 @@ outputCellTypeProportionsPath: {WORKING_DIR}/glia_proportions_hybrid.json
 # Cell densities in number of cells per mm^3
 cellDensity:
   cerebellum:
-    oligodendrocyte: 12000
-    astrocyte: 1500
-    microglia: 6000
+    oligodendrocyte: 13750
+    astrocyte: 1512
+    microglia: 8624
   striatum:
-    oligodendrocyte: 9000
-    astrocyte: 9000
-    microglia: 12000
+    oligodendrocyte: 9950
+    astrocyte: 9867
+    microglia: 12100
 combination:
 - cellType: oligodendrocyte
   gene: cnp
-  averageExpressionIntensity: 1.0
+  averageExpressionIntensity: 35.962800
 - cellType: oligodendrocyte
   gene: mbp
-  averageExpressionIntensity: 0.5
+  averageExpressionIntensity: 3.304965
 - cellType: astrocyte
   gene: gfap
-  averageExpressionIntensity: 0.333333333333
+  averageExpressionIntensity: 3.2097903
 - cellType: astrocyte
   gene: s100b
-  averageExpressionIntensity: 1.0
+  averageExpressionIntensity: 4.174825
 - cellType: astrocyte
   gene: aldh1l1
-  averageExpressionIntensity: 0.5
+  averageExpressionIntensity: 1.326080
 - cellType: microglia
   gene: tmem119
-  averageExpressionIntensity: 0.333333333333
+  averageExpressionIntensity: 1.326080

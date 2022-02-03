@@ -1,0 +1,11 @@
+{
+  "activity_id": f"https://bbp.epfl.ch/neurosciencegraph/data/activity/{str(uuid4())}",
+  "softwareagent_name" : "Blue Brain Atlas Annotation Pipeline",
+  "software_version": "0.1.0", #f"{distribution('pipeline').version}" or have a version.py ?
+  "runtime_platform": f"{sysconfig.get_platform()}",
+  "repo_adress": "https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline",
+  "language": f"python {python_version()}",
+  "start_time" : f"{datetime.today().strftime('%Y-%m-%dT%H:%M:%S')}",
+  "input_dataset_used" : {},
+  "derivations": {}
+}

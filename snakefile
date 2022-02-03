@@ -7,7 +7,7 @@
 
 import os
 import time
-import datetime
+from datetime import datetime
 import fnmatch
 import subprocess
 import shutil
@@ -17,6 +17,11 @@ import re
 import logging
 import threading
 import getpass
+import sysconfig
+from copy import deepcopy
+from uuid import uuid4
+from importlib.metadata import distribution
+from platform import python_version
 from snakemake.logging import logger as L
 from blue_brain_token_fetch.Token_refresher import TokenFetcher
 
@@ -34,6 +39,7 @@ RULES_CONFIG_DIR_TEMPLATES = config["RULES_CONFIG_DIR_TEMPLATES"]
 RESOLUTION = str(config["RESOLUTION"])
 MODULES_VERBOSE = config["MODULES_VERBOSE"]
 DISPLAY_HELP = config["DISPLAY_HELP"]
+PROVENANCE_METADATA_PATH = f"{WORKING_DIR}/provenance_metadata.json"
 
 NEXUS_ATLAS_ENV = config["NEXUS_ATLAS_ENV"]
 NEXUS_ATLAS_ORG = config["NEXUS_ATLAS_ORG"]
@@ -65,7 +71,7 @@ if not os.path.exists(snakemake_run_logs):
 logfile = os.path.abspath(
             os.path.join(
                 snakemake_run_logs, 
-                datetime.datetime.now().isoformat().replace(":", "-")
+                datetime.now().isoformat().replace(":", "-")
                 + ".log"
             )
           )
@@ -115,19 +121,19 @@ except OSError:
 
 # fetch version of each app and write it down in a file
 applications = {"applications": {}}
-for app in APPS:
+#for app in APPS:
 
-    app_name_fixed = app.split()[0]
-    if MODULES_VERBOSE:
-        L.info(f"{app} [executable at] {shutil.which(app_name_fixed)}")
+#    app_name_fixed = app.split()[0]
+#    if MODULES_VERBOSE:
+#        L.info(f"{app} [executable at] {shutil.which(app_name_fixed)}")
 
     # first, we need to check if each CLI is in PATH, if not we abort with exit code 1
-    if shutil.which(app_name_fixed) is None:
-        raise Exception(f"The CLI {app_name_fixed} is not installed or not in PATH. Pipeline cannot execute.")
-        exit(1)
+#    if shutil.which(app_name_fixed) is None:
+#        raise Exception(f"The CLI {app_name_fixed} is not installed or not in PATH. Pipeline cannot execute.")
+#        exit(1)
 
-    app_version = subprocess.check_output(f"{app_name_fixed} --version", shell=True).decode('ascii').rstrip("\n\r")
-    applications["applications"].update({app: app_version})
+#    app_version = subprocess.check_output(f"{app_name_fixed} --version", shell=True).decode('ascii').rstrip("\n\r")
+#    applications["applications"].update({app: app_version})
 
 with open(VERSION_FILE, "w") as outfile: 
     outfile.write(json.dumps(applications, indent = 4))
@@ -193,6 +199,39 @@ MTYPES_PROFILE_CCFV2_CORRECTEDNISSL_CONFIG_ = f"{rules_config_dir}/mtypes_profil
 MTYPES_PROBABILITY_MAP_CONFIG_ = f"{rules_config_dir}/mtypes_probability_map_config.yaml"
 MTYPES_PROBABILITY_MAP_CORRECTEDNISSL_CONFIG_ = f"{rules_config_dir}/mtypes_probability_map_correctednissl_config.yaml"
 
+def write_json(asso_json_path, dict, **kwargs):
+    file_path_update = open(asso_json_path, 'w')
+    #new_dict = deepcopy(dict(content, **{"rule_name":f"{rule_name}"}))
+    new_dict = deepcopy(dict)
+    for key, value in kwargs.items():
+        new_dict[key] = value
+    file_path_update.write(json.dumps(new_dict, ensure_ascii=False, indent=2))
+    file_path_update.close()
+    return file_path_update
+
+# Provenance metadata:
+provenance_dict = {
+    "activity_id": f"https://bbp.epfl.ch/neurosciencegraph/data/activity/{str(uuid4())}",
+    "softwareagent_name" : "Blue Brain Atlas Annotation Pipeline",
+    "software_version": "0.1.0", #f"{distribution('pipeline').version}" or have a version.py ?
+    "runtime_platform": f"{sysconfig.get_platform()}",
+    "repo_adress": "https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline",
+    "language": f"python {python_version()}",
+    "start_time" : f"{datetime.today().strftime('%Y-%m-%dT%H:%M:%S')}",
+    "input_dataset_used" : {},
+    "derivations": {
+    "brain_region_mask_ccfv3_l23split": ["hierarchy_l23split", "annotation_ccfv3_l23split"],
+    "hierarchy_l23split": "hierarchy"
+    }
+}
+
+if not os.path.exists(PROVENANCE_METADATA_PATH):
+    write_json(PROVENANCE_METADATA_PATH, provenance_dict)
+
+with open(PROVENANCE_METADATA_PATH, "r+") as provenance_file:
+    provenance_file.seek(0)
+    PROVENANCE_METADATA = json.loads(provenance_file.read())
+
 if DISPLAY_HELP:
     try:
         L.info((open("HELP_RULES.txt", "r")).read())
@@ -216,9 +255,10 @@ rule fetch_ccf_brain_region_hierarchy:
     output:
         f"{PUSH_DATASET_CONFIG_FILE['HierarchyJson']['hierarchy']}",
     params:
-        nexus_id=NEXUS_IDS["brain_region_hierarchies"]["allen_mouse_ccf"],
+        nexus_id=NEXUS_IDS["ParcellationOntology"]["allen_mouse_ccf"],
         app=APPS["bba-datafetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.getAccessToken(),
+        derivation = PROVENANCE_METADATA["input_dataset_used"].update({"hierarchy" : {"id":NEXUS_IDS["ParcellationOntology"]["allen_mouse_ccf"], "type":"ParcellationOntology"}})
     log:
         f"{LOG_DIR}/fetch_ccf_brain_region_hierarchy.log"
     shell:
@@ -239,9 +279,9 @@ rule fetch_brain_parcellation_ccfv2:
     output:
         f"{WORKING_DIR}/brain_parcellation_ccfv2.nrrd"
     params:
-        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["parcellations"]["brain_ccfv2"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["brain_ccfv2"],
         app=APPS["bba-datafetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.getAccessToken(),
     log:
         f"{LOG_DIR}/fetch_brain_parcellation_ccfv2.log"
     shell:
@@ -261,7 +301,7 @@ rule fetch_fiber_parcellation_ccfv2:
     output:
         f"{WORKING_DIR}/fiber_parcellation_ccfv2.nrrd"
     params:
-        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["parcellations"]["fiber_ccfv2"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["fiber_ccfv2"],
         app=APPS["bba-datafetch"],
         token = myTokenFetcher.getAccessToken()
     log:
@@ -283,9 +323,10 @@ rule fetch_brain_parcellation_ccfv3:
     output:
         f"{WORKING_DIR}/brain_parcellation_ccfv3.nrrd"
     params:
-        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["parcellations"]["brain_ccfv3"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["brain_ccfv3"],
         app=APPS["bba-datafetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.getAccessToken(),
+        derivation = PROVENANCE_METADATA["input_dataset_used"].update({"brain_parcellation_ccfv3" : {"id":NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["brain_ccfv3"], "type":"BrainParcellationDataLayer"}})
     log:
         f"{LOG_DIR}/fetch_brain_parcellation_ccfv3.log"
     shell:
@@ -305,7 +346,7 @@ rule fetch_brain_parcellation_realigned:
     output:
         f"{WORKING_DIR}/annotation_realigned.nrrd"
     params:
-        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["parcellations"]["brain_realigned"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["brain_realigned"],
         app=APPS["bba-datafetch"],
         token = myTokenFetcher.getAccessToken()
     log:
@@ -327,7 +368,7 @@ rule fetch_nissl_stained_volume:
     output:
         f"{WORKING_DIR}/nissl_stained_volume.nrrd"
     params:
-        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["parcellations"]["ara_nissl"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["NISSLImageDataLayer"]["ara_nissl"],
         app=APPS["bba-datafetch"],
         token = myTokenFetcher.getAccessToken()
     log:
@@ -349,7 +390,7 @@ rule fetch_corrected_nissl_stained_volume:
     output:
         f"{WORKING_DIR}/nissl_corrected_volume.nrrd"
     params:
-        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["parcellations"]["corrected_nissl"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["NISSLImageDataLayer"]["corrected_nissl"],
         app=APPS["bba-datafetch"],
         token = myTokenFetcher.getAccessToken()
     log:
@@ -371,7 +412,7 @@ rule fetch_annotation_stack_ccfv2_coronal:
     output:
         directory(f"{WORKING_DIR}/annotation_stack_ccfv2_coronal")
     params:
-        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["image_stack"]["annotation_stack_ccfv2_coronal"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["ImageStack"]["annotation_stack_ccfv2_coronal"],
         app=APPS["bba-datafetch"],
         token = myTokenFetcher.getAccessToken()
     log:
@@ -396,7 +437,7 @@ rule fetch_nissl_stack_ccfv2_coronal:
     output:
         directory(f"{WORKING_DIR}/nissl_stack_ccfv2_coronal")
     params:
-        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["image_stack"]["nissl_stack_ccfv2_coronal"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["ImageStack"]["nissl_stack_ccfv2_coronal"],
         app=APPS["bba-datafetch"],
         token = myTokenFetcher.getAccessToken()
     log:
@@ -444,7 +485,7 @@ rule fetch_gene_gad:
     output:
         f"{WORKING_DIR}/gene_gad.nrrd"
     params:
-        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["gad"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["gad"],
         app=APPS["bba-datafetch"],
         token = myTokenFetcher.getAccessToken()
     log:
@@ -466,7 +507,7 @@ rule fetch_gene_nrn1:
     output:
         f"{WORKING_DIR}/gene_nrn1.nrrd"
     params:
-        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["nrn1"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["nrn1"],
         app=APPS["bba-datafetch"],
         token = myTokenFetcher.getAccessToken()
     log:
@@ -488,7 +529,7 @@ rule fetch_gene_aldh1l1:
     output:
         f"{COMBINE_MARKERS_HYBRID_CONFIG_FILE['inputGeneVolumePath']['aldh1l1']}"
     params:
-        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["aldh1l1"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["aldh1l1"],
         app=APPS["bba-datafetch"],
         token = myTokenFetcher.getAccessToken()
     log:
@@ -510,7 +551,7 @@ rule fetch_gene_cnp:
     output:
         f"{COMBINE_MARKERS_HYBRID_CONFIG_FILE['inputGeneVolumePath']['cnp']}"
     params:
-        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["cnp"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["cnp"],
         app=APPS["bba-datafetch"],
         token = myTokenFetcher.getAccessToken()
     log:
@@ -532,7 +573,7 @@ rule fetch_gene_mbp:
     output:
         f"{COMBINE_MARKERS_HYBRID_CONFIG_FILE['inputGeneVolumePath']['mbp']}"
     params:
-        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["mbp"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["mbp"],
         app=APPS["bba-datafetch"],
         token = myTokenFetcher.getAccessToken()
     log:
@@ -554,7 +595,7 @@ rule fetch_gene_gfap:
     output:
         f"{COMBINE_MARKERS_HYBRID_CONFIG_FILE['inputGeneVolumePath']['gfap']}"
     params:
-        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["gfap"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["gfap"],
         app=APPS["bba-datafetch"],
         token = myTokenFetcher.getAccessToken()
     log:
@@ -576,7 +617,7 @@ rule fetch_gene_s100b:
     output:
         f"{COMBINE_MARKERS_HYBRID_CONFIG_FILE['inputGeneVolumePath']['s100b']}"
     params:
-        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["s100b"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["s100b"],
         app=APPS["bba-datafetch"],
         token = myTokenFetcher.getAccessToken()
     log:
@@ -598,7 +639,7 @@ rule fetch_gene_tmem119:
     output:
         f"{COMBINE_MARKERS_HYBRID_CONFIG_FILE['inputGeneVolumePath']['tmem119']}"
     params:
-        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["tmem119"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["tmem119"],
         app=APPS["bba-datafetch"],
         token = myTokenFetcher.getAccessToken()
     log:
@@ -620,7 +661,7 @@ rule fetch_gene_pv:
     output:
         f"{WORKING_DIR}/gene_pv.nrrd"
     params:
-        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["pv"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["pv"],
         app=APPS["bba-datafetch"],
         token = myTokenFetcher.getAccessToken()
     log:
@@ -642,7 +683,7 @@ rule fetch_gene_pv_correctednissl:
     output:
         f"{WORKING_DIR}/gene_pv_correctednissl.nrrd"
     params:
-        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["pv_correctednissl"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["pv_correctednissl"],
         app=APPS["bba-datafetch"],
         token = myTokenFetcher.getAccessToken()
     log:
@@ -664,7 +705,7 @@ rule fetch_gene_sst:
     output:
         f"{WORKING_DIR}/gene_sst.nrrd"
     params:
-        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["sst"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["sst"],
         app=APPS["bba-datafetch"],
         token = myTokenFetcher.getAccessToken()
     log:
@@ -686,7 +727,7 @@ rule fetch_gene_sst_correctednissl:
     output:
         f"{WORKING_DIR}/gene_sst_correctednissl.nrrd"
     params:
-        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["sst_correctednissl"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["sst_correctednissl"],
         app=APPS["bba-datafetch"],
         token = myTokenFetcher.getAccessToken()
     log:
@@ -708,7 +749,7 @@ rule fetch_gene_vip:
     output:
         f"{WORKING_DIR}/gene_vip.nrrd"
     params:
-        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["vip"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["vip"],
         app=APPS["bba-datafetch"],
         token = myTokenFetcher.getAccessToken()
     log:
@@ -730,7 +771,7 @@ rule fetch_gene_vip_correctednissl:
     output:
         f"{WORKING_DIR}/gene_vip_correctednissl.nrrd"
     params:
-        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["vip_correctednissl"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["vip_correctednissl"],
         app=APPS["bba-datafetch"],
         token = myTokenFetcher.getAccessToken()
     log:
@@ -752,7 +793,7 @@ rule fetch_gene_gad67:
     output:
         f"{WORKING_DIR}/gene_gad67.nrrd"
     params:
-        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["gad67"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["gad67"],
         app=APPS["bba-datafetch"],
         token = myTokenFetcher.getAccessToken()
     log:
@@ -774,7 +815,7 @@ rule fetch_gene_gad67_correctednissl:
     output:
         f"{WORKING_DIR}/gene_gad67_correctednissl.nrrd"
     params:
-        nexus_id=NEXUS_IDS["volumes"][RESOLUTION]["gene_expressions"]["gad67_correctednissl"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["gad67_correctednissl"],
         app=APPS["bba-datafetch"],
         token = myTokenFetcher.getAccessToken()
     log:
@@ -1024,7 +1065,7 @@ rule cell_density_ccfv2_correctednissl:
     input:
         hierarchy = rules.fetch_ccf_brain_region_hierarchy.output,
         parcellation_volume = rules.fetch_brain_parcellation_ccfv2.output,
-        nissl_volume = f"{WORKING_DIR}/V2_nissl_ctx_blurz3_histm.nrrd" #rules.fetch_nissl_stained_volume.output
+        nissl_volume = rules.fetch_corrected_nissl_stained_volume.output
     output:
         f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['overall_cell_density_ccfv2_correctednissl']}"
     params:
@@ -1404,7 +1445,7 @@ rule interpolate_direction_vectors_isocortex_ccfv2:
         {params.app} --annotation-path {input.parcellation_volume} \
             --hierarchy-path {input.hierarchy} \
             --direction-vectors-path {input.direction_vectors} \
-            --metadata-path /gpfs/bbp.cscs.ch/home/lguyot/Documents/NSE/atlas_input/isocortex_metadata.json \
+            --metadata-path f"{rules_config_dir}/isocortex_metadata.json" \
             --nans \
             --output-path {output} \
             2>&1 | tee {log}
@@ -1427,7 +1468,7 @@ rule interpolate_direction_vectors_isocortex_realigned:
         {params.app} --annotation-path {input.parcellation_volume} \
             --hierarchy-path {input.hierarchy} \
             --direction-vectors-path {input.direction_vectors} \
-            --metadata-path /gpfs/bbp.cscs.ch/home/lguyot/Documents/NSE/atlas_input/isocortex_metadata.json \
+            --metadata-path f"{rules_config_dir}/isocortex_metadata.json" \
             --nans \
             --output-path {output} \
             2>&1 | tee {log}
@@ -1459,11 +1500,9 @@ rule split_isocortex_layer_23_ccfv3:
 ##>split_isocortex_layer_23_hybrid : Refine annotations by splitting brain regions 
 rule split_isocortex_layer_23_hybrid:
     input:
-        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
         parcellation_volume=rules.combine_annotations.output,
         direction_vectors=rules.direction_vectors_isocortex_hybrid.output
     output:
-        hierarchy_l23split=f"{PUSH_DATASET_CONFIG_FILE['HierarchyJson']['hierarchy_l23split']}",
         annotation_l23split=f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['annotation_hybrid_l23split']}"
     params:
         app=APPS["atlas-building-tools region-splitter split-isocortex-layer-23"]
@@ -1471,10 +1510,8 @@ rule split_isocortex_layer_23_hybrid:
         f"{LOG_DIR}/split_isocortex_layer_23_hybrid.log"
     shell:
         """
-        {params.app} --hierarchy-path {input.hierarchy} \
-            --annotation-path {input.parcellation_volume} \
+        {params.app} --annotation-path {input.parcellation_volume} \
             --direction-vectors-path {input.direction_vectors} \
-            --output-hierarchy-path {output.hierarchy_l23split} \
             --output-annotation-path {output.annotation_l23split} \
             2>&1 | tee {log}
         """
@@ -1486,7 +1523,6 @@ rule split_isocortex_layer_23_realigned:
         parcellation_volume=rules.fetch_brain_parcellation_realigned.output,
         direction_vectors=rules.interpolate_direction_vectors_isocortex_realigned.output
     output:
-        hierarchy_l23split=f"{PUSH_DATASET_CONFIG_FILE['HierarchyJson']['hierarchy_l23split']}",
         annotation_l23split=f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['annotation_realigned_l23split']}"
     params:
         app=APPS["atlas-building-tools region-splitter split-isocortex-layer-23"]
@@ -1509,7 +1545,6 @@ rule split_isocortex_layer_23_ccfv2:
         parcellation_volume=rules.fetch_brain_parcellation_ccfv2.output,
         direction_vectors=rules.interpolate_direction_vectors_isocortex_ccfv2.output
     output:
-        hierarchy_l23split=f"{PUSH_DATASET_CONFIG_FILE['HierarchyJson']['hierarchy_l23split']}",
         annotation_l23split=f"annotation_ccfv2_l23split.nrrd"
     params:
         app=APPS["atlas-building-tools region-splitter split-isocortex-layer-23"]
@@ -1585,7 +1620,8 @@ rule placement_hints_isocortex_ccfv3_l23split:
     output:
         directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['placement_hints_ccfv3_l23split']}")
     params:
-        app=APPS["atlas-building-tools placement-hints isocortex"]
+        app=APPS["atlas-building-tools placement-hints isocortex"],
+        derivation = PROVENANCE_METADATA["derivations"].update({"placement_hints_ccfv3_l23split":["hierarchy_l23split","annotation_ccfv3_l23split"]})
     log:
         f"{LOG_DIR}/placement_hints_isocortex_ccfv3_l23split.log"
     shell:
@@ -1594,6 +1630,7 @@ rule placement_hints_isocortex_ccfv3_l23split:
             --hierarchy-path {input.hierarchy} \
             --direction-vectors-path {input.direction_vectors} \
             --output-dir {output} \
+            --algorithm voxel-based \
             2>&1 | tee {log}
         """
 
@@ -1601,7 +1638,6 @@ rule placement_hints_isocortex_ccfv3_l23split:
 rule placement_hints_isocortex_hybrid_l23split:
     input:
         parcellation_volume=rules.split_isocortex_layer_23_hybrid.output.annotation_l23split,
-        hierarchy=rules.split_isocortex_layer_23_hybrid.output.hierarchy_l23split,
         direction_vectors=rules.direction_vectors_isocortex_hybrid.output
     output:
         ph_folder = directory(f"{WORKING_DIR}/placement_hints_isocortex_hybrid_l23split"),
@@ -1621,7 +1657,6 @@ rule placement_hints_isocortex_hybrid_l23split:
     shell:
         """
         {params.app} --annotation-path {input.parcellation_volume} \
-            --hierarchy-path {input.hierarchy} \
             --direction-vectors-path {input.direction_vectors} \
             --output-dir {output.ph_folder} \
             2>&1 | tee {log}
@@ -1631,7 +1666,6 @@ rule placement_hints_isocortex_hybrid_l23split:
 rule placement_hints_isocortex_realigned_l23split:
     input:
         parcellation_volume=rules.split_isocortex_layer_23_realigned.output.annotation_l23split,
-        hierarchy=rules.split_isocortex_layer_23_realigned.output.hierarchy_l23split,
         direction_vectors=rules.interpolate_direction_vectors_isocortex_realigned.output
     output:
         ph_folder = directory(f"{WORKING_DIR}/placement_hints_isocortex_realigned"),
@@ -1670,7 +1704,6 @@ rule compile_densities_measurements:
 ##>average_densities_realigned : Compute cell densities based on measurements and AIBS region volumes.
 rule average_densities_realigned:
     input:
-        hierarchy=rules.split_isocortex_layer_23_realigned.output.hierarchy_l23split,
         parcellation_volume=rules.split_isocortex_layer_23_realigned.output.annotation_l23split,
         overall_cell_density = rules.cell_density_realigned.output,
         neuron_density = rules.glia_cell_densities_realigned.output.neuron_density,
@@ -1745,7 +1778,6 @@ rule average_densities_ccfv2_correctednissl:
 ##>fit_average_densities_realigned : Estimate average cell densities of brain regions.
 rule fit_average_densities_realigned:
     input:
-        hierarchy=rules.split_isocortex_layer_23_realigned.output.hierarchy_l23split,
         parcellation_volume=rules.split_isocortex_layer_23_realigned.output.annotation_l23split,
         neuron_density = rules.glia_cell_densities_realigned.output.neuron_density,
         average_densities =rules.average_densities_realigned.output,
@@ -1829,7 +1861,7 @@ rule fit_average_densities_ccfv2_correctednissl:
             2>&1 | tee {log}
         """
 
-##>inhibitory_neuron_densities_linprog_ccfv2_correctednissl : Estimate average cell densities of brain regions.
+##>inhibitory_neuron_densities_linprog_ccfv2_correctednissl : Create inhibitory neuron densities for the cell types in the csv file containing the fitted densities. Use algorithm 'lingprog'.
 rule inhibitory_neuron_densities_linprog_ccfv2_correctednissl:
     input:
         hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
@@ -1853,7 +1885,7 @@ rule inhibitory_neuron_densities_linprog_ccfv2_correctednissl:
             2>&1 | tee {log}
         """
 
-##>inhibitory_neuron_densities_preserveprop_ccfv2_correctednissl : Estimate average cell densities of brain regions.
+##>inhibitory_neuron_densities_preserveprop_ccfv2_correctednissl : Create inhibitory neuron densities for the cell types in the csv file containing the fitted densities. Use algorithm 'keep-proportions'.
 rule inhibitory_neuron_densities_preserveprop_ccfv2_correctednissl:
     input:
         hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
@@ -1907,7 +1939,7 @@ rule create_mtypes_densities_from_probability_map_ccfv2_correctednissl:
     input:
         hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
         parcellation_volume=rules.fetch_brain_parcellation_ccfv2.output,
-        metadata_file = rules.glia_cell_densities_ccfv2_correctednissl.output.neuron_density,
+        metadata_file = f"{rules_config_dir}/isocortex_23_metadata.json",
         mtypes_config = f"{MTYPES_PROBABILITY_MAP_CORRECTEDNISSL_CONFIG_}",
     output:
         directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['mtypes_densities_probability_map_ccfv2_correctednissl']}")
@@ -1937,7 +1969,7 @@ rule export_brain_region_ccfv3_l23split:
         mask_dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['brain_region_mask_ccfv3_l23split']}"),
         json_metadata_parcellations = f"{WORKING_DIR}/metadata_parcellations_ccfv3_l23split.json"
     params:
-        app=APPS["parcellationexport"]
+        app=APPS["parcellationexport"],
     log:
         f"{LOG_DIR}/export_brain_region_ccfv3_l23split.log"
     shell:
@@ -1957,7 +1989,7 @@ rule export_brain_region_hybrid:
         parcellation_volume=rules.combine_annotations.output
     output:
         mesh_dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['MeshFile']['brain_region_meshes_hybrid']}"),
-        mask_dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['brain_region_mask_hybrid']}"),
+        mask_dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['brain_region_masks_hybrid']}"),
         json_metadata_parcellations = f"{WORKING_DIR}/metadata_parcellations_hybrid.json"
     params:
         app=APPS["parcellationexport"]
@@ -1976,11 +2008,10 @@ rule export_brain_region_hybrid:
 ##>export_brain_region_hybrid_l23split : export a mesh, a volumetric mask and a region summary json file for every brain region available in the hybrid isocortex layer 2-3 split brain parcellation volume. Note: not only the leaf regions are exported but also the above regions that are combinaisons of leaves
 rule export_brain_region_hybrid_l23split:
     input:
-        hierarchy=rules.split_isocortex_layer_23_hybrid.output.hierarchy_l23split,
         parcellation_volume=rules.split_isocortex_layer_23_hybrid.output.annotation_l23split
     output:
         mesh_dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['MeshFile']['brain_region_meshes_hybrid_l23split']}"),
-        mask_dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['brain_region_mask_hybrid_l23split']}"),
+        mask_dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['brain_region_masks_hybrid_l23split']}"),
         json_metadata_parcellations = f"{WORKING_DIR}/metadata_parcellations_hybrid_l23split.json"
     params:
         app=APPS["parcellationexport"]
@@ -1988,8 +2019,7 @@ rule export_brain_region_hybrid_l23split:
         f"{LOG_DIR}/export_brain_region_hybrid_l23split.log"
     shell:
         """
-        {params.app} --hierarchy {input.hierarchy} \
-            --parcellation-volume {input.parcellation_volume} \
+        {params.app} --parcellation-volume {input.parcellation_volume} \
             --out-mesh-dir {output.mesh_dir} \
             --out-mask-dir {output.mask_dir} \
             --out-metadata {output.json_metadata_parcellations} \
@@ -2351,7 +2381,7 @@ rule push_hybrid_v2v3_annotation:
         touch(f"{WORKING_DIR}/push_hybrid_v2v3_annotation_success.txt")
     params:
         app=APPS["bba-data-push push-volumetric"].split(),
-        provenance = f"atlas-building-tools combination combine-annotations:{applications['applications']['atlas-building-tools combination combine-annotations']}",
+        provenance = "", #f"atlas-building-tools combination combine-annotations:{applications['applications']['atlas-building-tools combination combine-annotations']}",
         token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/push_hybrid_v2v3_annotation.log"
@@ -2380,7 +2410,7 @@ rule push_hybrid_l23split_annotation:
         touch(f"{WORKING_DIR}/push_hybrid_l23split_annotation_success.txt")
     params:
         app=APPS["bba-data-push push-volumetric"].split(),
-        provenance = f"atlas-building-tools region-splitter split-isocortex-layer-23:{applications['applications']['atlas-building-tools region-splitter split-isocortex-layer-23']}",
+        provenance = "", #f"atlas-building-tools region-splitter split-isocortex-layer-23:{applications['applications']['atlas-building-tools region-splitter split-isocortex-layer-23']}",
         token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/push_hybrid_l23split_annotation.log"
@@ -2428,7 +2458,6 @@ rule push_realigned_l23split_annotation:
 rule push_realigned_l23split_atlasrelease:
     input:
         annotation_l23split=rules.split_isocortex_layer_23_realigned.output.annotation_l23split,
-        hierarchy_file=rules.split_isocortex_layer_23_realigned.output.hierarchy_l23split,
         push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
         #check_nrrd = rules.check_hybrid_l23split_annotation.output
     output:
@@ -2514,7 +2543,7 @@ rule push_cell_densities:
         touch(f"{WORKING_DIR}/push_cell_densities_success.txt")
     params:
         app=APPS["bba-data-push push-volumetric"].split(),
-        provenance = f"atlas-building-tools cell-densities glia-cell-densities:{applications['applications']['atlas-building-tools cell-densities glia-cell-densities']}",
+        provenance = "", #f"atlas-building-tools cell-densities glia-cell-densities:{applications['applications']['atlas-building-tools cell-densities glia-cell-densities']}",
         token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/push_cell_densities.log"
@@ -2542,7 +2571,7 @@ rule push_neuron_densities:
         touch(f"{WORKING_DIR}/push_neuron_densities_success.txt")
     params:
         app=APPS["bba-data-push push-volumetric"].split(),
-        provenance = f"atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities:{applications['applications']['atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities']}",
+        provenance = "", #f"atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities:{applications['applications']['atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities']}",
         token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/push_neuron_densities.log"
@@ -2572,9 +2601,9 @@ rule push_hybrid_v2v3_volumetric_nrrd_datasets:
         touch(f"{WORKING_DIR}/push_hybrid_v2v3_volumetric_nrrd_datasets_success.txt")
     params:
         app=APPS["bba-data-push push-volumetric"].split(),
-        provenance_hybrid = f"atlas-building-tools combination combine-annotations:{applications['applications']['atlas-building-tools combination combine-annotations']}",
-        provenance_cell_densities = f"atlas-building-tools cell-densities glia-cell-densities:{applications['applications']['atlas-building-tools cell-densities glia-cell-densities']}",
-        provenance_neuron_densities = f"atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities:{applications['applications']['atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities']}",
+        provenance_hybrid = "", #f"atlas-building-tools combination combine-annotations:{applications['applications']['atlas-building-tools combination combine-annotations']}",
+        provenance_cell_densities = "", #f"atlas-building-tools cell-densities glia-cell-densities:{applications['applications']['atlas-building-tools cell-densities glia-cell-densities']}",
+        provenance_neuron_densities = "", #f"atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities:{applications['applications']['atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities']}",
         token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/push_hybrid_v2v3_volumetric_nrrd_datasets.log"
@@ -2608,9 +2637,9 @@ rule push_hybrid_l23split_volumetric_nrrd_datasets:
         touch(f"{WORKING_DIR}/push_hybrid_l23split_volumetric_nrrd_datasets_success.txt")
     params:
         app=APPS["bba-data-push push-volumetric"].split(),
-        provenance_l23split = f"atlas-building-tools region-splitter split-isocortex-layer-23:{applications['applications']['atlas-building-tools region-splitter split-isocortex-layer-23']}",
-        provenance_cell_densities = f"atlas-building-tools cell-densities glia-cell-densities:{applications['applications']['atlas-building-tools cell-densities glia-cell-densities']}",
-        provenance_neuron_densities = f"atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities:{applications['applications']['atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities']}",
+        provenance_l23split = "", #f"atlas-building-tools region-splitter split-isocortex-layer-23:{applications['applications']['atlas-building-tools region-splitter split-isocortex-layer-23']}",
+        provenance_cell_densities = "", #f"atlas-building-tools cell-densities glia-cell-densities:{applications['applications']['atlas-building-tools cell-densities glia-cell-densities']}",
+        provenance_neuron_densities = "", #f"atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities:{applications['applications']['atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities']}",
         token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/push_hybrid_l23split_volumetric_nrrd_datasets.log"
@@ -2645,10 +2674,10 @@ rule push_all_volumetric_nrrd_datasets:
         touch(f"{WORKING_DIR}/push_all_volumetric_nrrd_datasets_success.txt")
     params:
         app=APPS["bba-data-push push-volumetric"].split(),
-        provenance_hybrid = f"atlas-building-tools combination combine-annotations:{applications['applications']['atlas-building-tools combination combine-annotations']}",
-        provenance_l23split = f"atlas-building-tools region-splitter split-isocortex-layer-23:{applications['applications']['atlas-building-tools region-splitter split-isocortex-layer-23']}",
-        provenance_cell_densities = f"atlas-building-tools cell-densities glia-cell-densities:{applications['applications']['atlas-building-tools cell-densities glia-cell-densities']}",
-        provenance_neuron_densities = f"atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities:{applications['applications']['atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities']}",
+        provenance_hybrid = "", #f"atlas-building-tools combination combine-annotations:{applications['applications']['atlas-building-tools combination combine-annotations']}",
+        provenance_l23split = "", #f"atlas-building-tools region-splitter split-isocortex-layer-23:{applications['applications']['atlas-building-tools region-splitter split-isocortex-layer-23']}",
+        provenance_cell_densities = "", #f"atlas-building-tools cell-densities glia-cell-densities:{applications['applications']['atlas-building-tools cell-densities glia-cell-densities']}",
+        provenance_neuron_densities = "", #f"atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities:{applications['applications']['atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities']}",
         token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/push_all_volumetric_nrrd_datasets.log"
@@ -2703,7 +2732,6 @@ rule push_hybrid_v2v3_meshes_obj:
 rule push_hybrid_l23split_meshes_obj:
     input:
         mesh_l23split=rules.export_brain_region_hybrid_l23split.output,
-        hierarchy_split = rules.split_isocortex_layer_23_hybrid.output.hierarchy_l23split,
         push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
         check_obj_meshes = rules.check_hybrid_l23split_meshes_obj.output
     output:
@@ -2721,7 +2749,6 @@ rule push_hybrid_l23split_meshes_obj:
             --nexus-proj {NEXUS_DESTINATION_PROJ} \
             --nexus-token {params.token} \
         {params.app[1]} --dataset-path {input.mesh_l23split} \
-            --hierarchy-path {input.hierarchy_split} \
             --config {input.push_dataset_config} \
             2>&1 | tee {log}
         """
@@ -2732,7 +2759,6 @@ rule push_all_meshes_obj_datasets:
         mesh_hybrid=rules.export_brain_region_hybrid.output,
         mesh_l23split=rules.export_brain_region_hybrid_l23split.output,
         hierarchy = rules.fetch_ccf_brain_region_hierarchy.output,
-        hierarchy_split = rules.split_isocortex_layer_23_hybrid.output.hierarchy_l23split,
         push_dataset_config = f"{PUSH_DATASET_CONFIG_FILE}",
         check_obj_meshes = rules.check_all_meshes_obj_datasets.output
     output:
@@ -2752,7 +2778,6 @@ rule push_all_meshes_obj_datasets:
         {params.app[1]} --dataset-path {input.mesh_hybrid} \
             --dataset-path {input.mesh_l23split} \
             --hierarchy-path {input.hierarchy} \
-            --hierarchy-path {input.hierarchy_split} \
             --config {rules_config_dir}/push_dataset_config.yaml \
             2>&1 | tee {log}
         """
@@ -2767,7 +2792,7 @@ rule push_sonata_cellrecords:
         touch(f"{WORKING_DIR}/push_sonata_cellrecords_success.txt")
     params:
         app=APPS["bba-data-push push-cellrecords"].split(),
-        provenance = f"brainbuilder cells positions-and-orientations:{applications['applications']['brainbuilder cells positions-and-orientations']}",
+        provenance = "", #f"brainbuilder cells positions-and-orientations:{applications['applications']['brainbuilder cells positions-and-orientations']}",
         token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/push_sonata_cellrecords.log"
@@ -2918,6 +2943,101 @@ rule generate_annotation_pipeline_datasets:
         all_datasets = rules.check_annotation_pipeline.output,
 
 
+##>push_annotation_pipeline_test : test push orientation and ccfv3 split volumes.
+rule push_annotation_pipeline_test:
+    input:
+        hierarchy=rules.split_isocortex_layer_23_ccfv3.output.hierarchy_l23split,
+        annotation_ccfv3_split=rules.split_isocortex_layer_23_ccfv3.output.annotation_l23split,
+        placement_hints_ccfv3_split=rules.placement_hints_isocortex_ccfv3_l23split.output,
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
+    output:
+        touch = touch(f"{WORKING_DIR}/push_annotation_pipeline_test_success.txt")
+    params:
+        app=APPS["bba-data-push push-volumetric"].split(),
+        token = myTokenFetcher.getAccessToken(),
+        create_provenance_json = write_json(PROVENANCE_METADATA_PATH, PROVENANCE_METADATA, rule_name = "push_annotation_pipeline_test")
+    log:
+        f"{LOG_DIR}/push_annotation_pipeline_test.log"
+    shell:
+        """
+        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app[1]} --dataset-path {input.annotation_ccfv3_split} \
+            --dataset-path {input.placement_hints_ccfv3_split} \
+            --config-path {input.push_dataset_config} \
+            --voxels-resolution {RESOLUTION} \
+            --provenance-metadata-path {PROVENANCE_METADATA_PATH} \
+            --new-atlasrelease-hierarchy-path {input.hierarchy} \
+            2>&1 | tee {log}
+        """
+        
+##>push_annotation_pipeline_datasets : Push annotation pipeline dataset
+rule push_annotation_pipeline_datasets:
+    input:
+        hierarchy="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/hierarchy_l23split.json",
+        annotation_ccfv3_split="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/annotation_ccfv3_l23split.nrrd",
+        mask="/gpfs/bbp.cscs.ch/home/alibou/Documents/pipeline_test/Data/brain_region_mask_ccfv3_l23split",
+        mesh="/gpfs/bbp.cscs.ch/home/alibou/Documents/pipeline_test/Data/brain_region_meshes_ccfv3_l23split",
+        metadata="/gpfs/bbp.cscs.ch/home/alibou/Documents/pipeline_test/Data/metadata_parcellations_ccfv3_l23split.json",
+        placement_hints_ccfv3_split="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/placement_hints_ccfv3_l23split",
+        orientation_field_ccfv3="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/orientation_field.nrrd",
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
+    output:
+        link_regions = "/gpfs/bbp.cscs.ch/home/alibou/Documents/pipeline_test/Data/link_regions_path.json",
+        touch = temp(touch(f"{WORKING_DIR}/push_annotation_pipeline_datasets_success.txt"))
+    params:
+        app1=APPS["bba-data-push push-volumetric"].split(),
+        app2=APPS["bba-data-push push-meshes"].split(),
+        app3=APPS["bba-data-push push-regionsummary"].split(),
+        token = myTokenFetcher.getAccessToken(),
+        create_provenance_json = write_json(PROVENANCE_METADATA_PATH, PROVENANCE_METADATA, rule_name = "push_annotation_pipeline_datasets")
+    log:
+        f"{LOG_DIR}/push_annotation_pipeline_datasets.log"
+    shell:
+        """
+        {params.app1[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app1[1]} --dataset-path {input.annotation_ccfv3_split} \
+            --dataset-path {input.mask} \
+            --dataset-path {input.placement_hints_ccfv3_split} \
+            --dataset-path {input.orientation_field_ccfv3} \
+            --hierarchy-path {input.hierarchy} \
+            --config-path {input.push_dataset_config} \
+            --link-regions-path {output.link_regions} \
+            --provenance-metadata-path {PROVENANCE_METADATA_PATH} \
+            --voxels-resolution {RESOLUTION} ;
+        {params.app2[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app2[1]} --dataset-path {input.mesh} \
+            --hierarchy-path {input.hierarchy} \
+            --config-path {input.push_dataset_config} \
+            --link-regions-path {output.link_regions} \
+            --provenance-metadata-path {PROVENANCE_METADATA_PATH} \
+            --voxels-resolution {RESOLUTION} ;
+        {params.app3[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app3[1]} --dataset-path {input.metadata} \
+            --hierarchy-path {input.hierarchy} \
+            --config-path {input.push_dataset_config} \
+            --link-regions-path {output.link_regions} \
+            --provenance-metadata-path {PROVENANCE_METADATA_PATH} \
+            2>&1 | tee {log}
+        """
+
+
+
 ##>push_annotation_pipeline_volume_datasets : Create VolumetricDataLayer resource payloads and push them along with the pipeline volumetric datasets (verified beforehand) into Nexus.
 rule push_annotation_pipeline_volume_datasets:
     input:
@@ -2934,6 +3054,7 @@ rule push_annotation_pipeline_volume_datasets:
     params:
         app=APPS["bba-data-push push-volumetric"].split(),
         token = myTokenFetcher.getAccessToken()
+        create_provenance_json = write_json(PROVENANCE_METADATA_PATH, PROVENANCE_METADATA, rule_name = "push_annotation_pipeline_volume_datasets")
     log:
         f"{LOG_DIR}/push_annotation_pipeline_volume_datasets.log"
     shell:
@@ -2950,6 +3071,7 @@ rule push_annotation_pipeline_volume_datasets:
             --hierarchy-path {input.hierarchy} \
             --config-path {input.push_dataset_config} \
             --link-regions-path {output.link_regions} \
+            --provenance-metadata-path {PROVENANCE_METADATA_PATH} \
             --voxels-resolution {RESOLUTION} \
             2>&1 | tee {log}
         """
@@ -2970,6 +3092,7 @@ rule push_annotation_pipeline_mesh_datasets:
         app1=APPS["bba-data-push push-meshes"].split(),
         app2=APPS["bba-data-push push-regionsummary"].split(),
         token = myTokenFetcher.getAccessToken()
+        create_provenance_json = write_json(PROVENANCE_METADATA_PATH, PROVENANCE_METADATA, rule_name = "push_annotation_pipeline_mesh_datasets")
     log:
         f"{LOG_DIR}/push_annotation_pipeline_mesh_datasets.log"
     shell:
@@ -2983,6 +3106,7 @@ rule push_annotation_pipeline_mesh_datasets:
             --hierarchy-path {input.hierarchy} \
             --config-path {input.push_dataset_config} \
             --link-regions-path {output.link_regions} \
+            --provenance-metadata-path {PROVENANCE_METADATA_PATH} \
             --voxels-resolution {RESOLUTION} \
             2>&1 | tee {log} \
         {params.app2[0]} --forge-config-file {FORGE_CONFIG} \
@@ -2993,13 +3117,14 @@ rule push_annotation_pipeline_mesh_datasets:
         {params.app2[1]} --dataset-path {input.metadata} \
             --hierarchy-path {input.hierarchy} \
             --config-path{input.push_dataset_config} \
+            --provenance-metadata-path {PROVENANCE_METADATA_PATH} \
             --link-regions-path {output.link_regions} \
             2>&1 | tee {log}
         """
 
 
-##>push_annotation_pipeline_datasets : Global rule to generate, check and push into Nexus every products of the annotation pipeline.
-rule push_annotation_pipeline_datasets:
+##>push_annotation_pipeline_datasets_all : Global rule to generate, check and push into Nexus every products of the annotation pipeline.
+rule push_annotation_pipeline_datasets_all:
     input:
         push_volumes = rules.push_annotation_pipeline_volume_datasets.output,
         push_meshes = rules.push_annotation_pipeline_mesh_datasets.output,
