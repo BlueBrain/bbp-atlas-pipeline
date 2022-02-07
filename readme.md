@@ -94,7 +94,7 @@ List of modules used by the annotation pipeline:
 
 The packages are available as bb5 module using :
 
-`module load unstable py-atlas-building-tools py-bba-datafetch py-token-fetch py-data-integrity-check py-bba-webexporter py-nexusforge`
+`module load unstable py-atlas-building-tools py-bba-datafetch py-token-fetch py-data-integrity-check py-nexusforge py-bba-webexporter`
 
 Or it can be installed following the ‘Installation’ section in their confluence documentation linked higher.
 
