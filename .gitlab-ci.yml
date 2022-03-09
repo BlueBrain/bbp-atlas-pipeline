@@ -44,7 +44,7 @@ deploy-documentation-in-staging-openshift:
       - if: $CI_COMMIT_MESSAGE =~ /DRAFT$/
   variables:
     KANIKO_EXTRA_ARGS: "--build-arg GENERATED_DOCS_PATH=generated/html"
-    CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/sphinx-documentation-staging
+    CI_REGISTRY_IMAGE: "http://docker-registry-default.ocp.bbp.epfl.ch/bbp-dke-staging/bba-pipeline-documentation"
 
 # Executes deployment of project documentation to bbp-dke-staging Openshift
 deploy-documentation-in-production-openshift:
@@ -57,4 +57,4 @@ deploy-documentation-in-production-openshift:
       when: on_success
   variables:
     KANIKO_EXTRA_ARGS: "--build-arg GENERATED_DOCS_PATH=generated/html"
-    CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/sphinx-documentation-production
+    CI_REGISTRY_IMAGE: "docker-registry-default.ocp.bbp.epfl.ch/bbp-dke-production/bba-pipeline-documentation"
