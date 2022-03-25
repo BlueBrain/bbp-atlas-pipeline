@@ -1,0 +1,515 @@
+##
+##Snakemake - Cell Atlas Pipeline
+##
+##nabil.alibou@epfl.ch
+##jonathan.lurie@epfl.ch
+##
+
+import os
+import time
+from datetime import datetime
+import fnmatch
+import subprocess
+import shutil
+import json
+import yaml
+import re
+import logging
+import threading
+import getpass
+import sysconfig
+from copy import deepcopy
+from uuid import uuid4
+from importlib.metadata import distribution
+from platform import python_version
+from snakemake.logging import logger as L
+from blue_brain_token_fetch.Token_refresher import TokenFetcher
+
+# loading the config
+configfile: "config.yaml"
+
+#Launch the automatic token refreshing
+myTokenFetcher = TokenFetcher()
+
+# placing the config values into local variable
+WORKING_DIR = config["WORKING_DIR"]
+NEXUS_IDS_FILE = config["NEXUS_IDS_FILE"]
+FORGE_CONFIG = config["FORGE_CONFIG"]
+RULES_CONFIG_DIR_TEMPLATES = config["RULES_CONFIG_DIR_TEMPLATES"]
+RESOLUTION = str(config["RESOLUTION"])
+MODULES_VERBOSE = config["MODULES_VERBOSE"]
+DISPLAY_HELP = config["DISPLAY_HELP"]
+PROVENANCE_METADATA_PATH = f"{WORKING_DIR}/provenance_metadata.json"
+
+NEXUS_ATLAS_ENV = config["NEXUS_ATLAS_ENV"]
+NEXUS_ATLAS_ORG = config["NEXUS_ATLAS_ORG"]
+NEXUS_ATLAS_PROJ = config["NEXUS_ATLAS_PROJ"]
+
+NEXUS_DESTINATION_ENV = config["NEXUS_DESTINATION_ENV"]
+NEXUS_DESTINATION_ORG = config["NEXUS_DESTINATION_ORG"]
+NEXUS_DESTINATION_PROJ = config["NEXUS_DESTINATION_PROJ"]
+
+VERSION_FILE = os.path.join(WORKING_DIR, "versions.txt")
+
+# Create Logs directory
+LOG_DIR = os.path.join(WORKING_DIR, "logs")
+snakemake_run_logs = os.path.join(LOG_DIR, "snakemake_run_logs")
+if not os.path.exists(LOG_DIR):
+    try:
+        os.mkdir(LOG_DIR)
+        L.info("folder '{LOG_DIR}' created")
+    except OSError:
+        L.error(f"creation of the directory {LOG_DIR} failed")
+if not os.path.exists(snakemake_run_logs):
+    try:
+        os.mkdir(snakemake_run_logs)
+        L.info("folder '{snakemake_run_logs}' created")
+    except OSError:
+        L.error(f"creation of the directory {snakemake_run_logs} failed")
+
+# Pipeline logs
+logfile = os.path.abspath(
+            os.path.join(
+                snakemake_run_logs, 
+                datetime.now().isoformat().replace(":", "-")
+                + ".log"
+            )
+          )
+logfile_handler = logging.FileHandler(logfile)
+L.logger.addHandler(logfile_handler)
+
+# All the apps must be listed here so that we can fetch all the versions
+APPS = {
+    "bba-data-fetch": "bba-data-fetch",
+    "parcellationexport": "parcellationexport",
+    "atlas-building-tools combination combine-annotations": "atlas-building-tools combination combine-annotations",
+    "atlas-building-tools combination combine-markers": "atlas-building-tools combination combine-markers",
+    "atlas-building-tools cell-detection svg-to-png": "atlas-building-tools cell-detection svg-to-png",
+    "atlas-building-tools cell-detection extract-color-map": "atlas-building-tools cell-detection extract-color-map",
+    "atlas-building-tools cell-detection compute-average-soma-radius": "atlas-building-tools cell-detection compute-average-soma-radius",
+    "atlas-building-tools cell-densities cell-density": "atlas-building-tools cell-densities cell-density",
+    "atlas-building-tools cell-densities glia-cell-densities": "atlas-building-tools cell-densities glia-cell-densities",
+    "atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities": "atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities",
+    "atlas-building-tools cell-densities compile-measurements": "atlas-building-tools cell-densities compile-measurements",
+    "atlas-building-tools cell-densities measurements-to-average-densities": "atlas-building-tools cell-densities measurements-to-average-densities",
+    "atlas-building-tools cell-densities fit-average-densities": "atlas-building-tools cell-densities fit-average-densities",
+    "atlas-building-tools cell-densities inhibitory-neuron-densities": "atlas-building-tools cell-densities inhibitory-neuron-densities",
+    "atlas-building-tools mtype-densities create-from-profile": "atlas-building-tools mtype-densities create-from-profile",
+    "atlas-building-tools mtype-densities create-from-probability-map": "atlas-building-tools mtype-densities create-from-probability-map",
+    "brainbuilder cells positions-and-orientations": "brainbuilder cells positions-and-orientations",
+    "atlas-building-tools direction-vectors isocortex": "atlas-building-tools direction-vectors isocortex",
+    "atlas-building-tools direction-vectors cerebellum": "atlas-building-tools direction-vectors cerebellum",
+    "atlas-building-tools direction-vectors interpolate": "atlas-building-tools direction-vectors interpolate",
+    "atlas-building-tools orientation-field": "atlas-building-tools orientation-field",
+    "atlas-building-tools region-splitter split-isocortex-layer-23": "atlas-building-tools region-splitter split-isocortex-layer-23",
+    "atlas-building-tools placement-hints isocortex": "atlas-building-tools placement-hints isocortex",
+    "bba-data-integrity-check nrrd-integrity": "bba-data-integrity-check nrrd-integrity",
+    "bba-data-integrity-check meshes-obj-integrity": "bba-data-integrity-check meshes-obj-integrity",
+    "bba-data-integrity-check atlas-sonata-integrity": "bba-data-integrity-check atlas-sonata-integrity",
+    "bba-data-push push-volumetric": "bba-data-push push-volumetric",
+    "bba-data-push push-meshes": "bba-data-push push-meshes",
+    "bba-data-push push-cellrecords": "bba-data-push push-cellrecords",
+    "bba-data-push push-regionsummary": "bba-data-push push-regionsummary"
+}
+#"gene-expression-volume create-volumes": "gene-expression-volume create-volumes",
+
+# delete the log of app versions
+try:
+    os.remove(VERSION_FILE)
+except OSError:
+    pass
+
+# fetch version of each app and write it down in a file
+applications = {"applications": {}}
+#for app in APPS:
+
+#    app_name_fixed = app.split()[0]
+#    if MODULES_VERBOSE:
+#        L.info(f"{app} [executable at] {shutil.which(app_name_fixed)}")
+
+    # first, we need to check if each CLI is in PATH, if not we abort with exit code 1
+#    if shutil.which(app_name_fixed) is None:
+#        raise Exception(f"The CLI {app_name_fixed} is not installed or not in PATH. Pipeline cannot execute.")
+#        exit(1)
+
+    # Slow but simplest way to check every modules regardless of how they have been installed
+#    app_version = subprocess.check_output(f"{app_name_fixed} --version", shell=True).decode('ascii').rstrip("\n\r")
+#    applications["applications"].update({app: app_version})
+
+with open(VERSION_FILE, "w") as outfile: 
+    outfile.write(json.dumps(applications, indent = 4))
+
+# Reading some Nexus file @id mapping
+NEXUS_IDS = json.loads(open(NEXUS_IDS_FILE, 'r').read().strip())
+
+# Create the rules configuration files from the template configuration files and annotate the data paths they contains
+rules_config_dir = f"{WORKING_DIR}/rules_config_dir"
+
+if not os.path.exists(rules_config_dir):
+    try:
+        os.mkdir(rules_config_dir)
+        L.info("folder '{rules_config_dir}' created")
+    except OSError:
+        L.error(f"creation of the directory {rules_config_dir} failed")
+
+# Generate all the configuration yaml files from the template ones located in blue_brain_atlas_pipeline/rules_config_dir_templates
+repository = "rules_config_dir_templates"
+files = os.listdir(repository)
+pattern = "*_template.yaml"
+files_list = fnmatch.filter(files, pattern)
+for file in files_list:
+    try:
+        rule_config_file_template = open(f"{RULES_CONFIG_DIR_TEMPLATES}/{file}", "r")
+        rule_config_file_name = file.replace('_template', '')
+        rule_config_file = open(f"{rules_config_dir}/{rule_config_file_name}", "w+")
+        rule_config_file.write(re.sub("{WORKING_DIR}", WORKING_DIR, rule_config_file_template.read()))
+        rule_config_file_template.close()
+        rule_config_file.seek(0)
+    except FileExistsError:
+        pass
+
+with open(f"{rules_config_dir}/combine_markers_hybrid_config.yaml", "r") as file:
+    COMBINE_MARKERS_HYBRID_CONFIG_FILE = yaml.safe_load(file.read().strip())
+
+with open(f"{rules_config_dir}/combine_markers_ccfv2_config.yaml", "r") as file:
+    COMBINE_MARKERS_CCFV2_CONFIG_FILE = yaml.safe_load(file.read().strip())
+
+with open(f"{rules_config_dir}/cell_positions_hybrid_config.yaml", "r") as file:
+    CELL_POSITIONS_HYBRID_CONFIG_FILE = yaml.safe_load(file.read().strip())
+
+with open(f"{rules_config_dir}/cell_positions_ccfv2_config.yaml", "r") as file:
+    CELL_POSITIONS_CCFV2_CONFIG_FILE = yaml.safe_load(file.read().strip())
+
+with open(f"{rules_config_dir}/cell_positions_ccfv2_correctednissl_config.yaml", "r") as file:
+    CELL_POSITIONS_CCFV2_CORRECTEDNISSL_CONFIG_FILE = yaml.safe_load(file.read().strip())
+
+with open(f"{rules_config_dir}/push_dataset_config.yaml", "r") as file:
+    PUSH_DATASET_CONFIG_FILE = yaml.safe_load(file.read().strip())
+
+AVERAGE_DENSITIES_CONFIG_FILE = f"{rules_config_dir}/fit_average_densities_config.yaml"
+AVERAGE_DENSITIES_CORRECTEDNISSL_CONFIG_FILE = f"{rules_config_dir}/fit_average_densities_correctednissl_config.yaml"
+MTYPES_PROFILE_CCFV2_CONFIG_ = f"{rules_config_dir}/mtypes_profile_ccfv2_config.yaml"
+MTYPES_PROFILE_CCFV2_CORRECTEDNISSL_CONFIG_ = f"{rules_config_dir}/mtypes_profile_ccfv2_correctednissl_config.yaml"
+MTYPES_PROBABILITY_MAP_CONFIG_ = f"{rules_config_dir}/mtypes_probability_map_config.yaml"
+MTYPES_PROBABILITY_MAP_CORRECTEDNISSL_CONFIG_ = f"{rules_config_dir}/mtypes_probability_map_correctednissl_config.yaml"
+
+def write_json(asso_json_path, dict, **kwargs):
+    file_path_update = open(asso_json_path, 'w')
+    #new_dict = deepcopy(dict(content, **{"rule_name":f"{rule_name}"}))
+    new_dict = deepcopy(dict)
+    for key, value in kwargs.items():
+        new_dict[key] = value
+    file_path_update.write(json.dumps(new_dict, ensure_ascii=False, indent=2))
+    file_path_update.close()
+    return file_path_update
+
+# Provenance metadata:
+provenance_dict = {
+    "activity_id": f"https://bbp.epfl.ch/neurosciencegraph/data/activity/{str(uuid4())}",
+    "softwareagent_name" : "Blue Brain Atlas Annotation Pipeline",
+    "software_version": "0.1.0", # later f"{distribution('pipeline').version}" or version.py
+    "runtime_platform": f"{sysconfig.get_platform()}",
+    "repo_adress": "https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline",
+    "language": f"python {python_version()}",
+    "start_time" : f"{datetime.today().strftime('%Y-%m-%dT%H:%M:%S')}",
+    "input_dataset_used" : {},
+    "derivations": {
+    "brain_region_mask_ccfv3_l23split": ["hierarchy_l23split", "annotation_ccfv3_l23split"],
+    "hierarchy_l23split": "hierarchy"
+    }
+}
+
+if not os.path.exists(PROVENANCE_METADATA_PATH):
+    write_json(PROVENANCE_METADATA_PATH, provenance_dict)
+
+with open(PROVENANCE_METADATA_PATH, "r+") as provenance_file:
+    provenance_file.seek(0)
+    PROVENANCE_METADATA = json.loads(provenance_file.read())
+
+if DISPLAY_HELP:
+    try:
+        L.info((open("HELP_RULES.txt", "r")).read())
+        os._exit(0)
+    except OSError as e:
+        L.error(f"{e}. Could not open 'HELP_RULES.txt'. Its content can also be access by running the 'help' rule.")
+
+
+##>help : prints help comments for Snakefile
+rule help:
+    input: "snakefile"
+    output: "HELP_RULES.txt"
+    shell:
+        """
+        sed -n 's/^##//p' {input} \
+        | tee {output}
+        """
+
+##>fetch_ccf_brain_region_hierarchy : fetch the hierarchy file, originally called 1.json
+rule fetch_ccf_brain_region_hierarchy:
+    output:
+        f"{PUSH_DATASET_CONFIG_FILE['HierarchyJson']['hierarchy']}",
+    params:
+        nexus_id=NEXUS_IDS["ParcellationOntology"]["allen_mouse_ccf"],
+        app=APPS["bba-datafetch"],
+        token = myTokenFetcher.getAccessToken(),
+        derivation = PROVENANCE_METADATA["input_dataset_used"].update({"hierarchy" : {"id":NEXUS_IDS["ParcellationOntology"]["allen_mouse_ccf"], "type":"ParcellationOntology"}})
+    log:
+        f"{LOG_DIR}/fetch_ccf_brain_region_hierarchy.log"
+    shell:
+        """
+        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+            --nexus-token {params.token} \
+            --nexus-org neurosciencegraph \
+            --nexus-proj datamodels \
+            --out {output} \
+            --nexus-id {params.nexus_id} \
+            --favor name:1.json \
+            --verbose \
+            2>&1 | tee {log}
+        """
+
+##>fetch_brain_parcellation_ccfv2 :  fetch the CCF v2 brain parcellation volume in the given resolution
+rule fetch_brain_parcellation_ccfv2:
+    output:
+        f"{WORKING_DIR}/brain_parcellation_ccfv2.nrrd"
+    params:
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["brain_ccfv2"],
+        app=APPS["bba-datafetch"],
+        token = myTokenFetcher.getAccessToken(),
+    log:
+        f"{LOG_DIR}/fetch_brain_parcellation_ccfv2.log"
+    shell:
+        """
+        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+            --nexus-token {params.token} \
+            --nexus-org {NEXUS_ATLAS_ORG} \
+            --nexus-proj {NEXUS_ATLAS_PROJ} \
+            --out {output} \
+            --nexus-id {params.nexus_id} \
+            --verbose \
+            2>&1 | tee {log}
+        """              
+
+##>fetch_fiber_parcellation_ccfv2 : fetch the CCF v2 fiber parcellation volume in the given resolution
+rule fetch_fiber_parcellation_ccfv2:
+    output:
+        f"{WORKING_DIR}/fiber_parcellation_ccfv2.nrrd"
+    params:
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["fiber_ccfv2"],
+        app=APPS["bba-datafetch"],
+        token = myTokenFetcher.getAccessToken()
+    log:
+        f"{LOG_DIR}/fetch_fiber_parcellation_ccfv2.log"
+    shell:
+        """
+        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+            --nexus-token {params.token} \
+            --nexus-org {NEXUS_ATLAS_ORG} \
+            --nexus-proj {NEXUS_ATLAS_PROJ} \
+            --out {output} \
+            --nexus-id {params.nexus_id} \
+            --verbose \
+            2>&1 | tee {log}
+        """
+
+##>fetch_brain_parcellation_ccfv3 : fetch the CCF v3 brain parcellation volume in the given resolution
+rule fetch_brain_parcellation_ccfv3:
+    output:
+        f"{WORKING_DIR}/brain_parcellation_ccfv3.nrrd"
+    params:
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["brain_ccfv3"],
+        app=APPS["bba-datafetch"],
+        token = myTokenFetcher.getAccessToken(),
+        derivation = PROVENANCE_METADATA["input_dataset_used"].update({"brain_parcellation_ccfv3" : {"id":NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["brain_ccfv3"], "type":"BrainParcellationDataLayer"}})
+    log:
+        f"{LOG_DIR}/fetch_brain_parcellation_ccfv3.log"
+    shell:
+        """
+        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+            --nexus-token {params.token} \
+            --nexus-org {NEXUS_ATLAS_ORG} \
+            --nexus-proj {NEXUS_ATLAS_PROJ} \
+            --out {output} \
+            --nexus-id {params.nexus_id} \
+            --verbose \
+            2>&1 | tee {log}
+        """
+        
+##>fetch_brain_parcellation_realigned : fetch the brain parcellation volume realigned from ccfv2 to ccfv3 in the given resolution
+rule fetch_brain_parcellation_realigned:
+    output:
+        f"{WORKING_DIR}/annotation_realigned.nrrd"
+    params:
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["brain_realigned"],
+        app=APPS["bba-datafetch"],
+        token = myTokenFetcher.getAccessToken()
+    log:
+        f"{LOG_DIR}/fetch_brain_parcellation_realigned.log"
+    shell:
+        """
+        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+            --nexus-token {params.token} \
+            --nexus-org {NEXUS_ATLAS_ORG} \
+            --nexus-proj {NEXUS_ATLAS_PROJ} \
+            --out {output} \
+            --nexus-id {params.nexus_id} \
+            --verbose \
+            2>&1 | tee {log}
+        """
+
+##>fetch_nissl_stained_volume : fetch the CCF nissl stained volume in the given resolution
+rule fetch_nissl_stained_volume:
+    output:
+        f"{WORKING_DIR}/nissl_stained_volume.nrrd"
+    params:
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["NISSLImageDataLayer"]["ara_nissl"],
+        app=APPS["bba-datafetch"],
+        token = myTokenFetcher.getAccessToken()
+    log:
+        f"{LOG_DIR}/fetch_nissl_stained_volume.log"
+    shell:
+        """
+        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+            --nexus-token {params.token} \
+            --nexus-org {NEXUS_ATLAS_ORG} \
+            --nexus-proj {NEXUS_ATLAS_PROJ} \
+            --out {output} \
+            --nexus-id {params.nexus_id} \
+            --verbose \
+            2>&1 | tee {log}
+        """
+
+##>fetch_corrected_nissl_stained_volume : fetch the corrected nissl stained volume in the given resolution
+rule fetch_corrected_nissl_stained_volume:
+    output:
+        f"{WORKING_DIR}/nissl_corrected_volume.nrrd"
+    params:
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["NISSLImageDataLayer"]["corrected_nissl"],
+        app=APPS["bba-datafetch"],
+        token = myTokenFetcher.getAccessToken()
+    log:
+        f"{LOG_DIR}/fetch_corrected_nissl_stained_volume.log"
+    shell:
+        """
+        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+            --nexus-token {params.token} \
+            --nexus-org {NEXUS_ATLAS_ORG} \
+            --nexus-proj {NEXUS_ATLAS_PROJ} \
+            --out {output} \
+            --nexus-id {params.nexus_id} \
+            --verbose \
+            2>&1 | tee {log}
+        """
+
+##>fetch_annotation_stack_ccfv2_coronal : fetch the CCFv2 annotation coronal image stack stack
+rule fetch_annotation_stack_ccfv2_coronal:
+    output:
+        directory(f"{WORKING_DIR}/annotation_stack_ccfv2_coronal")
+    params:
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["ImageStack"]["annotation_stack_ccfv2_coronal"],
+        app=APPS["bba-datafetch"],
+        token = myTokenFetcher.getAccessToken()
+    log:
+        f"{LOG_DIR}/fetch_annotation_stack_ccfv2_coronal.log"
+    shell:
+        """
+        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+            --nexus-token {params.token} \
+            --nexus-org {NEXUS_ATLAS_ORG} \
+            --nexus-proj {NEXUS_ATLAS_PROJ} \
+            --out {output}.tar.gz \
+            --nexus-id {params.nexus_id} \
+            --verbose ;
+            mkdir {output} ;
+            tar xf {WORKING_DIR}/annotation_stack_ccfv2_coronal.tar.gz --directory={output} --strip-components=1 ;
+            rm {WORKING_DIR}/annotation_stack_ccfv2_coronal.tar.gz ;
+            2>&1 | tee {log}
+        """
+
+##>fetch_nissl_stack_ccfv2_coronal : fetch the CCFv2 nissl coronal image stack stack
+rule fetch_nissl_stack_ccfv2_coronal:
+    output:
+        directory(f"{WORKING_DIR}/nissl_stack_ccfv2_coronal")
+    params:
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["ImageStack"]["nissl_stack_ccfv2_coronal"],
+        app=APPS["bba-datafetch"],
+        token = myTokenFetcher.getAccessToken()
+    log:
+        f"{LOG_DIR}/fetch_nissl_stack_ccfv2_coronal.log"
+    shell:
+        """
+        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+            --nexus-token {params.token} \
+            --nexus-org {NEXUS_ATLAS_ORG} \
+            --nexus-proj {NEXUS_ATLAS_PROJ} \
+            --out {output}.tar.gz \
+            --nexus-id {params.nexus_id} \
+            --verbose ;
+            mkdir {output} ;
+            tar xf {WORKING_DIR}/nissl_stack_ccfv2_coronal.tar.gz --directory={output} --strip-components=1 ;
+            rm {WORKING_DIR}/nissl_stack_ccfv2_coronal.tar.gz \
+            2>&1 | tee {log}
+        """
+
+##>combine_annotations : Generate and save the combined annotation file
+rule combine_annotations:
+    input:
+        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
+        brain_ccfv2=rules.fetch_brain_parcellation_ccfv2.output,
+        fiber_ccfv2=rules.fetch_fiber_parcellation_ccfv2.output,
+        brain_ccfv3=rules.fetch_brain_parcellation_ccfv3.output
+    output:
+        f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['annotation_hybrid']}"
+    params:
+        app=APPS["atlas-building-tools combination combine-annotations"]
+    log:
+        f"{LOG_DIR}/combine_annotations.log"
+    shell:
+        """
+        {params.app} --hierarchy {input.hierarchy} \
+            --brain-annotation-ccfv2 {input.brain_ccfv2} \
+            --fiber-annotation-ccfv2 {input.fiber_ccfv2} \
+            --brain-annotation-ccfv3 {input.brain_ccfv3} \
+            --output-path {output} \
+            2>&1 | tee {log}
+        """
+
+
+#rule creator:
+#    output: f"{WORKING_DIR}"+"/gene_{sample}.nrrd"
+#    params: lambda wildcards: NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"][wildcards.sample]
+#    shell: 'echo yeyeyeyye'
+    
+##>fetch_glia : fetch the gene expression volume corresponding to the genetic marker gad
+rule fetch_glia:
+    output:
+        f"{WORKING_DIR}"+"/gene_{sample}.nrrd"
+    params:
+        nexus_id = lambda wildcards: NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"][wildcards.sample],
+        app=APPS["bba-datafetch"],
+        token = myTokenFetcher.getAccessToken()
+    shell:
+        """
+        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+            --nexus-token {params.token} \
+            --nexus-org {NEXUS_ATLAS_ORG} \
+            --nexus-proj {NEXUS_ATLAS_PROJ} \
+            --out {output} \
+            --nexus-id {params.nexus_id} \
+            --verbose
+        """
+
+#def myfunc(wildcards): #AttributeError: 'Wildcards' object has no attribute 'glia'
+#    return COMBINE_MARKERS_HYBRID_CONFIG_FILE['inputGeneVolumePath'][wildcards.glia]
+
+DATASETS = []
+for value in COMBINE_MARKERS_HYBRID_CONFIG_FILE['inputGeneVolumePath'].values():
+    DATASETS.append(value)
+
+rule bb:
+    input:
+        expand("{dataset}", dataset=DATASETS)
+
+#rule aa:
+#    input: myfunc
+# f"{WORKING_DIR}/gene_cnp.nrrd"

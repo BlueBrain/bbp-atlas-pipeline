@@ -29,7 +29,8 @@ from blue_brain_token_fetch.Token_refresher import TokenFetcher
 configfile: "config.yaml"
 
 #Launch the automatic token refreshing
-myTokenFetcher = TokenFetcher()
+#myTokenFetcher = TokenFetcher()
+myTokenFetcher = "aaa"
 
 # placing the config values into local variable
 WORKING_DIR = config["WORKING_DIR"]
@@ -39,7 +40,6 @@ RULES_CONFIG_DIR_TEMPLATES = config["RULES_CONFIG_DIR_TEMPLATES"]
 RESOLUTION = str(config["RESOLUTION"])
 MODULES_VERBOSE = config["MODULES_VERBOSE"]
 DISPLAY_HELP = config["DISPLAY_HELP"]
-RESOURCE_TAG = config["RESOURCE_TAG"]
 PROVENANCE_METADATA_PATH = f"{WORKING_DIR}/provenance_metadata.json"
 
 NEXUS_ATLAS_ENV = config["NEXUS_ATLAS_ENV"]
@@ -267,7 +267,7 @@ rule fetch_ccf_brain_region_hierarchy:
     params:
         nexus_id=NEXUS_IDS["ParcellationOntology"]["allen_mouse_ccf"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken(),
+        token = "aa",#myTokenFetcher.getAccessToken(),
         derivation = PROVENANCE_METADATA["input_dataset_used"].update({"hierarchy" : {"id":NEXUS_IDS["ParcellationOntology"]["allen_mouse_ccf"], "type":"ParcellationOntology"}})
     log:
         f"{LOG_DIR}/fetch_ccf_brain_region_hierarchy.log"
@@ -291,7 +291,7 @@ rule fetch_brain_parcellation_ccfv2:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["brain_ccfv2"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken(),
+        token = "aa",#myTokenFetcher.getAccessToken(),
     log:
         f"{LOG_DIR}/fetch_brain_parcellation_ccfv2.log"
     shell:
@@ -313,7 +313,7 @@ rule fetch_fiber_parcellation_ccfv2:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["fiber_ccfv2"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = "aa"#myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_fiber_parcellation_ccfv2.log"
     shell:
@@ -335,7 +335,7 @@ rule fetch_brain_parcellation_ccfv3:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["brain_ccfv3"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken(),
+        token = "aa",#myTokenFetcher.getAccessToken(),
         derivation = PROVENANCE_METADATA["input_dataset_used"].update({"brain_parcellation_ccfv3" : {"id":NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["brain_ccfv3"], "type":"BrainParcellationDataLayer"}})
     log:
         f"{LOG_DIR}/fetch_brain_parcellation_ccfv3.log"
@@ -358,7 +358,7 @@ rule fetch_brain_parcellation_realigned:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["brain_realigned"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = "aa"#myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_brain_parcellation_realigned.log"
     shell:
@@ -380,7 +380,7 @@ rule fetch_nissl_stained_volume:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["NISSLImageDataLayer"]["ara_nissl"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = "aa"#myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_nissl_stained_volume.log"
     shell:
@@ -402,7 +402,7 @@ rule fetch_corrected_nissl_stained_volume:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["NISSLImageDataLayer"]["corrected_nissl"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = "aa"#myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_corrected_nissl_stained_volume.log"
     shell:
@@ -424,7 +424,7 @@ rule fetch_annotation_stack_ccfv2_coronal:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["ImageStack"]["annotation_stack_ccfv2_coronal"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = "aa"#myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_annotation_stack_ccfv2_coronal.log"
     shell:
@@ -449,7 +449,7 @@ rule fetch_nissl_stack_ccfv2_coronal:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["ImageStack"]["nissl_stack_ccfv2_coronal"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = "aa"#myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_nissl_stack_ccfv2_coronal.log"
     shell:
@@ -490,11 +490,6 @@ rule combine_annotations:
             2>&1 | tee {log}
         """
 
-## =========================================================================================
-## ============================== CELL DENSITY PIPELINE PART 1 =============================
-## =========================================================================================
-
-
 ##>fetch_gene_gad : fetch the gene expression volume corresponding to the genetic marker gad
 rule fetch_gene_gad:
     output:
@@ -502,7 +497,7 @@ rule fetch_gene_gad:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["gad"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = "aa"#myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_gene_gad.log"
     shell:
@@ -524,7 +519,7 @@ rule fetch_gene_nrn1:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["nrn1"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = "aa"#myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_gene_nrn1.log"
     shell:
@@ -546,7 +541,7 @@ rule fetch_gene_aldh1l1:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["aldh1l1"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = "aa"#myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_gene_aldh1l1.log"
     shell:
@@ -568,7 +563,7 @@ rule fetch_gene_cnp:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["cnp"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = "aa"#myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_gene_cnp.log"
     shell:
@@ -590,7 +585,7 @@ rule fetch_gene_mbp:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["mbp"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = "aa"#myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_gene_mbp.log"
     shell:
@@ -612,7 +607,7 @@ rule fetch_gene_gfap:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["gfap"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = "aa"#myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_gene_gfap.log"
     shell:
@@ -634,7 +629,7 @@ rule fetch_gene_s100b:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["s100b"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = "aa"#myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_gene_s100b.log"
     shell:
@@ -656,7 +651,7 @@ rule fetch_gene_tmem119:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["tmem119"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = "aa"#myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_gene_tmem119.log"
     shell:
@@ -678,7 +673,7 @@ rule fetch_gene_pv:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["pv"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = "aa"#myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_gene_pv.log"
     shell:
@@ -700,7 +695,7 @@ rule fetch_gene_pv_correctednissl:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["pv_correctednissl"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = "aa"#myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_gene_pv_correctednissl.log"
     shell:
@@ -722,7 +717,7 @@ rule fetch_gene_sst:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["sst"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = "aa"#myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_gene_sst.log"
     shell:
@@ -744,7 +739,7 @@ rule fetch_gene_sst_correctednissl:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["sst_correctednissl"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = "aa"#myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_gene_sst_correctednissl.log"
     shell:
@@ -766,7 +761,7 @@ rule fetch_gene_vip:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["vip"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = "aa"#myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_gene_vip.log"
     shell:
@@ -788,7 +783,7 @@ rule fetch_gene_vip_correctednissl:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["vip_correctednissl"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = "aa"#myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_gene_vip_correctednissl.log"
     shell:
@@ -810,7 +805,7 @@ rule fetch_gene_gad67:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["gad67"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = "aa"#myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_gene_gad67.log"
     shell:
@@ -832,7 +827,7 @@ rule fetch_gene_gad67_correctednissl:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["gad67_correctednissl"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = "aa"#myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_gene_gad67_correctednissl.log"
     shell:
@@ -1237,9 +1232,7 @@ rule inhibitory_excitatory_neuron_densities_ccfv2_correctednissl:
             2>&1 | tee {log}
         """
 
-## =========================================================================================
-## =============================== ANNOTATION PIPELINE PART 1 ==============================
-## =========================================================================================
+##====================================================
 
 ##>direction_vectors_isocortex_ccfv2 : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood. The output is only for the top regions of the isocortex.
 rule direction_vectors_isocortex_ccfv2:
@@ -1492,10 +1485,6 @@ rule placement_hints_isocortex_hybrid_l23split:
         """
 
 
-## =========================================================================================
-## ============================== CELL DENSITY PIPELINE PART 2 =============================
-## =========================================================================================
-
 ##======== Optimized inhibitory neuron densities and mtypes ========
 
 
@@ -1734,8 +1723,7 @@ rule export_brain_region_ccfv3_l23split:
         #mask_dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['brain_region_mask_ccfv3_l23split']}"),
         mask_dir = "test2",
         #json_metadata_parcellations = f"{WORKING_DIR}/metadata_parcellations_ccfv3_l23split.json"
-        json_metadata_parcellations = "test3",
-        hierarchy_jsonld = f"{PUSH_DATASET_CONFIG_FILE['HierarchyJson']['mba_hierarchy_l23split']}"
+        json_metadata_parcellations = "test3"
     params:
         app=APPS["parcellationexport"],
     log:
@@ -1747,7 +1735,6 @@ rule export_brain_region_ccfv3_l23split:
             --out-mesh-dir {output.mesh_dir} \
             --out-mask-dir {output.mask_dir} \
             --out-metadata {output.json_metadata_parcellations} \
-            --out-hierarchy-jsonld {output.hierarchy_jsonld} \
             2>&1 | tee {log}
         """
 
@@ -1820,6 +1807,58 @@ rule cell_records:
 
 ##========================== Check Rules ==========================
 
+
+##>check_hybrid_v2v3_annotation : Check the integrity of the generated annotation hybrid .nrrd volumetric dataset
+rule check_hybrid_v2v3_annotation:
+    input:
+        annotation_hybrid=rules.combine_annotations.output,
+    output:
+        f"{WORKING_DIR}/data_check_report/report_volumetric_nrrd.json"
+    params:
+        app=APPS["bba-data-integrity-check nrrd-integrity"]
+    log:
+        f"{LOG_DIR}/check_hybrid_v2v3_annotation.log"
+    shell:
+        """
+        {params.app} --input-dataset {input.annotation_hybrid} \
+            --report_path {output} \
+            2>&1 | tee {log}
+        """
+
+##>check_hybrid_l23split_annotation : Check the integrity of the generated annotation with layer23 split .nrrd volumetric dataset
+rule check_hybrid_l23split_annotation:
+    input:
+        annotation_l23split=rules.split_isocortex_layer_23_hybrid.output.annotation_l23split
+    output:
+        f"{WORKING_DIR}/data_check_report/report_volumetric_nrrd.json"
+    params:
+        app=APPS["bba-data-integrity-check nrrd-integrity"]
+    log:
+        f"{LOG_DIR}/check_hybrid_l23split_annotation.log"
+    shell:
+        """
+        {params.app} --input-dataset {input.annotation_l23split} \
+            --report-path {output} \
+            2>&1 | tee {log}
+        """
+
+##>check_hybrid_v2v3_nrrd_dataset : Check the integrity of the generated cell densities folder containing .nrrd volumetric dataset
+rule check_cell_densities:
+    input:
+        cell_densities=rules.glia_cell_densities_hybrid.output.cell_densities,
+    output:
+        f"{WORKING_DIR}/data_check_report/report_volumetric_nrrd.json"
+    params:
+        app=APPS["bba-data-integrity-check nrrd-integrity"]
+    log:
+        f"{LOG_DIR}/check_cell_densities.log"
+    shell:
+        """
+        {params.app} --input-dataset {input.cell_densities} \
+            --report-path {output} \
+            2>&1 | tee {log}
+        """
+
 ##>check_neuron_densities : Check the integrity of the generated neuron densities folder containing .nrrd volumetric dataset
 rule check_neuron_densities:
     input:
@@ -1833,6 +1872,28 @@ rule check_neuron_densities:
     shell:
         """
         {params.app} --input-dataset {input.neuron_densities} \
+            --report-path {output} \
+            2>&1 | tee {log}
+        """
+
+##>check_hybrid_v2v3_volumetric_nrrd_datasets : Check the integrity of the hybrid .nrrd volumetric datasets that can be generated by the pipeline
+rule check_hybrid_v2v3_volumetric_nrrd_datasets:
+    input:
+        annotation_hybrid=rules.combine_annotations.output,
+        cell_densities=rules.glia_cell_densities_hybrid.output.cell_densities,
+        neuron_densities=rules.inhibitory_excitatory_neuron_densities_hybrid.output.neuron_densities
+    output:
+        f"{WORKING_DIR}/data_check_report/report_volumetric_nrrd.json"
+    params:
+        app=APPS["bba-data-integrity-check nrrd-integrity"]
+    log:
+        f"{LOG_DIR}/check_hybrid_v2v3_volumetric_nrrd_datasets.log"
+    shell:
+        """
+        {params.app} --input-dataset {input.annotation_hybrid} \
+            --input-dataset {input.annotation_l23split} \
+            --input-dataset {input.cell_densities} \
+            --input-dataset {input.neuron_densities} \
             --report-path {output} \
             2>&1 | tee {log}
         """
@@ -1858,6 +1919,83 @@ rule check_l23split_volumetric_nrrd_datasets:
             2>&1 | tee {log}
         """
 
+
+##>check_all_volumetric_nrrd_datasets : Check the integrity of every .nrrd volumetric datasets that can be generated by the pipeline
+rule check_all_volumetric_nrrd_datasets:
+    input:
+        annotation_hybrid=rules.combine_annotations.output,
+        annotation_l23split=rules.split_isocortex_layer_23_hybrid.output.annotation_l23split,
+        cell_densities=rules.glia_cell_densities_hybrid.output.cell_densities,
+        neuron_densities=rules.inhibitory_excitatory_neuron_densities_hybrid.output.neuron_densities
+    output:
+        f"{WORKING_DIR}/data_check_report/report_volumetric_nrrd.json"
+    params:
+        app=APPS["bba-data-integrity-check nrrd-integrity"]
+    log:
+        f"{LOG_DIR}/check_all_volumetric_nrrd_datasets.log"
+    shell:
+        """
+        {params.app} --input-dataset {input.annotation_hybrid} \
+            --input-dataset {input.annotation_l23split} \
+            --input-dataset {input.cell_densities} \
+            --input-dataset {input.neuron_densities} \
+            --report-path {output} \
+            2>&1 | tee {log}
+        """
+
+##>check_hybrid_v2v3_meshes_obj : Check the integrity of the generated .obj meshes of the hybrid ccfv2-ccfv3 annotation 
+rule check_hybrid_v2v3_meshes_obj:
+    input:
+        mesh_hybrid=rules.export_brain_region_hybrid.output
+    output:
+        f"{WORKING_DIR}/data_check_report/report_obj_brain_meshes.json"
+    params:
+        app=APPS["bba-data-integrity-check meshes-obj-integrity"]
+    log:
+        f"{LOG_DIR}/check_hybrid_v2v3_meshes_obj.log"
+    shell:
+        """
+        {params.app} --input-dataset {input.mesh_hybrid} \
+            --report-path {output} \
+            2>&1 | tee {log}
+        """
+
+##>check_hybrid_l23split_meshes_obj : Check the integrity of the generated .obj meshes of the hybrid ccfv2-ccfv3 with layer 2,3 split annotation
+rule check_hybrid_l23split_meshes_obj:
+    input:
+        mesh_l23split=rules.export_brain_region_hybrid_l23split.output
+    output:
+        f"{WORKING_DIR}/data_check_report/report_obj_brain_meshes.json"
+    params:
+        app=APPS["bba-data-integrity-check meshes-obj-integrity"]
+    log:
+        f"{LOG_DIR}/check_hybrid_l23split_meshes_obj.log"
+    shell:
+        """
+        {params.app} --input-dataset {input.mesh_l23split} \
+            --report-path {output} \
+            2>&1 | tee {log}
+        """
+
+##>check_meshes_obj_dataset : Check the integrity of all the generated .obj meshes datasets that can be generated by the pipeline
+rule check_all_meshes_obj_datasets:
+    input:
+        mesh_hybrid=rules.export_brain_region_hybrid.output,
+        mesh_l23split=rules.export_brain_region_hybrid_l23split.output
+    output:
+        f"{WORKING_DIR}/data_check_report/report_obj_brain_meshes.json"
+    params:
+        app=APPS["bba-data-integrity-check meshes-obj-integrity"]
+    log:
+        f"{LOG_DIR}/check_all_meshes_obj_datasets.log"
+    shell:
+        """
+        {params.app} --input-dataset {input.mesh_hybrid} \
+            --input-dataset {input.mesh_l23split} \
+            --report-path {output} \
+            2>&1 | tee {log}
+        """
+
 ##>check_sonata_cellrecords : Check the integrity of the generated sonata .h5 containing the cell records
 rule check_sonata_cellrecords:
     input:
@@ -1875,9 +2013,179 @@ rule check_sonata_cellrecords:
             2>&1 | tee {log}
         """
 
+##>check_hybrid_v2v3_report : Verify that the report files generated by the module verifying the hybrid datasets integrity do not contain any issues before starting to push datasets into Nexus. These are contained in the folder data_check_report.
+rule check_hybrid_v2v3_report:
+    priority: 10
+    input:
+        nrrd_report = rules.check_hybrid_v2v3_volumetric_nrrd_datasets.output,
+        obj_report = rules.check_hybrid_v2v3_meshes_obj.output,
+        hdf5_report = rules.check_sonata_cellrecords.output
+    output:
+        touch(f"{WORKING_DIR}/data_check_report/report_valid.txt")
+    log:
+        f"{LOG_DIR}/check_hybrid_v2v3_report.log"
+    run:
+        with open(log[0], "w") as logfile:
+            report_files = input
+            for f in report_files:
+                report_file = open(f,'r')
+                report_json = json.load(report_file)
+                for k in report_json.keys():
+                    if not report_json[k]['success'] == 'true':
+                        logfile.write(f"The report file contains errors: \n{report_json}\n "\ 
+                                      "All the data_check_report need to show valid dataset or else those "\
+                                      "will not be pushed in Nexus.")
+                        #raise ValueError
+                        L.error(f"The report file contains errors: \n'{report_json}")
+                        exit(1)
+                report_file.close()
+            logfile.write(f"All report files show successful datasets integrity check.\nUpdating '{output}'")
+
+
+##>check_l23split_report : Verify that the report files generated by the module verifying the l23 split datasets integrity do not contain any issues before starting to push datasets into Nexus. These are contained in the folder data_check_report.
+rule check_l23split_report:
+    priority: 10
+    input:
+        nrrd_report = rules.check_l23split_volumetric_nrrd_datasets.output,
+        obj_report = rules.check_hybrid_l23split_meshes_obj.output,
+        hdf5_report = rules.check_sonata_cellrecords.output
+    output:
+        touch(f"{WORKING_DIR}/data_check_report/report_valid.txt")
+    log:
+        f"{LOG_DIR}/check_l23split_report.log"
+    run:
+        with open(log[0], "w") as logfile:
+            report_files = input
+            for f in report_files:
+                report_file = open(f,'r')
+                report_json = json.load(report_file)
+                for k in report_json.keys():
+                    if not report_json[k]['success'] == 'true':
+                        logfile.write(f"The report file contains errors: \n{report_json}\n "\ 
+                                      "All the data_check_report need to show valid dataset or else those "\
+                                      "will not be pushed in Nexus.")
+                        L.error(f"The report file contains errors: \n'{report_json}")
+                        exit(1)
+                report_file.close()
+            logfile.write(f"All report files show successful datasets integrity check.\nUpdating '{output}'")
+            
+
+##>check_alldatasets_report : Verify that the report files generated by the module verifying all the dataset integrity do not contain any issues before starting to push datasets into Nexus. These are contained in the folder data_check_report.
+rule check_alldatasets_report:
+    priority: 10
+    input:
+        nrrd_report = rules.check_all_volumetric_nrrd_datasets.output,
+        obj_report = rules.check_all_meshes_obj_datasets.output,
+        hdf5_report = rules.check_sonata_cellrecords.output
+    output:
+        touch(f"{WORKING_DIR}/data_check_report/report_valid.txt")
+    log:
+        f"{LOG_DIR}/check_alldatasets_report.log"
+    run:
+        with open(log[0], "w") as logfile:
+            report_files = input
+            for f in report_files:
+                report_file = open(f,'r')
+                report_json = json.load(report_file)
+                for k in report_json.keys():
+                    if not report_json[k]['success'] == 'true':
+                        logfile.write(f"The report file contains errors: \n{report_json}\n "\ 
+                                      "All the data_check_report need to show valid dataset or else those "\
+                                      "will not be pushed in Nexus.")
+                        L.error(f"The report file contains errors: \n'{report_json}")
+                        exit(1)
+                report_file.close()
+            logfile.write(f"All report files show successful datasets integrity check.\nUpdating '{output}'")
+
 
 ##========================== Push Rules ==========================
 
+
+##>push_hybrid_v2v3_annotation : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
+rule push_hybrid_v2v3_annotation:
+    input:
+        annotation_hybrid=rules.combine_annotations.output,
+        check_nrrd = rules.check_hybrid_v2v3_annotation.output,
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml"
+    output:
+        touch(f"{WORKING_DIR}/push_hybrid_v2v3_annotation_success.txt")
+    params:
+        app=APPS["bba-data-push push-volumetric"].split(),
+        provenance = "", #f"atlas-building-tools combination combine-annotations:{applications['applications']['atlas-building-tools combination combine-annotations']}",
+        token = "aa"#myTokenFetcher.getAccessToken()
+    log:
+        f"{LOG_DIR}/push_hybrid_v2v3_annotation.log"
+    shell:
+        """
+        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+            --verbose \
+        {params.app[1]} --dataset-path {input.annotation_hybrid} \
+            --provenances "{params.provenance}" \
+            --config {input.push_dataset_config} \
+            --voxels-resolution {RESOLUTION} \
+            2>&1 | tee {log}
+        """
+        
+##>push_hybrid_l23split_annotation : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
+rule push_hybrid_l23split_annotation:
+    input:
+        annotation_l23split=rules.split_isocortex_layer_23_hybrid.output.annotation_l23split,
+        check_nrrd = rules.check_hybrid_l23split_annotation.output,
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
+    output:
+        touch(f"{WORKING_DIR}/push_hybrid_l23split_annotation_success.txt")
+    params:
+        app=APPS["bba-data-push push-volumetric"].split(),
+        provenance = "", #f"atlas-building-tools region-splitter split-isocortex-layer-23:{applications['applications']['atlas-building-tools region-splitter split-isocortex-layer-23']}",
+        token = "aa"#myTokenFetcher.getAccessToken()
+    log:
+        f"{LOG_DIR}/push_hybrid_l23split_annotation.log"
+    shell:
+        """
+        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app[1]} --dataset-path {input.annotation_l23split} \
+            --provenances "{params.provenance}" \
+            --config {input.push_dataset_config} \
+            --voxels-resolution {RESOLUTION} \
+            2>&1 | tee {log}
+        """
+
+
+##>push_cell_densities : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
+rule push_cell_densities:
+    input:
+        cell_densities=rules.combine_annotations.output,
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
+        check_nrrd = rules.check_cell_densities.output
+    output:
+        touch(f"{WORKING_DIR}/push_cell_densities_success.txt")
+    params:
+        app=APPS["bba-data-push push-volumetric"].split(),
+        provenance = "", #f"atlas-building-tools cell-densities glia-cell-densities:{applications['applications']['atlas-building-tools cell-densities glia-cell-densities']}",
+        token = "aa"#myTokenFetcher.getAccessToken()
+    log:
+        f"{LOG_DIR}/push_cell_densities.log"
+    shell:
+        """
+        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app[1]} --dataset-path {input.cell_densities} \
+            --provenances "{params.provenance}" \
+            --config {input.push_dataset_config} \
+            --voxels-resolution {RESOLUTION} \
+            2>&1 | tee {log}
+        """
         
 ##>push_neuron_densities : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
 rule push_neuron_densities:
@@ -1890,7 +2198,7 @@ rule push_neuron_densities:
     params:
         app=APPS["bba-data-push push-volumetric"].split(),
         provenance = "", #f"atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities:{applications['applications']['atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities']}",
-        token = myTokenFetcher.getAccessToken()
+        token = "aa"#myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/push_neuron_densities.log"
     shell:
@@ -1907,6 +2215,199 @@ rule push_neuron_densities:
             2>&1 | tee {log}
         """
 
+##>push_hybrid_v2v3_volumetric_nrrd_datasets : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
+rule push_hybrid_v2v3_volumetric_nrrd_datasets:
+    input:
+        annotation_hybrid=rules.combine_annotations.output,
+        cell_densities=rules.glia_cell_densities_hybrid.output,
+        neuron_densities=rules.combine_annotations.output,
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
+        check_nrrd = rules.check_hybrid_v2v3_volumetric_nrrd_datasets.output
+    output:
+        touch(f"{WORKING_DIR}/push_hybrid_v2v3_volumetric_nrrd_datasets_success.txt")
+    params:
+        app=APPS["bba-data-push push-volumetric"].split(),
+        provenance_hybrid = "", #f"atlas-building-tools combination combine-annotations:{applications['applications']['atlas-building-tools combination combine-annotations']}",
+        provenance_cell_densities = "", #f"atlas-building-tools cell-densities glia-cell-densities:{applications['applications']['atlas-building-tools cell-densities glia-cell-densities']}",
+        provenance_neuron_densities = "", #f"atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities:{applications['applications']['atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities']}",
+        token = "aa"#myTokenFetcher.getAccessToken()
+    log:
+        f"{LOG_DIR}/push_hybrid_v2v3_volumetric_nrrd_datasets.log"
+    shell:
+        """
+        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app[1]} --dataset-path {input.annotation_hybrid} \
+            --dataset-path {input.cell_densities} \
+            --dataset-path {input.neuron_densities} \
+            --provenances "{params.provenance_hybrid}" \
+            --provenances "{params.provenance_cell_densities}" \
+            --provenances "{params.provenance_neuron_densities}" \
+            --config {input.push_dataset_config} \
+            --voxels-resolution {RESOLUTION} \
+            2>&1 | tee {log}
+        """
+
+##>push_hybrid_l23split_volumetric_nrrd_datasets : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
+rule push_hybrid_l23split_volumetric_nrrd_datasets:
+    input:
+        annotation_l23split=rules.split_isocortex_layer_23_hybrid.output.annotation_l23split,
+        cell_densities=rules.glia_cell_densities_hybrid.output,
+        neuron_densities=rules.combine_annotations.output,
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
+        check_nrrd = rules.check_l23split_volumetric_nrrd_datasets.output
+    output:
+        touch(f"{WORKING_DIR}/push_hybrid_l23split_volumetric_nrrd_datasets_success.txt")
+    params:
+        app=APPS["bba-data-push push-volumetric"].split(),
+        provenance_l23split = "", #f"atlas-building-tools region-splitter split-isocortex-layer-23:{applications['applications']['atlas-building-tools region-splitter split-isocortex-layer-23']}",
+        provenance_cell_densities = "", #f"atlas-building-tools cell-densities glia-cell-densities:{applications['applications']['atlas-building-tools cell-densities glia-cell-densities']}",
+        provenance_neuron_densities = "", #f"atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities:{applications['applications']['atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities']}",
+        token = "aa"#myTokenFetcher.getAccessToken()
+    log:
+        f"{LOG_DIR}/push_hybrid_l23split_volumetric_nrrd_datasets.log"
+    shell:
+        """
+        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app[1]} --dataset-path {input.annotation_l23split} \
+            --dataset-path {input.cell_densities} \
+            --dataset-path {input.neuron_densities} \
+            --provenances "{params.provenance_l23split}" \
+            --provenances "{params.provenance_cell_densities}" \
+            --provenances "{params.provenance_neuron_densities}" \
+            --config {input.push_dataset_config} \
+            --voxels-resolution {RESOLUTION} \
+            2>&1 | tee {log}
+        """
+
+##>push_all_volumetric_nrrd_datasets : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
+rule push_all_volumetric_nrrd_datasets:
+    input:
+        annotation_hybrid=rules.combine_annotations.output,
+        annotation_l23split=rules.split_isocortex_layer_23_hybrid.output.annotation_l23split,
+        cell_densities=rules.glia_cell_densities_hybrid.output,
+        neuron_densities=rules.combine_annotations.output,
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
+        check_nrrd = rules.check_all_volumetric_nrrd_datasets.output
+    output:
+        touch(f"{WORKING_DIR}/push_all_volumetric_nrrd_datasets_success.txt")
+    params:
+        app=APPS["bba-data-push push-volumetric"].split(),
+        provenance_hybrid = "", #f"atlas-building-tools combination combine-annotations:{applications['applications']['atlas-building-tools combination combine-annotations']}",
+        provenance_l23split = "", #f"atlas-building-tools region-splitter split-isocortex-layer-23:{applications['applications']['atlas-building-tools region-splitter split-isocortex-layer-23']}",
+        provenance_cell_densities = "", #f"atlas-building-tools cell-densities glia-cell-densities:{applications['applications']['atlas-building-tools cell-densities glia-cell-densities']}",
+        provenance_neuron_densities = "", #f"atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities:{applications['applications']['atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities']}",
+        token = "aa"#myTokenFetcher.getAccessToken()
+    log:
+        f"{LOG_DIR}/push_all_volumetric_nrrd_datasets.log"
+    shell:
+        """
+        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app[1]} --dataset-path {input.annotation_hybrid} \
+            --dataset-path {input.annotation_l23split} \
+            --dataset-path {input.cell_densities} \
+            --dataset-path {input.neuron_densities} \
+            --provenances "{params.provenance_hybrid}" \
+            --provenances "{params.provenance_l23split}" \
+            --provenances "{params.provenance_cell_densities}" \
+            --provenances "{params.provenance_neuron_densities}" \
+            --config {input.push_dataset_config} \
+            --voxels-resolution {RESOLUTION} \
+            2>&1 | tee {log}
+        """
+
+##>push_hybrid_v2v3_meshes_obj : Create a Mesh resource and push it along with the mesh files into Nexus
+rule push_hybrid_v2v3_meshes_obj:
+    input:
+        mesh_hybrid=rules.export_brain_region_hybrid.output,
+        hierarchy = rules.fetch_ccf_brain_region_hierarchy.output,
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
+        check_obj_meshes = rules.check_hybrid_v2v3_meshes_obj.output
+    output:
+        temp(touch(f"{WORKING_DIR}/push_hybrid_v2v3_meshes_obj_success.txt"))
+    params:
+        app=APPS["bba-data-push push-meshes"].split(),
+        token = "aa"#myTokenFetcher.getAccessToken()
+    log:
+        f"{LOG_DIR}/push_hybrid_v2v3_meshes_obj.log"
+    shell:
+        """
+        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app[1]} --dataset-path {input.mesh_hybrid} \
+            --hierarchy-path {input.hierarchy} \
+            --config {input.push_dataset_config} \
+            2>&1 | tee {log}
+        """
+
+##>push_hybrid_l23split_meshes_obj : Create a Mesh resource and push it along with the mesh files into Nexus
+rule push_hybrid_l23split_meshes_obj:
+    input:
+        mesh_l23split=rules.export_brain_region_hybrid_l23split.output,
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
+        check_obj_meshes = rules.check_hybrid_l23split_meshes_obj.output
+    output:
+        temp(touch(f"{WORKING_DIR}/push_l23split_meshes_obj_success.txt"))
+    params:
+        app=APPS["bba-data-push push-meshes"].split(),
+        token = "aa"#myTokenFetcher.getAccessToken()
+    log:
+        f"{LOG_DIR}/push_hybrid_l23split_meshes_obj.log"
+    shell:
+        """
+        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app[1]} --dataset-path {input.mesh_l23split} \
+            --config {input.push_dataset_config} \
+            2>&1 | tee {log}
+        """
+
+##>push_all_meshes_obj_datasets : Create a Mesh resource and push it along with the mesh files into Nexus
+rule push_all_meshes_obj_datasets:
+    input:
+        mesh_hybrid=rules.export_brain_region_hybrid.output,
+        mesh_l23split=rules.export_brain_region_hybrid_l23split.output,
+        hierarchy = rules.fetch_ccf_brain_region_hierarchy.output,
+        push_dataset_config = f"{PUSH_DATASET_CONFIG_FILE}",
+        check_obj_meshes = rules.check_all_meshes_obj_datasets.output
+    output:
+        temp(touch(f"{WORKING_DIR}/push_all_meshes_obj_datasets_success.txt"))
+    params:
+        app=APPS["bba-data-push push-meshes"].split(),
+        token = "aa"#myTokenFetcher.getAccessToken()
+    log:
+        f"{LOG_DIR}/push_all_meshes_obj_datasets.log"
+    shell:
+        """
+        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app[1]} --dataset-path {input.mesh_hybrid} \
+            --dataset-path {input.mesh_l23split} \
+            --hierarchy-path {input.hierarchy} \
+            --config {rules_config_dir}/push_dataset_config.yaml \
+            2>&1 | tee {log}
+        """
+
 ##>push_sonata_cellrecords : Create a CellRecordSerie resource and push it along with the Sonata .h5 file into Nexus
 rule push_sonata_cellrecords:
     input:
@@ -1918,7 +2419,7 @@ rule push_sonata_cellrecords:
     params:
         app=APPS["bba-data-push push-cellrecords"].split(),
         provenance = "", #f"brainbuilder cells positions-and-orientations:{applications['applications']['brainbuilder cells positions-and-orientations']}",
-        token = myTokenFetcher.getAccessToken()
+        token = "aa"#myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/push_sonata_cellrecords.log"
     shell:
@@ -1935,10 +2436,7 @@ rule push_sonata_cellrecords:
             2>&1 | tee {log}
         """
 
-## =========================================================================================
-## =============================== ANNOTATION PIPELINE RULES ===============================
-## =========================================================================================
-
+##========================== Annotation Pipeline Rules ==========================
 
 ##>push_ccfv3_mesh_mask : Create a Mesh, a Mask and a RegionSummary resource and push it along with their respective files into Nexus
 rule push_ccfv3_mesh_mask:
@@ -1956,7 +2454,7 @@ rule push_ccfv3_mesh_mask:
         app1=APPS["bba-data-push push-volumetric"].split(),
         app2=APPS["bba-data-push push-meshes"].split(),
         app3=APPS["bba-data-push push-regionsummary"].split(),
-        token = myTokenFetcher.getAccessToken()
+        token = "aa"#myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/push_ccfv3_mesh_mask.log"
     shell:
@@ -2071,7 +2569,7 @@ rule generate_annotation_pipeline_datasets:
         all_datasets = rules.check_annotation_pipeline.output,
 
 
-##>push_annotation_pipeline_test : SMALL TEST push orientation and ccfv3 split volumes.
+##>push_annotation_pipeline_test : test push orientation and ccfv3 split volumes.
 rule push_annotation_pipeline_test:
     input:
         hierarchy=rules.split_isocortex_layer_23_ccfv3.output.hierarchy_l23split,
@@ -2082,7 +2580,7 @@ rule push_annotation_pipeline_test:
         touch = touch(f"{WORKING_DIR}/push_annotation_pipeline_test_success.txt")
     params:
         app=APPS["bba-data-push push-volumetric"].split(),
-        token = myTokenFetcher.getAccessToken(),
+        token = "aa",#myTokenFetcher.getAccessToken(),
         create_provenance_json = write_json(PROVENANCE_METADATA_PATH, PROVENANCE_METADATA, rule_name = "push_annotation_pipeline_test")
     log:
         f"{LOG_DIR}/push_annotation_pipeline_test.log"
@@ -2102,19 +2600,17 @@ rule push_annotation_pipeline_test:
             2>&1 | tee {log}
         """
         
-##>push_annotation_pipeline_datasets : TEST Push annotation pipeline dataset
+##>push_annotation_pipeline_datasets : Push annotation pipeline dataset
 rule push_annotation_pipeline_datasets:
     input:
         hierarchy="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/hierarchy_l23split.json",
-        #hierarchy_jsonld=export_brain_region_ccfv3_l23split.output.hierarchy_jsonld,
-        hierarchy_jsonld="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/mba_hierarchy_l23split.json",
         annotation_ccfv3_split="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/annotation_ccfv3_l23split.nrrd",
-        #mask="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/brain_region_mask_ccfv3_l23split",
-        #mesh="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/brain_region_meshes_ccfv3_l23split",
-        #metadata="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/metadata_parcellations_ccfv3_l23split.json",
-        mask="/gpfs/bbp.cscs.ch/home/alibou/Documents/pipeline_test/Data/brain_region_mask_ccfv3_l23split",
-        mesh="/gpfs/bbp.cscs.ch/home/alibou/Documents/pipeline_test/Data/brain_region_meshes_ccfv3_l23split",
-        metadata="/gpfs/bbp.cscs.ch/home/alibou/Documents/pipeline_test/Data/metadata_parcellations_ccfv3_l23split.json",
+        mask="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/brain_region_mask_ccfv3_l23split",
+        mesh="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/brain_region_meshes_ccfv3_l23split",
+        metadata="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/metadata_parcellations_ccfv3_l23split.json",
+        #mask="/gpfs/bbp.cscs.ch/home/alibou/Documents/pipeline_test/Data/brain_region_mask_ccfv3_l23split",
+        #mesh="/gpfs/bbp.cscs.ch/home/alibou/Documents/pipeline_test/Data/brain_region_meshes_ccfv3_l23split",
+        #metadata="/gpfs/bbp.cscs.ch/home/alibou/Documents/pipeline_test/Data/metadata_parcellations_ccfv3_l23split.json",
         placement_hints_ccfv3_split = "/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/placement_hints_ccfv3_l23split",
         direction_vectors_ccfv3 = "/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/direction_vectors_isocortex_ccfv3.nrrd",
         orientation_field_ccfv3="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/cell_orientations_ccfv3.nrrd",
@@ -2126,9 +2622,8 @@ rule push_annotation_pipeline_datasets:
         app1=APPS["bba-data-push push-volumetric"].split(),
         app2=APPS["bba-data-push push-meshes"].split(),
         app3=APPS["bba-data-push push-regionsummary"].split(),
-        token = myTokenFetcher.getAccessToken(),
-        create_provenance_json = write_json(PROVENANCE_METADATA_PATH, PROVENANCE_METADATA, rule_name = "push_annotation_pipeline_datasets"),
-        resource_tag = RESOURCE_TAG
+        token = "aa",#myTokenFetcher.getAccessToken(),
+        create_provenance_json = write_json(PROVENANCE_METADATA_PATH, PROVENANCE_METADATA, rule_name = "push_annotation_pipeline_datasets")
     log:
         f"{LOG_DIR}/push_annotation_pipeline_datasets.log"
     shell:
@@ -2144,8 +2639,6 @@ rule push_annotation_pipeline_datasets:
             --dataset-path {input.orientation_field_ccfv3} \
             --dataset-path {input.direction_vectors_ccfv3} \
             --hierarchy-path {input.hierarchy} \
-            --hierarchy-jsonld-path {input.hierarchy_jsonld} \
-            --resource-tag {params.resource_tag} \
             --config-path {input.push_dataset_config} \
             --link-regions-path {output.link_regions} \
             --provenance-metadata-path {PROVENANCE_METADATA_PATH} \
@@ -2157,11 +2650,9 @@ rule push_annotation_pipeline_datasets:
             --nexus-token {params.token} \
         {params.app2[1]} --dataset-path {input.mesh} \
             --hierarchy-path {input.hierarchy} \
-            --hierarchy-jsonld-path {input.hierarchy_jsonld} \
             --config-path {input.push_dataset_config} \
             --link-regions-path {output.link_regions} \
             --provenance-metadata-path {PROVENANCE_METADATA_PATH} \
-            --resource-tag {params.resource_tag} \
             --voxels-resolution {RESOLUTION} ;
         {params.app3[0]} --forge-config-file {FORGE_CONFIG} \
             --nexus-env {NEXUS_DESTINATION_ENV} \
@@ -2170,10 +2661,8 @@ rule push_annotation_pipeline_datasets:
             --nexus-token {params.token} \
         {params.app3[1]} --dataset-path {input.metadata} \
             --hierarchy-path {input.hierarchy} \
-            --hierarchy-jsonld-path {input.hierarchy_jsonld} \
             --config-path {input.push_dataset_config} \
             --link-regions-path {output.link_regions} \
-            --resource-tag {params.resource_tag} \
             --provenance-metadata-path {PROVENANCE_METADATA_PATH} \
             2>&1 | tee {log}
         """
@@ -2195,7 +2684,7 @@ rule push_annotation_pipeline_volume_datasets:
         touch = touch(f"{WORKING_DIR}/push_annotation_pipeline_volume_datasets_success.txt")
     params:
         app=APPS["bba-data-push push-volumetric"].split(),
-        token = myTokenFetcher.getAccessToken(),
+        token = "aa",#myTokenFetcher.getAccessToken(),
         create_provenance_json = write_json(PROVENANCE_METADATA_PATH, PROVENANCE_METADATA, rule_name = "push_annotation_pipeline_volume_datasets")
     log:
         f"{LOG_DIR}/push_annotation_pipeline_volume_datasets.log"
@@ -2233,7 +2722,7 @@ rule push_annotation_pipeline_mesh_datasets:
     params:
         app1=APPS["bba-data-push push-meshes"].split(),
         app2=APPS["bba-data-push push-regionsummary"].split(),
-        token = myTokenFetcher.getAccessToken(),
+        token = "aa",#myTokenFetcher.getAccessToken(),
         create_provenance_json = write_json(PROVENANCE_METADATA_PATH, PROVENANCE_METADATA, rule_name = "push_annotation_pipeline_mesh_datasets")
     log:
         f"{LOG_DIR}/push_annotation_pipeline_mesh_datasets.log"
@@ -2274,13 +2763,52 @@ rule push_annotation_pipeline_datasets_all:
 
 ##========================== User Rules ==========================
 
+##>generate_hybrid_v2v3_annotation : global rule with the aim of triggering the generation and verification of annotation_l23split dataset
+rule generate_hybrid_v2v3_annotation:
+    input:
+        volumetric_dataset = rules.check_hybrid_v2v3_annotation.output
+        
+##>generate_l23split_annotation : global rule with the aim of triggering the generation and verification of annotation_l23split dataset
+rule generate_l23split_annotation:
+    input:
+        volumetric_dataset = rules.check_hybrid_l23split_annotation.output
+
+##>generate_cell_densities : global rule with the aim of triggering the generation and verification of annotation_l23split dataset
+rule generate_cell_densities:
+    input:
+        volumetric_dataset = rules.check_cell_densities.output
 
 ##>generate_neuron_densities : global rule with the aim of triggering the generation and verification of annotation_l23split dataset
 rule generate_neuron_densities:
     input:
         volumetric_dataset = rules.check_neuron_densities.output
+
+##>generate_hybrid_v2v3_meshes_obj : global rule with the aim of triggering the generation and verification of annotation_l23split dataset
+rule generate_hybrid_v2v3_meshes_obj:
+    input:
+        mesh_dataset = rules.check_hybrid_v2v3_meshes_obj.output
+        
+##>generate_l23split_meshes_obj : global rule with the aim of triggering the generation and verification of annotation_l23split dataset
+rule generate_l23split_meshes_obj:
+    input:
+        mesh_dataset = rules.check_hybrid_l23split_meshes_obj.output
         
 ##>generate_sonata_cellrecords : global rule with the aim of triggering the generation and verification of annotation_l23split dataset
 rule generate_sonata_cellrecords:
     input:
         cellrecords_dataset = rules.check_sonata_cellrecords.output
+    
+##>generate_hybrid_v2v3_datasets : global rule with the aim of triggering the generation and verification of volumetric datasets
+rule generate_hybrid_v2v3_datasets:
+    input:
+        hybrid_dataset = rules.check_hybrid_v2v3_report.output
+        
+##>generate_l23split_datasets : global rule with the aim of triggering the generation and verification of volumetric datasets
+rule generate_l23split_datasets:
+    input:
+        l23split_dataset = rules.check_l23split_report.output
+
+##>all : global rule with the aim of triggering the generation of datasets
+rule all:
+    input:
+        all_datasets = rules.check_alldatasets_report.output,

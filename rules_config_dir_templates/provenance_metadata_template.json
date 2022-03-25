@@ -1,0 +1,28 @@
+{
+  "activity_id": "https://bbp.epfl.ch/neurosciencegraph/data/activity/668726d5-af52-42ee-bc4d-a203c5aa8fe4",
+  "softwareagent_name": "Blue Brain Atlas Annotation Pipeline",
+  "software_version": "0.1.0",
+  "runtime_platform": "linux-x86_64",
+  "repo_adress": "https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline",
+  "language": "python 3.8.3",
+  "start_time": "2022-02-10T19:28:12",
+  "input_dataset_used": {
+    "hierarchy": {
+      "id": "http://bbp.epfl.ch/neurosciencegraph/ontologies/mba",
+      "type": "ParcellationOntology"
+    },
+    "brain_parcellation_ccfv3": {
+      "id": "https://bbp.epfl.ch/neurosciencegraph/data/025eef5f-2a9a-4119-b53f-338452c72f2a",
+      "type": "BrainParcellationDataLayer"
+    }
+  },
+  "derivations": {
+    "brain_region_mask_ccfv3_l23split": "annotation_ccfv3_l23split",
+    "hierarchy_l23split": "hierarchy",
+    "annotation_ccfv3_l23split": "brain_parcellation_ccfv3",
+    "direction_vectors_isocortex_ccfv3": "brain_parcellation_ccfv3",
+    "cell_orientations_ccfv3": "direction_vectors_isocortex_ccfv3",
+    "placement_hints_ccfv3_l23split": "annotation_ccfv3_l23split"
+  },
+  "rule_name": "push_annotation_pipeline_datasets"
+}

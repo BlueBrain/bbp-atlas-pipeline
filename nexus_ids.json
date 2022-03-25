@@ -1,28 +1,30 @@
 {
-  "brain_region_hierarchies": {
+  "ParcellationOntology": {
     "allen_mouse_ccf": "http://bbp.epfl.ch/neurosciencegraph/ontologies/mba"
   },
-
-  "volumes": {
+  "VolumetricDataLayer": {
     "10": {
-      "parcellations": {
+      "BrainParcellationDataLayer": {
           "brain_ccfv2" : "https://bbp.epfl.ch/neurosciencegraph/data/7f85cd66-d212-4799-bb4c-0732b8534442",
           "brain_ccfv3" : "https://bbp.epfl.ch/neurosciencegraph/data/e238a1f6-0b30-48df-ac8b-6185efe10a59",
-          "fiber_ccfv2" : "https://bbp.epfl.ch/neurosciencegraph/data/2f26c63b-6d01-4540-bf8b-b0a2a7c59597",
+          "fiber_ccfv2" : "https://bbp.epfl.ch/neurosciencegraph/data/2f26c63b-6d01-4540-bf8b-b0a2a7c59597"
+      },
+      "NISSLImageDataLayer": {
           "ara_nissl" : "https://bbp.epfl.ch/neurosciencegraph/data/c1f768f8-5bbb-46ea-aeee-bc92909a0b52"
       }
     },
-
     "25": {
-      "parcellations": {
+      "BrainParcellationDataLayer": {
         "brain_ccfv2" : "https://bbp.epfl.ch/neurosciencegraph/data/7b4b36ad-911c-4758-8686-2bf7943e10fb",
         "brain_ccfv3" : "https://bbp.epfl.ch/neurosciencegraph/data/025eef5f-2a9a-4119-b53f-338452c72f2a",
         "brain_realigned" : "https://bbp.epfl.ch/neurosciencegraph/data/d318062c-b24e-4eab-830c-37d2b0ec4c00",
-        "fiber_ccfv2" : "https://bbp.epfl.ch/neurosciencegraph/data/a4552116-607b-469e-ad2a-50bba00c23d8",
+        "fiber_ccfv2" : "https://bbp.epfl.ch/neurosciencegraph/data/a4552116-607b-469e-ad2a-50bba00c23d8"
+      },
+      "NISSLImageDataLayer": {
         "ara_nissl" : "https://bbp.epfl.ch/neurosciencegraph/data/9768fb11-6461-4705-995f-7ad40b3aab77",
         "corrected_nissl" : "https://bbp.epfl.ch/neurosciencegraph/data/35cb6642-db10-49e9-8f9c-46be17a9c376"
       },
-      "gene_expressions": {
+      "GeneExpressionVolumetricDataLayer": {
         "aldh1l1": "https://bbp.epfl.ch/neurosciencegraph/data/9e2c3aa7-3b19-4da6-9623-f864368326e6",
         "cnp": "https://bbp.epfl.ch/neurosciencegraph/data/dfaaece4-04b9-49c9-9561-6141f4e9c848",
         "mbp": "https://bbp.epfl.ch/neurosciencegraph/data/96db5934-e9ef-47e8-bc66-3624509ddaeb",
@@ -40,7 +42,7 @@
         "vip_correctednissl": "https://bbp.epfl.ch/neurosciencegraph/data/a3c77f3f-3cb4-4b19-95f3-92b2330dfdb8",
         "gad67_correctednissl": "https://bbp.epfl.ch/neurosciencegraph/data/e51f53c8-6883-49e5-8a5b-eec4bd7d41c3"
       },
-      "image_stack": {
+      "ImageStack": {
         "nissl_stack_ccfv2_coronal": "https://bbp.epfl.ch/neurosciencegraph/data/ae8cbd28-e17b-4c1e-967a-a5084b7ad335",
         "annotation_stack_ccfv2_coronal": "https://bbp.epfl.ch/neurosciencegraph/data/d45f1a66-e663-4991-bda9-3ee8bc447061"
       }
