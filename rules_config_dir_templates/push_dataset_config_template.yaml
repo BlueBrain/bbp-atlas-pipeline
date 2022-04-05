@@ -1,11 +1,12 @@
 HierarchyJson:
-  hierarchy: {WORKING_DIR}/hierarchy.json
-  hierarchy_l23split: {WORKING_DIR}/hierarchy_l23split.json
-  mba_hierarchy_l23split: {WORKING_DIR}/mba_hierarchy_l23split.json
+  hierarchy: "/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/hierarchy.json"
+  hierarchy_l23split: "/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/hierarchy_l23split.json"
+  mba_hierarchy_l23split: "/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/mba_hierarchy_l23split.json"
 GeneratedDatasetPath:
   VolumetricFile:
+    average_template_25: {WORKING_DIR}/average_template_25.nrrd
     annotation_hybrid: {WORKING_DIR}/annotation_v2v3_hybrid.nrrd
-    annotation_ccfv3_l23split: {WORKING_DIR}/annotation_ccfv3_l23split.nrrd
+    annotation_ccfv3_l23split: "/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/annotation_ccfv3_l23split.nrrd"
     annotation_hybrid_l23split: {WORKING_DIR}/annotation_hybrid_l23split.nrrd
     direction_vectors_isocortex_ccfv3: "/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/direction_vectors_isocortex_ccfv3.nrrd"
     cell_orientations_hybrid: {WORKING_DIR}/cell_orientations_hybrid.nrrd

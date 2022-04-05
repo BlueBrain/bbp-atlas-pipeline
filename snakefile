@@ -40,6 +40,7 @@ RESOLUTION = str(config["RESOLUTION"])
 MODULES_VERBOSE = config["MODULES_VERBOSE"]
 DISPLAY_HELP = config["DISPLAY_HELP"]
 RESOURCE_TAG = config["RESOURCE_TAG"]
+ATLAS_CONFIG_PATH = config["ATLAS_CONFIG_PATH"]
 PROVENANCE_METADATA_PATH = f"{WORKING_DIR}/provenance_metadata.json"
 
 NEXUS_ATLAS_ENV = config["NEXUS_ATLAS_ENV"]
@@ -54,19 +55,26 @@ NEXUS_DESTINATION_PROJ = config["NEXUS_DESTINATION_PROJ"]
 
 VERSION_FILE = os.path.join(WORKING_DIR, "versions.txt")
 
+if not os.path.exists(WORKING_DIR):
+    try:
+        os.mkdir(WORKING_DIR)
+        L.info(f"folder '{WORKING_DIR}' created")
+    except OSError:
+        L.error(f"creation of the directory {WORKING_DIR} failed")
+
 # Create Logs directory
 LOG_DIR = os.path.join(WORKING_DIR, "logs")
 snakemake_run_logs = os.path.join(LOG_DIR, "snakemake_run_logs")
 if not os.path.exists(LOG_DIR):
     try:
         os.mkdir(LOG_DIR)
-        L.info("folder '{LOG_DIR}' created")
+        L.info(f"folder '{LOG_DIR}' created")
     except OSError:
         L.error(f"creation of the directory {LOG_DIR} failed")
 if not os.path.exists(snakemake_run_logs):
     try:
         os.mkdir(snakemake_run_logs)
-        L.info("folder '{snakemake_run_logs}' created")
+        L.info(f"folder '{snakemake_run_logs}' created")
     except OSError:
         L.error(f"creation of the directory {snakemake_run_logs} failed")
 
@@ -124,6 +132,7 @@ except OSError:
 
 # fetch version of each app and write it down in a file
 applications = {"applications": {}}
+# UNCOMMENT TO CHECK SYSTEMATICALY EVERY MODULES PRESENCE BEFORE RUNNING THE PIPELINE:
 #for app in APPS:
 
 #    app_name_fixed = app.split()[0]
@@ -151,7 +160,7 @@ rules_config_dir = f"{WORKING_DIR}/rules_config_dir"
 if not os.path.exists(rules_config_dir):
     try:
         os.mkdir(rules_config_dir)
-        L.info("folder '{rules_config_dir}' created")
+        L.info(f"folder '{rules_config_dir}' created")
     except OSError:
         L.error(f"creation of the directory {rules_config_dir} failed")
 
@@ -350,17 +359,18 @@ rule fetch_brain_parcellation_ccfv3:
             --verbose \
             2>&1 | tee {log}
         """
-        
-##>fetch_brain_parcellation_realigned : fetch the brain parcellation volume realigned from ccfv2 to ccfv3 in the given resolution
-rule fetch_brain_parcellation_realigned:
+
+
+##>fetch_brain_template : fetch the CCF v3 brain average template volume in the given resolution
+rule fetch_brain_template:
     output:
-        f"{WORKING_DIR}/annotation_realigned.nrrd"
+        f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['average_template_25']}"
     params:
-        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["brain_realigned"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainTemplateDataLayer"]["average_template_25"],
         app=APPS["bba-data-fetch"],
         token = myTokenFetcher.getAccessToken()
     log:
-        f"{LOG_DIR}/fetch_brain_parcellation_realigned.log"
+        f"{LOG_DIR}/fetch_brain_template.log"
     shell:
         """
         {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
@@ -372,6 +382,7 @@ rule fetch_brain_parcellation_realigned:
             --verbose \
             2>&1 | tee {log}
         """
+
 
 ##>fetch_nissl_stained_volume : fetch the CCF nissl stained volume in the given resolution
 rule fetch_nissl_stained_volume:
@@ -493,6 +504,36 @@ rule combine_annotations:
 ## =========================================================================================
 ## ============================== CELL DENSITY PIPELINE PART 1 =============================
 ## =========================================================================================
+
+#### TO DO: replace all the fetch 'genes' by one rule using wildcard : ####
+### WILDCARD SUCCESSFUL TEST:
+###>fetch_glia_gene : fetch all the gene expression volumes using wildcard
+#rule fetch_glia_gene:
+#    output:
+#        f"{WORKING_DIR}"+"/gene_{sample}.nrrd"
+#    params:
+#        nexus_id = lambda wildcards: NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]
+["GeneExpressionVolumetricDataLayer"][wildcards.sample],
+#        app=APPS["bba-datafetch"],
+#        token = myTokenFetcher.getAccessToken()
+#    shell:
+#        """
+#        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+#            --nexus-token {params.token} \
+#            --nexus-org {NEXUS_ATLAS_ORG} \
+#            --nexus-proj {NEXUS_ATLAS_PROJ} \
+#            --out {output} \
+#            --nexus-id {params.nexus_id} \
+#            --verbose
+#        """
+
+#DATASETS = []
+#for value in COMBINE_MARKERS_HYBRID_CONFIG_FILE['inputGeneVolumePath'].values():
+#    DATASETS.append(value)
+
+#rule fetch_all_glia: trigger the retrieving of all the gene expression volumes from Nexus
+#    input:
+#        expand("{dataset}", dataset=DATASETS)
 
 
 ##>fetch_gene_gad : fetch the gene expression volume corresponding to the genetic marker gad
@@ -1463,34 +1504,6 @@ rule placement_hints_isocortex_ccfv3_l23split:
             2>&1 | tee {log}
         """
 
-##>placement_hints_isocortex_hybrid_l23split : Generate and save the placement hints of different regions of the AIBS mouse brain
-rule placement_hints_isocortex_hybrid_l23split:
-    input:
-        parcellation_volume=rules.split_isocortex_layer_23_hybrid.output.annotation_l23split,
-        direction_vectors=rules.direction_vectors_isocortex_hybrid.output
-    output:
-        ph_folder = directory(f"{WORKING_DIR}/placement_hints_isocortex_hybrid_l23split"),
-        ph_1 = f"{WORKING_DIR}/placement_hints_isocortex_hybrid_l23split/[PH]layer_1.nrrd",
-        ph_2 = f"{WORKING_DIR}/placement_hints_isocortex_hybrid_l23split/[PH]layer_2.nrrd",
-        ph_3 = f"{WORKING_DIR}/placement_hints_isocortex_hybrid_l23split/[PH]layer_3.nrrd",
-        ph_4 = f"{WORKING_DIR}/placement_hints_isocortex_hybrid_l23split/[PH]layer_4.nrrd",
-        ph_5 = f"{WORKING_DIR}/placement_hints_isocortex_hybrid_l23split/[PH]layer_5.nrrd",
-        ph_6 = f"{WORKING_DIR}/placement_hints_isocortex_hybrid_l23split/[PH]layer_6.nrrd",
-        y = f"{WORKING_DIR}/placement_hints_isocortex_hybrid_l23split/[PH]y.nrrd",
-        problematique_mask = f"{WORKING_DIR}/placement_hints_isocortex_hybrid_l23split/Isocortex_problematic_volume.nrrd",
-        problematique_report = f"{WORKING_DIR}/placement_hints_isocortex_hybrid_l23split/distance_report.json"
-    params:
-        app=APPS["atlas-building-tools placement-hints isocortex"]
-    log:
-        f"{LOG_DIR}/placement_hints_isocortex_hybrid_l23split.log"
-    shell:
-        """
-        {params.app} --annotation-path {input.parcellation_volume} \
-            --direction-vectors-path {input.direction_vectors} \
-            --output-dir {output.ph_folder} \
-            2>&1 | tee {log}
-        """
-
 
 ## =========================================================================================
 ## ============================== CELL DENSITY PIPELINE PART 2 =============================
@@ -1721,20 +1734,19 @@ rule create_mtypes_densities_from_probability_map_ccfv2_correctednissl:
             2>&1 | tee {log}
         """
 
-##=================================================
+## =========================================================================================
+## ======================== EXPORT MASKS,MESHES,SUMMARIES,CELLRECORDS ======================
+## =========================================================================================
 
-##>export_brain_region_ccfv3_l23split : export a mesh, a volumetric mask and a region summary json file for every brain region available in the ccfv3 isocortex layer 2-3 split brain parcellation volume. Note: not only the leaf regions are exported but also the above regions that are combinaisons of leaves
+##>export_brain_region_ccfv3_l23split : export a mesh, a volumetric mask and a region summary json file for every brain region available in the ccfv3 isocortex layer 2-3 split brain parcellation volume. Create a hierarchy JSONLD file from the input hierarchy JSON file as well. Note: not only the leaf regions are exported but also the above regions that are combinaisons of leaves
 rule export_brain_region_ccfv3_l23split:
     input:
         hierarchy=rules.split_isocortex_layer_23_ccfv3.output.hierarchy_l23split,
         parcellation_volume=rules.split_isocortex_layer_23_ccfv3.output.annotation_l23split
     output:
-        #mesh_dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['MeshFile']['brain_region_meshes_ccfv3_l23split']}"),
-        mesh_dir = "test",
-        #mask_dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['brain_region_mask_ccfv3_l23split']}"),
-        mask_dir = "test2",
-        #json_metadata_parcellations = f"{WORKING_DIR}/metadata_parcellations_ccfv3_l23split.json"
-        json_metadata_parcellations = "test3",
+        mesh_dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['MeshFile']['brain_region_meshes_ccfv3_l23split']}"),
+        mask_dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['brain_region_mask_ccfv3_l23split']}"),
+        json_metadata_parcellations = f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['MetadataFile']['metadata_parcellations_ccfv3_l23split']}",
         hierarchy_jsonld = f"{PUSH_DATASET_CONFIG_FILE['HierarchyJson']['mba_hierarchy_l23split']}"
     params:
         app=APPS["parcellationexport"],
@@ -1751,51 +1763,8 @@ rule export_brain_region_ccfv3_l23split:
             2>&1 | tee {log}
         """
 
-##>export_brain_region_hybrid : export a mesh, a volumetric mask and a region summary json file for every brain region available in the hybrid brain parcellation volume. Note: not only the leaf regions are exported but also the above regions that are combinaisons of leaves
-rule export_brain_region_hybrid:
-    input:
-        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
-        parcellation_volume=rules.combine_annotations.output
-    output:
-        mesh_dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['MeshFile']['brain_region_meshes_hybrid']}"),
-        mask_dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['brain_region_masks_hybrid']}"),
-        json_metadata_parcellations = f"{WORKING_DIR}/metadata_parcellations_hybrid.json"
-    params:
-        app=APPS["parcellationexport"]
-    log:
-        f"{LOG_DIR}/export_brain_region_hybrid.log"
-    shell:
-        """
-        {params.app} --hierarchy {input.hierarchy} \
-            --parcellation-volume {input.parcellation_volume} \
-            --out-mesh-dir {output.mesh_dir} \
-            --out-mask-dir {output.mask_dir} \
-            --out-metadata {output.json_metadata_parcellations} \
-            2>&1 | tee {log}
-        """
 
-##>export_brain_region_hybrid_l23split : export a mesh, a volumetric mask and a region summary json file for every brain region available in the hybrid isocortex layer 2-3 split brain parcellation volume. Note: not only the leaf regions are exported but also the above regions that are combinaisons of leaves
-rule export_brain_region_hybrid_l23split:
-    input:
-        parcellation_volume=rules.split_isocortex_layer_23_hybrid.output.annotation_l23split
-    output:
-        mesh_dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['MeshFile']['brain_region_meshes_hybrid_l23split']}"),
-        mask_dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['brain_region_masks_hybrid_l23split']}"),
-        json_metadata_parcellations = f"{WORKING_DIR}/metadata_parcellations_hybrid_l23split.json"
-    params:
-        app=APPS["parcellationexport"]
-    log:
-        f"{LOG_DIR}/export_brain_region_hybrid_l23split.log"
-    shell:
-        """
-        {params.app} --parcellation-volume {input.parcellation_volume} \
-            --out-mesh-dir {output.mesh_dir} \
-            --out-mask-dir {output.mask_dir} \
-            --out-metadata {output.json_metadata_parcellations} \
-            2>&1 | tee {log}
-        """
-
-##>cell_records : Generate 3D cell records for the whole mouse brain and save them with the orientations and the region_ID in an hdf5 file
+##>cell_records : Generate 3D cell records for the whole mouse brain and save them with the orientations and the region_ID in an hdf5 file. OUTDATED
 rule cell_records:
     input:
         parcellation_volume = rules.combine_annotations.output,
@@ -1818,188 +1787,16 @@ rule cell_records:
             2>&1 | tee {log}
         """
 
-##========================== Check Rules ==========================
-
-##>check_neuron_densities : Check the integrity of the generated neuron densities folder containing .nrrd volumetric dataset
-rule check_neuron_densities:
-    input:
-        neuron_densities=rules.inhibitory_excitatory_neuron_densities_hybrid.output.neuron_densities
-    output:
-        f"{WORKING_DIR}/data_check_report/report_volumetric_nrrd.json"
-    params:
-        app=APPS["bba-data-integrity-check nrrd-integrity"]
-    log:
-        f"{LOG_DIR}/check_neuron_densities.log"
-    shell:
-        """
-        {params.app} --input-dataset {input.neuron_densities} \
-            --report-path {output} \
-            2>&1 | tee {log}
-        """
-
-##>check_l23split_volumetric_nrrd_datasets : Check the integrity of the hybrid with layer 2,3 split .nrrd volumetric datasets that can be generated by the pipeline
-rule check_l23split_volumetric_nrrd_datasets:
-    input:
-        annotation_l23split=rules.split_isocortex_layer_23_hybrid.output.annotation_l23split,
-        cell_densities=rules.glia_cell_densities_hybrid.output.cell_densities,
-        neuron_densities=rules.inhibitory_excitatory_neuron_densities_hybrid.output.neuron_densities
-    output:
-        f"{WORKING_DIR}/data_check_report/report_volumetric_nrrd.json"
-    params:
-        app=APPS["bba-data-integrity-check nrrd-integrity"]
-    log:
-        f"{LOG_DIR}/check_l23split_volumetric_nrrd_datasets.log"
-    shell:
-        """
-        {params.app}  --input-dataset {input.annotation_l23split} \
-            --input-dataset {input.cell_densities} \
-            --input-dataset {input.neuron_densities} \
-            --report-path {output} \
-            2>&1 | tee {log}
-        """
-
-##>check_sonata_cellrecords : Check the integrity of the generated sonata .h5 containing the cell records
-rule check_sonata_cellrecords:
-    input:
-        cell_records_file=rules.cell_records.output
-    output:
-        f"{WORKING_DIR}/data_check_report/report_sonata_cell_records_h5.json"
-    params:
-        app=APPS["bba-data-integrity-check atlas-sonata-integrity"]
-    log:
-        f"{LOG_DIR}/check_sonata_cellrecords.log"
-    shell:
-        """
-        {params.app} --input-dataset {input.cell_records_file} \
-            --report-path {output} \
-            2>&1 | tee {log}
-        """
-
-
-##========================== Push Rules ==========================
-
-        
-##>push_neuron_densities : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
-rule push_neuron_densities:
-    input:
-        neuron_densities=rules.combine_annotations.output,
-        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
-        check_nrrd = rules.check_neuron_densities.output
-    output:
-        touch(f"{WORKING_DIR}/push_neuron_densities_success.txt")
-    params:
-        app=APPS["bba-data-push push-volumetric"].split(),
-        provenance = "", #f"atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities:{applications['applications']['atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities']}",
-        token = myTokenFetcher.getAccessToken()
-    log:
-        f"{LOG_DIR}/push_neuron_densities.log"
-    shell:
-        """
-        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
-            --nexus-env {NEXUS_DESTINATION_ENV} \
-            --nexus-org {NEXUS_DESTINATION_ORG} \
-            --nexus-proj {NEXUS_DESTINATION_PROJ} \
-            --nexus-token {params.token} \
-        {params.app[1]} --dataset-path {input.neuron_densities} \
-            --provenances "{params.provenance}" \
-            --config {input.push_dataset_config} \
-            --voxels_resolution {RESOLUTION} \
-            2>&1 | tee {log}
-        """
-
-##>push_sonata_cellrecords : Create a CellRecordSerie resource and push it along with the Sonata .h5 file into Nexus
-rule push_sonata_cellrecords:
-    input:
-        cell_records=rules.cell_records.output,
-        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
-        check_sonata = rules.check_sonata_cellrecords.output
-    output:
-        touch(f"{WORKING_DIR}/push_sonata_cellrecords_success.txt")
-    params:
-        app=APPS["bba-data-push push-cellrecords"].split(),
-        provenance = "", #f"brainbuilder cells positions-and-orientations:{applications['applications']['brainbuilder cells positions-and-orientations']}",
-        token = myTokenFetcher.getAccessToken()
-    log:
-        f"{LOG_DIR}/push_sonata_cellrecords.log"
-    shell:
-        """
-        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
-            --nexus-env {NEXUS_DESTINATION_ENV} \
-            --nexus-org {NEXUS_DESTINATION_ORG} \
-            --nexus-proj {NEXUS_DESTINATION_PROJ} \
-            --nexus-token {params.token} \
-        {params.app[1]} --dataset-path {input.cell_records} \
-            --provenances "{params.provenance}" \
-            --config {input.push_dataset_config} \
-            --voxels-resolution {RESOLUTION} \
-            2>&1 | tee {log}
-        """
-
 ## =========================================================================================
-## =============================== ANNOTATION PIPELINE RULES ===============================
+## ====================== ANNOTATION PIPELINE DATASET INTEGRITY CHECK ======================
 ## =========================================================================================
-
-
-##>push_ccfv3_mesh_mask : Create a Mesh, a Mask and a RegionSummary resource and push it along with their respective files into Nexus
-rule push_ccfv3_mesh_mask:
-    input:
-        hierarchy=rules.split_isocortex_layer_23_ccfv3.output.hierarchy_l23split,
-        mask=rules.export_brain_region_ccfv3_l23split.output.mask_dir,
-        mesh=rules.export_brain_region_ccfv3_l23split.output.mesh_dir,
-        metadata=rules.export_brain_region_ccfv3_l23split.output.json_metadata_parcellations,
-        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
-        #check_obj_meshes = rules.check_hybrid_v2v3_meshes_obj.output
-    output:
-        link_regions = f"{WORKING_DIR}/link_regions.json",
-        touch = temp(touch(f"{WORKING_DIR}/push_hybrid_v2v3_meshes_obj_success.txt"))
-    params:
-        app1=APPS["bba-data-push push-volumetric"].split(),
-        app2=APPS["bba-data-push push-meshes"].split(),
-        app3=APPS["bba-data-push push-regionsummary"].split(),
-        token = myTokenFetcher.getAccessToken()
-    log:
-        f"{LOG_DIR}/push_ccfv3_mesh_mask.log"
-    shell:
-        """
-        {params.app1[0]} --forge-config-file {FORGE_CONFIG} \
-            --nexus-env {NEXUS_DESTINATION_ENV} \
-            --nexus-org {NEXUS_DESTINATION_ORG} \
-            --nexus-proj {NEXUS_DESTINATION_PROJ} \
-            --nexus-token {params.token} \
-        {params.app1[1]} --dataset-path {input.mask} \
-            --hierarchy-path {input.hierarchy} \
-            --config-path {input.push_dataset_config} \
-            --link-regions-path {output.link_regions} \
-            --voxels-resolution {RESOLUTION} \
-            2>&1 | tee {log} \
-        {params.app2[0]} --forge-config-file {FORGE_CONFIG} \
-            --nexus-env {NEXUS_DESTINATION_ENV} \
-            --nexus-org {NEXUS_DESTINATION_ORG} \
-            --nexus-proj {NEXUS_DESTINATION_PROJ} \
-            --nexus-token {params.token} \
-        {params.app2[1]} --dataset-path {input.mesh} \
-            --hierarchy-path {input.hierarchy} \
-            --config-path {input.push_dataset_config} \
-            --link-regions-path {output.link_regions} \
-            --voxels-resolution {RESOLUTION} \
-            2>&1 | tee {log} \
-        {params.app3[0]} --forge-config-file {FORGE_CONFIG} \
-            --nexus-env {NEXUS_DESTINATION_ENV} \
-            --nexus-org {NEXUS_DESTINATION_ORG} \
-            --nexus-proj {NEXUS_DESTINATION_PROJ} \
-            --nexus-token {params.token} \
-        {params.app3[1]} --dataset-path {input.metadata} \
-            --hierarchy-path {input.hierarchy} \
-            --config-path{input.push_dataset_config} \
-            --link-regions-path {output.link_regions} \
-            2>&1 | tee {log}
-        """
 
 
 ##>check_annotation_pipeline_volume_datasets : Check the integrity of the .nrrd volumetric datasets generated by the annotation pipeline
 rule check_annotation_pipeline_volume_datasets:
     input:
         annotation_ccfv3_split=rules.split_isocortex_layer_23_ccfv3.output.annotation_l23split,
+        direction_vectors_ccfv3=rules.direction_vectors_isocortex_ccfv3.output,
         orientation_ccfv3=rules.orientation_field_ccfv3.output,
         placement_hints_ccfv3_split=rules.placement_hints_isocortex_ccfv3_l23split.output,
         mask_ccfv3_split=rules.export_brain_region_ccfv3_l23split.output.mask_dir
@@ -2013,6 +1810,7 @@ rule check_annotation_pipeline_volume_datasets:
         """
         {params.app} --input-dataset {input.annotation_ccfv3_split} \
             --input-dataset {input.orientation_ccfv3} \
+            --input-dataset {input.direction_vectors_ccfv3} \
             --input-dataset {input.placement_hints_ccfv3_split} \
             --input-dataset {input.mask_ccfv3_split} \
             --report-path {output} \
@@ -2065,62 +1863,34 @@ rule check_annotation_pipeline:
             logfile.write(f"All report files show successful datasets integrity check.\nUpdating '{output}'")
 
 
+## =========================================================================================
+## ============================= ANNOTATION PIPELINE USER RULES ============================
+## =========================================================================================
+
+
 ##>generate_annotation_pipeline_datasets : Global rule to generate and check the integrity of every products of the annotation pipeline
 rule generate_annotation_pipeline_datasets:
     input:
         all_datasets = rules.check_annotation_pipeline.output,
 
 
-##>push_annotation_pipeline_test : SMALL TEST push orientation and ccfv3 split volumes.
-rule push_annotation_pipeline_test:
-    input:
-        hierarchy=rules.split_isocortex_layer_23_ccfv3.output.hierarchy_l23split,
-        annotation_ccfv3_split=rules.split_isocortex_layer_23_ccfv3.output.annotation_l23split,
-        placement_hints_ccfv3_split=rules.placement_hints_isocortex_ccfv3_l23split.output,
-        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
-    output:
-        touch = touch(f"{WORKING_DIR}/push_annotation_pipeline_test_success.txt")
-    params:
-        app=APPS["bba-data-push push-volumetric"].split(),
-        token = myTokenFetcher.getAccessToken(),
-        create_provenance_json = write_json(PROVENANCE_METADATA_PATH, PROVENANCE_METADATA, rule_name = "push_annotation_pipeline_test")
-    log:
-        f"{LOG_DIR}/push_annotation_pipeline_test.log"
-    shell:
-        """
-        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
-            --nexus-env {NEXUS_DESTINATION_ENV} \
-            --nexus-org {NEXUS_DESTINATION_ORG} \
-            --nexus-proj {NEXUS_DESTINATION_PROJ} \
-            --nexus-token {params.token} \
-        {params.app[1]} --dataset-path {input.annotation_ccfv3_split} \
-            --dataset-path {input.placement_hints_ccfv3_split} \
-            --config-path {input.push_dataset_config} \
-            --voxels-resolution {RESOLUTION} \
-            --provenance-metadata-path {PROVENANCE_METADATA_PATH} \
-            --new-atlasrelease-hierarchy-path {input.hierarchy} \
-            2>&1 | tee {log}
-        """
-        
-##>push_annotation_pipeline_datasets : TEST Push annotation pipeline dataset
+##>push_annotation_pipeline_datasets : Global rule to generate, check and push into Nexus every products of the annotation pipeline.
 rule push_annotation_pipeline_datasets:
     input:
-        hierarchy="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/hierarchy_l23split.json",
-        #hierarchy_jsonld=export_brain_region_ccfv3_l23split.output.hierarchy_jsonld,
-        hierarchy_jsonld="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/mba_hierarchy_l23split.json",
-        annotation_ccfv3_split="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/annotation_ccfv3_l23split.nrrd",
-        #mask="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/brain_region_mask_ccfv3_l23split",
-        #mesh="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/brain_region_meshes_ccfv3_l23split",
-        #metadata="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/metadata_parcellations_ccfv3_l23split.json",
-        mask="/gpfs/bbp.cscs.ch/home/alibou/Documents/pipeline_test/Data/brain_region_mask_ccfv3_l23split",
-        mesh="/gpfs/bbp.cscs.ch/home/alibou/Documents/pipeline_test/Data/brain_region_meshes_ccfv3_l23split",
-        metadata="/gpfs/bbp.cscs.ch/home/alibou/Documents/pipeline_test/Data/metadata_parcellations_ccfv3_l23split.json",
-        placement_hints_ccfv3_split = "/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/placement_hints_ccfv3_l23split",
-        direction_vectors_ccfv3 = "/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/direction_vectors_isocortex_ccfv3.nrrd",
-        orientation_field_ccfv3="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/cell_orientations_ccfv3.nrrd",
+        all_datasets = rules.check_annotation_pipeline.output,
+        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
+        hierarchy_jsonld=rules.export_brain_region_ccfv3_l23split.output.hierarchy_jsonld,
+        brain_template=rules.fetch_brain_template.output,
+        annotation_ccfv3_split=rules.split_isocortex_layer_23_ccfv3.output.annotation_l23split,
+        mask=rules.export_brain_region_ccfv3_l23split.output.mask_dir,
+        mesh=rules.export_brain_region_ccfv3_l23split.output.mesh_dir,
+        metadata=rules.export_brain_region_ccfv3_l23split.output.json_metadata_parcellations,
+        placement_hints_ccfv3_split =rules.placement_hints_isocortex_ccfv3_l23split.output,
+        direction_vectors_ccfv3 =rules.direction_vectors_isocortex_ccfv3.output,
+        orientation_field_ccfv3=rules.orientation_field_ccfv3.output,
         push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
     output:
-        link_regions = "/gpfs/bbp.cscs.ch/home/alibou/Documents/pipeline_test/Data/link_regions_path.json",
+        link_regions = f"{WORKING_DIR}/link_regions_path.json",
         touch = temp(touch(f"{WORKING_DIR}/push_annotation_pipeline_datasets_success.txt"))
     params:
         app1=APPS["bba-data-push push-volumetric"].split(),
@@ -2139,17 +1909,17 @@ rule push_annotation_pipeline_datasets:
             --nexus-proj {NEXUS_DESTINATION_PROJ} \
             --nexus-token {params.token} \
         {params.app1[1]} --dataset-path {input.annotation_ccfv3_split} \
+            --dataset-path {input.brain_template} \
             --dataset-path {input.mask} \
-            --dataset-path {input.placement_hints_ccfv3_split} \
             --dataset-path {input.orientation_field_ccfv3} \
             --dataset-path {input.direction_vectors_ccfv3} \
             --hierarchy-path {input.hierarchy} \
             --hierarchy-jsonld-path {input.hierarchy_jsonld} \
-            --resource-tag {params.resource_tag} \
+            --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
             --config-path {input.push_dataset_config} \
             --link-regions-path {output.link_regions} \
             --provenance-metadata-path {PROVENANCE_METADATA_PATH} \
-            --voxels-resolution {RESOLUTION} ;
+            --resource-tag {params.resource_tag} ;
         {params.app2[0]} --forge-config-file {FORGE_CONFIG} \
             --nexus-env {NEXUS_DESTINATION_ENV} \
             --nexus-org {NEXUS_DESTINATION_ORG} \
@@ -2160,9 +1930,9 @@ rule push_annotation_pipeline_datasets:
             --hierarchy-jsonld-path {input.hierarchy_jsonld} \
             --config-path {input.push_dataset_config} \
             --link-regions-path {output.link_regions} \
+            --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
             --provenance-metadata-path {PROVENANCE_METADATA_PATH} \
-            --resource-tag {params.resource_tag} \
-            --voxels-resolution {RESOLUTION} ;
+            --resource-tag {params.resource_tag} ;
         {params.app3[0]} --forge-config-file {FORGE_CONFIG} \
             --nexus-env {NEXUS_DESTINATION_ENV} \
             --nexus-org {NEXUS_DESTINATION_ORG} \
@@ -2172,71 +1942,44 @@ rule push_annotation_pipeline_datasets:
             --hierarchy-path {input.hierarchy} \
             --hierarchy-jsonld-path {input.hierarchy_jsonld} \
             --config-path {input.push_dataset_config} \
+            --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
             --link-regions-path {output.link_regions} \
+            --provenance-metadata-path {PROVENANCE_METADATA_PATH} \
             --resource-tag {params.resource_tag} \
-            --provenance-metadata-path {PROVENANCE_METADATA_PATH} \
             2>&1 | tee {log}
         """
 
-
-
-##>push_annotation_pipeline_volume_datasets : Create VolumetricDataLayer resource payloads and push them along with the pipeline volumetric datasets (verified beforehand) into Nexus.
-rule push_annotation_pipeline_volume_datasets:
+        
+##>push_annotation_pipeline_datasets_test : TEST Push annotation pipeline dataset
+rule push_annotation_pipeline_datasets_test:
     input:
-        hierarchy=rules.split_isocortex_layer_23_ccfv3.output.hierarchy_l23split,
-        annotation_ccfv3_split=rules.split_isocortex_layer_23_ccfv3.output.annotation_l23split,
-        orientation_ccfv3=rules.orientation_field_ccfv3.output,
-        placement_hints_ccfv3_split=rules.placement_hints_isocortex_ccfv3_l23split.output,
-        mask_ccfv3_split=rules.export_brain_region_ccfv3_l23split.output.mask_dir,
+        hierarchy="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/hierarchy_l23split.json",
+        hierarchy_jsonld="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/mba_hierarchy_l23split.json",
+        brain_template=rules.fetch_brain_template.output,
+        annotation_ccfv3_split="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/annotation_ccfv3_l23split.nrrd",
+        mask="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/brain_region_mask_ccfv3_l23split",
+        mesh="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/brain_region_meshes_ccfv3_l23split",
+        metadata="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/metadata_parcellations_ccfv3_l23split.json",
+        #hierarchy_jsonld=export_brain_region_ccfv3_l23split.output.hierarchy_jsonld,
+        #mask="/gpfs/bbp.cscs.ch/home/alibou/Documents/pipeline_test/Data/brain_region_mask_ccfv3_l23split",
+        #mesh="/gpfs/bbp.cscs.ch/home/alibou/Documents/pipeline_test/Data/brain_region_meshes_ccfv3_l23split",
+        #metadata="/gpfs/bbp.cscs.ch/home/alibou/Documents/pipeline_test/Data/metadata_parcellations_ccfv3_l23split.json",
+        placement_hints_ccfv3_split = "/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/placement_hints_ccfv3_l23split",
+        direction_vectors_ccfv3 = "/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/direction_vectors_isocortex_ccfv3.nrrd",
+        orientation_field_ccfv3="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/cell_orientations_ccfv3.nrrd",
         push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
-        check_nrrd = rules.check_annotation_pipeline_volume_datasets.output
     output:
-        link_regions = f"{WORKING_DIR}/link_regions.json",
-        touch = touch(f"{WORKING_DIR}/push_annotation_pipeline_volume_datasets_success.txt")
+        link_regions = "/gpfs/bbp.cscs.ch/home/alibou/Documents/pipeline_test/Data/link_regions_path.json",
+        touch = temp(touch(f"{WORKING_DIR}/push_annotation_pipeline_datasets_test_success.txt"))
     params:
-        app=APPS["bba-data-push push-volumetric"].split(),
+        app1=APPS["bba-data-push push-volumetric"].split(),
+        app2=APPS["bba-data-push push-meshes"].split(),
+        app3=APPS["bba-data-push push-regionsummary"].split(),
         token = myTokenFetcher.getAccessToken(),
-        create_provenance_json = write_json(PROVENANCE_METADATA_PATH, PROVENANCE_METADATA, rule_name = "push_annotation_pipeline_volume_datasets")
+        create_provenance_json = write_json(PROVENANCE_METADATA_PATH, PROVENANCE_METADATA, rule_name = "push_annotation_pipeline_datasets_test"),
+        resource_tag = RESOURCE_TAG
     log:
-        f"{LOG_DIR}/push_annotation_pipeline_volume_datasets.log"
-    shell:
-        """
-        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
-            --nexus-env {NEXUS_DESTINATION_ENV} \
-            --nexus-org {NEXUS_DESTINATION_ORG} \
-            --nexus-proj {NEXUS_DESTINATION_PROJ} \
-            --nexus-token {params.token} \
-        {params.app[1]} --dataset-path {input.annotation_ccfv3_split} \
-            --dataset-path {input.orientation_ccfv3} \
-            --dataset-path {input.placement_hints_ccfv3_split} \
-            --dataset-path {input.mask_ccfv3_split} \
-            --hierarchy-path {input.hierarchy} \
-            --config-path {input.push_dataset_config} \
-            --link-regions-path {output.link_regions} \
-            --provenance-metadata-path {PROVENANCE_METADATA_PATH} \
-            --voxels-resolution {RESOLUTION} \
-            2>&1 | tee {log}
-        """
-
-
-##>push_annotation_pipeline_mesh_datasets : Create Mesh resource payloads and push them along with the pipeline mesh datasets (verified beforehand) into Nexus.
-rule push_annotation_pipeline_mesh_datasets:
-    input:
-        hierarchy=rules.split_isocortex_layer_23_ccfv3.output.hierarchy_l23split,
-        mesh=rules.export_brain_region_ccfv3_l23split.output.mesh_dir,
-        metadata=rules.export_brain_region_ccfv3_l23split.output.json_metadata_parcellations,
-        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
-        check_obj_meshes = rules.check_annotation_pipeline_mesh_datasets.output
-    output:
-        link_regions = f"{WORKING_DIR}/link_regions.json",
-        touch = temp(touch(f"{WORKING_DIR}/push_annotation_pipeline_mesh_datasets_success.txt"))
-    params:
-        app1=APPS["bba-data-push push-meshes"].split(),
-        app2=APPS["bba-data-push push-regionsummary"].split(),
-        token = myTokenFetcher.getAccessToken(),
-        create_provenance_json = write_json(PROVENANCE_METADATA_PATH, PROVENANCE_METADATA, rule_name = "push_annotation_pipeline_mesh_datasets")
-    log:
-        f"{LOG_DIR}/push_annotation_pipeline_mesh_datasets.log"
+        f"{LOG_DIR}/push_annotation_pipeline_datasets_test.log"
     shell:
         """
         {params.app1[0]} --forge-config-file {FORGE_CONFIG} \
@@ -2244,43 +1987,84 @@ rule push_annotation_pipeline_mesh_datasets:
             --nexus-org {NEXUS_DESTINATION_ORG} \
             --nexus-proj {NEXUS_DESTINATION_PROJ} \
             --nexus-token {params.token} \
-        {params.app1[1]} --dataset-path {input.mesh} \
+        {params.app1[1]} --dataset-path {input.annotation_ccfv3_split} \
+            --dataset-path {input.brain_template} \
+            --dataset-path {input.mask} \
+            --dataset-path {input.orientation_field_ccfv3} \
+            --dataset-path {input.direction_vectors_ccfv3} \
             --hierarchy-path {input.hierarchy} \
+            --hierarchy-jsonld-path {input.hierarchy_jsonld} \
+            --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
             --config-path {input.push_dataset_config} \
             --link-regions-path {output.link_regions} \
             --provenance-metadata-path {PROVENANCE_METADATA_PATH} \
-            --voxels-resolution {RESOLUTION} \
-            2>&1 | tee {log} \
+            --resource-tag {params.resource_tag} ;
         {params.app2[0]} --forge-config-file {FORGE_CONFIG} \
             --nexus-env {NEXUS_DESTINATION_ENV} \
             --nexus-org {NEXUS_DESTINATION_ORG} \
             --nexus-proj {NEXUS_DESTINATION_PROJ} \
             --nexus-token {params.token} \
-        {params.app2[1]} --dataset-path {input.metadata} \
+        {params.app2[1]} --dataset-path {input.mesh} \
             --hierarchy-path {input.hierarchy} \
-            --config-path{input.push_dataset_config} \
-            --provenance-metadata-path {PROVENANCE_METADATA_PATH} \
+            --hierarchy-jsonld-path {input.hierarchy_jsonld} \
+            --config-path {input.push_dataset_config} \
             --link-regions-path {output.link_regions} \
+            --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
+            --provenance-metadata-path {PROVENANCE_METADATA_PATH} \
+            --resource-tag {params.resource_tag} ;
+        {params.app3[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app3[1]} --dataset-path {input.metadata} \
+            --hierarchy-path {input.hierarchy} \
+            --hierarchy-jsonld-path {input.hierarchy_jsonld} \
+            --config-path {input.push_dataset_config} \
+            --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
+            --link-regions-path {output.link_regions} \
+            --provenance-metadata-path {PROVENANCE_METADATA_PATH} \
+            --resource-tag {params.resource_tag} \
             2>&1 | tee {log}
         """
 
-
-##>push_annotation_pipeline_datasets_all : Global rule to generate, check and push into Nexus every products of the annotation pipeline.
-rule push_annotation_pipeline_datasets_all:
+##>push_annotation_pipeline_datasets_2 : TEST Push annotation pipeline dataset
+rule push_annotation_pipeline_datasets_2:
     input:
-        push_volumes = rules.push_annotation_pipeline_volume_datasets.output,
-        push_meshes = rules.push_annotation_pipeline_mesh_datasets.output,
-        check_all = rules.check_annotation_pipeline.output,
-
-##========================== User Rules ==========================
-
-
-##>generate_neuron_densities : global rule with the aim of triggering the generation and verification of annotation_l23split dataset
-rule generate_neuron_densities:
-    input:
-        volumetric_dataset = rules.check_neuron_densities.output
-        
-##>generate_sonata_cellrecords : global rule with the aim of triggering the generation and verification of annotation_l23split dataset
-rule generate_sonata_cellrecords:
-    input:
-        cellrecords_dataset = rules.check_sonata_cellrecords.output
+        hierarchy="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/hierarchy_l23split.json",
+        hierarchy_jsonld="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/mba_hierarchy_l23split.json",
+        brain_template=rules.fetch_brain_template.output,
+        annotation_ccfv3_split="/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/annotation_ccfv3_l23split.nrrd",
+        placement_hints_ccfv3_split = "/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/placement_hints_ccfv3_l23split",
+        direction_vectors_ccfv3 = "/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/direction_vectors_isocortex_ccfv3.nrrd",
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
+    output:
+        touch = temp(touch(f"{WORKING_DIR}/push_annotation_pipeline_datasets_2_success.txt"))
+    params:
+        app1=APPS["bba-data-push push-volumetric"].split(),
+        app2=APPS["bba-data-push push-meshes"].split(),
+        app3=APPS["bba-data-push push-regionsummary"].split(),
+        token = myTokenFetcher.getAccessToken(),
+        create_provenance_json = write_json(PROVENANCE_METADATA_PATH, PROVENANCE_METADATA, rule_name = "push_annotation_pipeline_datasets_2"),
+        resource_tag = RESOURCE_TAG
+    log:
+        f"{LOG_DIR}/push_annotation_pipeline_datasets_2.log"
+    shell:
+        """
+        {params.app1[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app1[1]} --dataset-path {input.annotation_ccfv3_split} \
+            --dataset-path {input.brain_template} \
+            --dataset-path {input.placement_hints_ccfv3_split} \
+            --dataset-path {input.direction_vectors_ccfv3} \
+            --hierarchy-path {input.hierarchy} \
+            --hierarchy-jsonld-path {input.hierarchy_jsonld} \
+            --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
+            --config-path {input.push_dataset_config} \
+            --provenance-metadata-path {PROVENANCE_METADATA_PATH} \
+            --resource-tag {params.resource_tag} \
+            2>&1 | tee {log}
+        """

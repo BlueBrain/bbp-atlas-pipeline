@@ -4,6 +4,7 @@ HierarchyJson:
   mba_hierarchy_l23split: {WORKING_DIR}/mba_hierarchy_l23split.json
 GeneratedDatasetPath:
   VolumetricFile:
+    average_template_25: {WORKING_DIR}/average_template_25.nrrd
     annotation_hybrid: {WORKING_DIR}/annotation_v2v3_hybrid.nrrd
     annotation_ccfv3_l23split: {WORKING_DIR}/annotation_ccfv3_l23split.nrrd
     annotation_hybrid_l23split: {WORKING_DIR}/annotation_hybrid_l23split.nrrd
