@@ -512,8 +512,7 @@ rule combine_annotations:
 #    output:
 #        f"{WORKING_DIR}"+"/gene_{sample}.nrrd"
 #    params:
-#        nexus_id = lambda wildcards: NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]
-["GeneExpressionVolumetricDataLayer"][wildcards.sample],
+#        nexus_id = lambda wildcards:NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"][wildcards.sample],
 #        app=APPS["bba-datafetch"],
 #        token = myTokenFetcher.getAccessToken()
 #    shell:
@@ -1854,10 +1853,10 @@ rule check_annotation_pipeline:
                 report_json = json.load(report_file)
                 for k in report_json.keys():
                     if not report_json[k]['success'] == 'true':
-                        logfile.write(f"The report file contains errors: \n{report_json}\n "\ 
+                        logfile.write(f"The report file '{f}' contains errors:"\ 
                                       "All the data_check_report need to show valid dataset or else those "\
                                       "will not be pushed in Nexus.")
-                        L.error(f"The report file contains errors: \n'{report_json}")
+                        L.error(f"The report file '{f}' contains errors")
                         exit(1)
                 report_file.close()
             logfile.write(f"All report files show successful datasets integrity check.\nUpdating '{output}'")

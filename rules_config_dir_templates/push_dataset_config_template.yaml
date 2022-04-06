@@ -1,17 +1,17 @@
 HierarchyJson:
-  hierarchy: "/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/hierarchy.json"
-  hierarchy_l23split: "/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/hierarchy_l23split.json"
-  mba_hierarchy_l23split: "/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/mba_hierarchy_l23split.json"
+  hierarchy: {WORKING_DIR}/hierarchy.json
+  hierarchy_l23split: {WORKING_DIR}/hierarchy_l23split.json
+  mba_hierarchy_l23split: {WORKING_DIR}/mba_hierarchy_l23split.json
 GeneratedDatasetPath:
   VolumetricFile:
     average_template_25: {WORKING_DIR}/average_template_25.nrrd
     annotation_hybrid: {WORKING_DIR}/annotation_v2v3_hybrid.nrrd
-    annotation_ccfv3_l23split: "/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/annotation_ccfv3_l23split.nrrd"
+    annotation_ccfv3_l23split: {WORKING_DIR}/annotation_ccfv3_l23split.nrrd
     annotation_hybrid_l23split: {WORKING_DIR}/annotation_hybrid_l23split.nrrd
-    direction_vectors_isocortex_ccfv3: "/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/direction_vectors_isocortex_ccfv3.nrrd"
+    direction_vectors_isocortex_ccfv3: {WORKING_DIR}/direction_vectors_isocortex_ccfv3.nrrd
     cell_orientations_hybrid: {WORKING_DIR}/cell_orientations_hybrid.nrrd
-    cell_orientations_ccfv3: "/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/cell_orientations_ccfv3.nrrd"
-    placement_hints_ccfv3_l23split: "/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/placement_hints_ccfv3_l23split"
+    cell_orientations_ccfv3: {WORKING_DIR}/cell_orientations_ccfv3.nrrd
+    placement_hints_ccfv3_l23split: {WORKING_DIR}/placement_hints_ccfv3_l23split
     placement_hints_hybrid_l23split: {WORKING_DIR}/placement_hints_hybrid_l23split
     overall_cell_density_ccfv2_correctednissl: {WORKING_DIR}/overall_cell_density_ccfv2_correctednissl.nrrd
     cell_densities_hybrid: {WORKING_DIR}/cell_densities_hybrid
@@ -24,14 +24,14 @@ GeneratedDatasetPath:
     inhibitory_neuron_densities_preserveprop_ccfv2_correctednissl: {WORKING_DIR}/inhibitory_neuron_densities_preserveprop_ccfv2_correctednissl
     mtypes_densities_profile_ccfv2_correctednissl: {WORKING_DIR}/mtypes_densities_profile_ccfv2_correctednissl
     mtypes_densities_probability_map_ccfv2_correctednissl: {WORKING_DIR}/mtypes_densities_probability_map_ccfv2_correctednissl
-    brain_region_mask_ccfv3_l23split: "/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/brain_region_mask_ccfv3_l23split"
+    brain_region_mask_ccfv3_l23split: {WORKING_DIR}/brain_region_mask_ccfv3_l23split
     brain_region_masks_hybrid: {WORKING_DIR}/brain_region_masks_hybrid
     brain_region_masks_hybrid_l23split: {WORKING_DIR}/brain_region_masks_hybrid_l23split
   MeshFile:
     brain_region_meshes_hybrid: {WORKING_DIR}/brain_region_meshes_v2v3_hybrid
     brain_region_meshes_hybrid_l23split: {WORKING_DIR}/brain_region_meshes_hybrid_l23split
-    brain_region_meshes_ccfv3_l23split: "/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/brain_region_meshes_ccfv3_l23split"
+    brain_region_meshes_ccfv3_l23split: {WORKING_DIR}/brain_region_mesh_ccfv3_l23split
   CellRecordsFile:
     cell_records_sonata: {WORKING_DIR}/cell_records_sonata.h5
   MetadataFile:
-    metadata_parcellations_ccfv3_l23split: "/gpfs/bbp.cscs.ch/project/proj39/atlas_pipeline/output_data/metadata_parcellations_ccfv3_l23split.json"
+    metadata_parcellations_ccfv3_l23split: {WORKING_DIR}/metadata_parcellations_ccfv3_l23split.json
