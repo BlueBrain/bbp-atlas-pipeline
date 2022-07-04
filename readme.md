@@ -1,3 +1,5 @@
+> Alternatively to runing the pipeline with Snakemake, it is also possible to generate the data using the scripts in the [shell-rules](shell-rules). This method was later developped in order to be more lightweight.
+
 # Blue Brain Atlas Pipeline
 
 ## Introduction

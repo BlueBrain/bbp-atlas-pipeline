@@ -1,6 +1,6 @@
 {
   "ParcellationOntology": {
-    "allen_mouse_ccf": "http://bbp.epfl.ch/neurosciencegraph/ontologies/mba"
+    "allen_mouse_ccf": "http://bbp.epfl.ch/neurosciencegraph/ontologies/core/mba_brainregion_corrected"
   },
   "VolumetricDataLayer": {
     "10": {

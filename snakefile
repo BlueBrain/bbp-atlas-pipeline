@@ -20,7 +20,7 @@ import getpass
 import sysconfig
 from copy import deepcopy
 from uuid import uuid4
-from importlib.metadata import distribution
+# from importlib.metadata import distribution
 from platform import python_version
 from snakemake.logging import logger as L
 from blue_brain_token_fetch.Token_refresher import TokenFetcher

@@ -1,15 +1,14 @@
-WORKING_DIR: ../../../../../project/proj39/atlas_pipeline/output_data
+WORKING_DIR: ../working_dir
 NEXUS_IDS_FILE: ./nexus_ids.json
 FORGE_CONFIG: ../blue_brain_atlas_nexus_push/forge_configuration/forge_config.yml
-ATLAS_CONFIG_PATH: ../../../../../project/proj39/atlas_pipeline/output_data/atlasrelease_config_path.json
 RULES_CONFIG_DIR_TEMPLATES: ./rules_config_dir_templates
+ATLAS_CONFIG_PATH: ./atlasrelease_config_path.json
 RESOLUTION: "25"
-RESOURCE_TAG: "None"  # put None to generate an automatic tag corresponding to the timestamp
 MODULES_VERBOSE: False
+RESOURCE_TAG: "None"  # put None to generate an automatic tag corresponding to the timestamp
 DISPLAY_HELP: False
 
 # The pipeline will fetch the necessary datasets from:
-#NEXUS_ATLAS_ENV: "https://bbp.epfl.ch/nexus/v1"
 NEXUS_ATLAS_ENV: "https://bbp.epfl.ch/nexus/v1"
 NEXUS_ATLAS_ORG: "bbp"
 NEXUS_ATLAS_PROJ: "atlas"
@@ -17,9 +16,11 @@ NEXUS_ONTOLOGY_ORG: "neurosciencegraph"
 NEXUS_ONTOLOGY_PROJ: "datamodels"
 
 # The pipeline will push the generated datasets into:
-#NEXUS_DESTINATION_ENV: "https://staging.nise.bbp.epfl.ch/nexus/v1"
+NEXUS_DESTINATION_ENV: "https://staging.nise.bbp.epfl.ch/nexus/v1"
+NEXUS_DESTINATION_ORG: "bbp"
+NEXUS_DESTINATION_PROJ: "atlas"
+
+# The pipeline will push the generated datasets into:
+#NEXUS_DESTINATION_ENV: "https://bbp.epfl.ch/nexus/v1"
 #NEXUS_DESTINATION_ORG: "bbp"
 #NEXUS_DESTINATION_PROJ: "atlas"
-NEXUS_DESTINATION_ENV: "https://bbp.epfl.ch/nexus/v1"
-NEXUS_DESTINATION_ORG: "dke"
-NEXUS_DESTINATION_PROJ: "annotation-pipeline"

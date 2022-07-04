@@ -1,0 +1,15 @@
+channels:
+  - conda-forge
+dependencies:
+  - python=3.9
+  - cmake
+  - scipy
+  - numpy
+  - pandas
+  - pip
+  - pip:
+    - nexusforge
+    - "git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_fetch.git@develop"
+    - "git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_token_fetch.git@develop"
+    - "git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_web_exporter.git"
+    - "git+https://bbpgitlab.epfl.ch/nse/atlas-building-tools.git"
