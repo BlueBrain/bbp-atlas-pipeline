@@ -4,7 +4,7 @@
 export TOKEN_FILE="$HOME/.token_fetch/Token"
 
 # The Nexus Forge configuration is included in this directory
-export FORGE_CONFIG="$BASEDIR/forge-config.json"
+export FORGE_CONFIG="$BASEDIR/forge-config.yml"
 
 # The pipeline will fetch the necessary datasets from:
 export NEXUS_ATLAS_ENV="https://bbp.epfl.ch/nexus/v1"
@@ -25,6 +25,7 @@ export NEXUS_ID_ANNOTATION_VOLUME_MOUSE_CCF_V2_BRAIN="https://bbp.epfl.ch/neuros
 export NEXUS_ID_ANNOTATION_VOLUME_MOUSE_CCF_V2_FIBER="https://bbp.epfl.ch/neurosciencegraph/data/a4552116-607b-469e-ad2a-50bba00c23d8"
 export NEXUS_ID_ANNOTATION_VOLUME_MOUSE_CCF_V3_BRAIN="https://bbp.epfl.ch/neurosciencegraph/data/025eef5f-2a9a-4119-b53f-338452c72f2a"
 export NEXUS_ID_TEMPLATE_VOLUME_MOUSE_CCF_V3="https://bbp.epfl.ch/neurosciencegraph/data/dca40f99-b494-4d2c-9a2f-c407180138b7"
+export NEXUS_ID_AIBS_MOUSE_CCF_SRS="https://bbp.epfl.ch/neurosciencegraph/data/allen_ccfv3_spatial_reference_system"
 
 export NEXUS_ID_NISSL_STACK_CORONAL_CCF_V2="https://bbp.epfl.ch/neurosciencegraph/data/ae8cbd28-e17b-4c1e-967a-a5084b7ad335"
 export NEXUS_ID_NISSL_ANNOTATION_STACK_CORONAL_CCF_V2="https://bbp.epfl.ch/neurosciencegraph/data/d45f1a66-e663-4991-bda9-3ee8bc447061"
@@ -51,7 +52,8 @@ export NEXUS_ID_GENE_EXPRESSION_VOLUME_gad67_correctednissl="https://bbp.epfl.ch
 # they later on need to the known by the CLI pushing data back to Nexus.
 
 # The working directory is were all the file (temporary or not) will be written.
-export WORKING_DIR="$HOME/working_dir_atlas"
+# export WORKING_DIR="$HOME/working_dir_atlas"
+export WORKING_DIR="$HOME/Documents/BBP/data/atlas-pipeline/working_dir3"
 
 # Path to the local copy of the CCF v3 annotation volume
 export FETCHED_ANNOTATION_VOLUME_MOUSE_CCF_V3_BRAIN="$WORKING_DIR/brain_parcellation_ccfv3.nrrd"
