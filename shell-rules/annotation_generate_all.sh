@@ -89,7 +89,7 @@ mkdir -p $WORKING_DIR
 echo "📤 pushing onto Nexus..."
 # reading the token from the file
 ACCESS_TOKEN=`cat $TOKEN_FILE`
-python $BASEDIR/push_annotation_data.py --forge-config $FORGE_CONFIG \
+python $BASEDIR/push_atlasrelease.py --forge-config $FORGE_CONFIG \
   --nexus-env $NEXUS_DESTINATION_ENV \
   --nexus-org $NEXUS_DESTINATION_ORG \
   --nexus-proj $NEXUS_DESTINATION_PROJ \

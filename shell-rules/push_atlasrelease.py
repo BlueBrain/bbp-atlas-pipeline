@@ -106,64 +106,82 @@ dataSampleModalitiesNumberOfComponents = {
 VOLUMETRICDATALAYER_SCHEMAS_ID = "https://neuroshapes.org/dash/volumetricdatalayer"
 ONTOLOGY_SCHEMAS_ID = "https://neuroshapes.org/dash/ontology"
 
-
-def generate_payload_volumetric_data_layer(filepath, id, name, description, type, atlas_release_id, srs_id, region_id, sample_modality, resolution):
+def generate_payload_volumetric_data_layer(filepath, id, name, description, type, atlas_release_id, srs_id, region_node, sample_modality, resolution):
+    
     nrrd_header = nrrd.read_header(filepath)
     return {
         "@id": id,
         "@type": [
             "VolumetricDataLayer",
-            type
+            type,
+            "Dataset"
         ],
         "atlasRelease": {
             "@id": atlas_release_id
         },
         "brainLocation": {
             "atlasSpatialReferenceSystem": {
-                "@id": srs_id,
-                "@type": [
-                    "AtlasSpatialReferenceSystem",
-                    "BrainAtlasSpatialReferenceSystem"
-                ]
-            },
-            "brainRegion": {
-               "@id": f"mba:{region_id}",
-            }
-        },
-        "bufferEncoding": nrrd_header["encoding"],
-        "componentEncoding": NRRD_TYPES_TO_NUMPY[nrrd_header["type"]],
-        "dataSampleModality": dataSampleModalities[sample_modality],
-        "description": description,
-        "dimension": [
-            {
-                "@type": "ComponentDimension",
-                "name": dataSampleModalities[sample_modality],
-                "size": dataSampleModalitiesNumberOfComponents[sample_modality],
-            },
-            {
-                "@type": "SpaceDimension",
-                "size": 528,
-                "unitCode": "µm"
-            },
-            {
-                "@type": "SpaceDimension",
-                "size": 320,
-                "unitCode": "µm"
-            },
-            {
-                "@type": "SpaceDimension",
-                "size": 456,
-                "unitCode": "µm"
-            }
-        ],
-
-        "endianness": nrrd_header["endian"],
-        "fileExtension": "nrrd",
-        "isRegisteredIn": {
             "@id": srs_id,
             "@type": [
                 "AtlasSpatialReferenceSystem",
                 "BrainAtlasSpatialReferenceSystem"
+            ]
+            },
+            "brainRegion": {
+            "@id": f"mba:{region_node['id']}",
+            "label": region_node["name"],
+            }
+        },
+        
+        "bufferEncoding": nrrd_header["encoding"],
+
+        "componentEncoding": NRRD_TYPES_TO_NUMPY[nrrd_header["type"]],
+
+        "contribution": {
+            "@type": "Contribution",
+            "agent": {
+            "@id": "https://ror.org/02s376052",
+            "@type": [
+                "Organization",
+                "Agent"
+            ]
+            }
+        },
+
+        "dataSampleModality": dataSampleModalities[sample_modality],
+
+        "description": description,
+        "dimension": [
+            {
+            "@type": "ComponentDimension",
+            "name": dataSampleModalities[sample_modality],
+            "size": dataSampleModalitiesNumberOfComponents[sample_modality],
+            },
+            {
+            "@type": "SpaceDimension",
+            "size": 528,
+            "unitCode": "voxel"
+            },
+            {
+            "@type": "SpaceDimension",
+            "size": 320,
+            "unitCode": "voxel"
+            },
+            {
+            "@type": "SpaceDimension",
+            "size": 456,
+            "unitCode": "voxel"
+            }
+        ],
+   
+        "endianness": nrrd_header["endian"],
+
+        "fileExtension": "nrrd",
+        "isRegisteredIn": {
+            "@id": srs_id,
+            "@type": [
+            "AtlasSpatialReferenceSystem",
+            "BrainAtlasSpatialReferenceSystem"
             ]
         },
         "name": name,
@@ -171,16 +189,33 @@ def generate_payload_volumetric_data_layer(filepath, id, name, description, type
             "unitCode": "µm",
             "value": resolution
         },
-        "sampleType": dataSampleModalities[sample_modality],
+        "sampleType": "label",
         "subject": {
             "@type": "Subject",
             "species": {
-                "@id": "http://purl.obolibrary.org/obo/NCBITaxon_10090",
-                "label": "Mus musculus"
+            "@id": "http://purl.obolibrary.org/obo/NCBITaxon_10090",
+            "label": "Mus musculus"
             }
         },
-        "worldMatrix": [resolution, 0, 0, 0, 0, resolution, 0, 0, 0, 0, resolution, 0, 0, 0, 0, 1]
-    }
+        "worldMatrix": [
+            resolution,
+            0,
+            0,
+            0,
+            0,
+            resolution,
+            0,
+            0,
+            0,
+            0,
+            resolution,
+            0,
+            0,
+            0,
+            0,
+            1
+        ]
+        }
 
 
 def generate_payload_region_mesh(filepath, id, name, description, atlas_release_id, srs_id, region_id,):
@@ -394,14 +429,15 @@ def parse_args():
 def main():
     args = parse_args()
 
-    # print(args)
-
     forge = KnowledgeGraphForge(
         args.forge_config,
         endpoint=args.nexus_env,
         bucket=f"{args.nexus_org}/{args.nexus_proj}",
-        token=args.access_token
+        token=args.access_token,
+        debug=True,
     )
+
+    forge._debug=True
 
     # Predefining the @ids of the AtlaRelease and the items being pointed at by the AtlasRelease
     atlas_release_id = forge.format("identifier", str(uuid.uuid4()))
@@ -409,6 +445,12 @@ def main():
     brain_annotation_volume_id = forge.format("identifier", str(uuid.uuid4()))
     brain_template_volume_id = forge.format("identifier", str(uuid.uuid4()))
     srs_id = args.nexus_id_aibs_ccf_srs
+
+    print("ID of atlas release to push: ", atlas_release_id)
+    print("ID of brain region ontology to push: ", brain_ontology_id)
+    print("ID of annotation volume to push: ", brain_annotation_volume_id)
+    print("ID of template volume to push: ", brain_template_volume_id)
+    print("Using SRS: ", srs_id)
 
     # Reading the brain region ontology, to later being able to generate
     # better names that include brain region labels
@@ -428,13 +470,8 @@ def main():
             root_node = node
             break
 
-    # print(onto_flat_tree[549]["name"])
-
-    # forge.register(dataset, schema_id)  
-
-    
-
     # Generating the base payload for the brain region ontology
+    print("Pushing to Nexus: Brain region ontology...")
     brain_ontology_payload = generate_payload_brain_region_ontology(
         brain_ontology_id,
         "BBP Mouse Brain region ontology",
@@ -443,11 +480,34 @@ def main():
     nexus_distrib_hierarchy_ld = forge.attach(args.hierarchy_ld, content_type="application/ld+json")
     nexus_resource_hierarchy = Resource.from_json(brain_ontology_payload)
     nexus_resource_hierarchy.distribution = [nexus_distrib_hierarchy, nexus_distrib_hierarchy_ld]
-    forge.register(nexus_resource_hierarchy, ONTOLOGY_SCHEMAS_ID)
+    # forge.register(nexus_resource_hierarchy, ONTOLOGY_SCHEMAS_ID)
+
+
+    # Generating the base payload for the brain annotation volume
+    print("Pushing to Nexus: annotation volume...")
+    brain_annotation_volume_payload = generate_payload_volumetric_data_layer(args.annotation_volume, 
+        brain_annotation_volume_id,
+        "BBP Mouse Brain Annotation Volume, 25µm",
+        "This raster volume contains the brain region annotation as IDs, including the separation of cortical layers 2 and 3.",
+        "BrainParcellationDataLayer",
+        atlas_release_id,
+        srs_id,
+        root_node,
+        "PARCELLATION_ID",
+        25,
+    )
+    nexus_resource_annotation_volume = Resource.from_json(brain_annotation_volume_payload)
+    nexus_resource_annotation_volume.distribution = forge.attach(args.annotation_volume, content_type="application/nrrd")
+    forge.register(nexus_resource_annotation_volume, schema_id=VOLUMETRICDATALAYER_SCHEMAS_ID)
+    # print('>>>>>>>>>>>>>>>>>>>>>>>>')
+    # print(forge.as_json(nexus_resource_annotation_volume))
+    # print('<<<<<<<<<<<<<<<<<<<<<<<<<')
 
     exit()
 
+
     # Generating the base payload for the Atlas Release
+    print("Pushing to Nexus:Atlas Release...")
     atlas_release_payload = generate_payload_atlas_release(atlas_release_id,
         "Blue Brain Atlas",
         "The official Atlas of the Blue Brain Project, derivated from AIBS Mouse CCF v3 (2017)",
@@ -456,25 +516,6 @@ def main():
         brain_annotation_volume_id,
         srs_id
     )
-
-    # Generating the base payload for the brain annotation volume
-    brain_annotation_volume_payload = generate_payload_volumetric_data_layer(args.annotation_volume, 
-        brain_annotation_volume_id,
-        "BBP Mouse Brain Annotation Volume, 25µm",
-        "This raster volume contains the brain region annotation as IDs, including the separation of cortical layers 2 and 3.",
-        "BrainParcellationDataLayer",
-        atlas_release_id,
-        srs_id,
-        root_node["id"],
-        "PARCELLATION_ID",
-        25,
-    )
-
-    # Creating the distribution for Nexus
-    
-    nexus_distrib_annotation_volume = forge.attach(args.annotation_volume, content_type="application/nrrd")
-
-    print(json.dumps(brain_annotation_volume_payload, indent=2))
 
 
 if __name__ == "__main__":
