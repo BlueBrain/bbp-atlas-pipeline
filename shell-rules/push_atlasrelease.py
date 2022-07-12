@@ -105,6 +105,7 @@ dataSampleModalitiesNumberOfComponents = {
 
 VOLUMETRICDATALAYER_SCHEMAS_ID = "https://neuroshapes.org/dash/volumetricdatalayer"
 ONTOLOGY_SCHEMAS_ID = "https://neuroshapes.org/dash/ontology"
+ATLASRELEASE_SCHEMAS_ID = "https://neuroshapes.org/dash/atlasrelease"
 
 def generate_payload_volumetric_data_layer(filepath, id, name, description, type, atlas_release_id, srs_id, region_node, sample_modality, resolution):
     
@@ -297,7 +298,7 @@ def generate_payload_atlas_release(atlas_release_id, name, description, brain_te
             "@type": "BrainParcellationDataLayer"
         },
         "releaseDate": {
-            "@type": "date",
+            "@type": "xsd:date",
             "@value": datetime.today().strftime("%Y-%m-%d")
         },
         "spatialReferenceSystem": {
@@ -422,6 +423,13 @@ def parse_args():
         metavar="<DIR PATH>",
         help="The directory containing the OBJ region meshes")
 
+    parser.add_argument(
+        "--out-atlasrelease-id-file",
+        dest="out_atlasrelease_id_file",
+        required=False,
+        metavar="<FILE PATH>",
+        help="The file to write the ID of the newly created AtlasRelease Nexus Resource")
+
     return parser.parse_args()
 
 
@@ -480,8 +488,7 @@ def main():
     nexus_distrib_hierarchy_ld = forge.attach(args.hierarchy_ld, content_type="application/ld+json")
     nexus_resource_hierarchy = Resource.from_json(brain_ontology_payload)
     nexus_resource_hierarchy.distribution = [nexus_distrib_hierarchy, nexus_distrib_hierarchy_ld]
-    # forge.register(nexus_resource_hierarchy, ONTOLOGY_SCHEMAS_ID)
-
+    forge.register(nexus_resource_hierarchy, ONTOLOGY_SCHEMAS_ID)
 
     # Generating the base payload for the brain annotation volume
     print("Pushing to Nexus: annotation volume...")
@@ -499,15 +506,26 @@ def main():
     nexus_resource_annotation_volume = Resource.from_json(brain_annotation_volume_payload)
     nexus_resource_annotation_volume.distribution = forge.attach(args.annotation_volume, content_type="application/nrrd")
     forge.register(nexus_resource_annotation_volume, schema_id=VOLUMETRICDATALAYER_SCHEMAS_ID)
-    # print('>>>>>>>>>>>>>>>>>>>>>>>>')
-    # print(forge.as_json(nexus_resource_annotation_volume))
-    # print('<<<<<<<<<<<<<<<<<<<<<<<<<')
 
-    exit()
-
+    # Generating the base payload for the brain annotation volume
+    print("Pushing to Nexus: template volume...")
+    brain_template_payload = generate_payload_volumetric_data_layer(args.template_volume, 
+        brain_template_volume_id,
+        "BBP Mouse Brain Template Volume, 25µm",
+        "Raster volume of the brain template. This originaly comes from AIBS CCF (25µm)",
+        "BrainTemplateDataLayer",
+        atlas_release_id,
+        srs_id,
+        root_node,
+        "LUMINANCE",
+        25,
+    )
+    nexus_resource_template_volume = Resource.from_json(brain_template_payload)
+    nexus_resource_template_volume.distribution = forge.attach(args.template_volume, content_type="application/nrrd")
+    forge.register(nexus_resource_template_volume, schema_id=VOLUMETRICDATALAYER_SCHEMAS_ID)
 
     # Generating the base payload for the Atlas Release
-    print("Pushing to Nexus:Atlas Release...")
+    print("Pushing to Nexus: Atlas Release...")
     atlas_release_payload = generate_payload_atlas_release(atlas_release_id,
         "Blue Brain Atlas",
         "The official Atlas of the Blue Brain Project, derivated from AIBS Mouse CCF v3 (2017)",
@@ -516,7 +534,11 @@ def main():
         brain_annotation_volume_id,
         srs_id
     )
+    nexus_resource_atlas_release = Resource.from_json(atlas_release_payload)
+    forge.register(nexus_resource_atlas_release, schema_id=ATLASRELEASE_SCHEMAS_ID)
 
+    # Writing the text file that contains the ID of this atlasRelease
+    open(args.out_atlasrelease_id_file, 'w').write(atlas_release_id)
 
 if __name__ == "__main__":
     main()

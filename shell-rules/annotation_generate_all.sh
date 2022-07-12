@@ -103,4 +103,5 @@ python $BASEDIR/push_atlasrelease.py --forge-config $FORGE_CONFIG \
   --orientation-field-volume $COMPUTED_VOLUME_ORIENTATION_FIELD_ISOCORTEX \
   --placement-hints-volume-dir $COMPUTED_PLACEMENT_HINTS_DIR \
   --region-mask-volume-dir $COMPUTED_ANNOTATION_MASKS_DIR \
-  --region-mesh-volume-dir $COMPUTED_ANNOTATION_MESHES_DIR
+  --region-mesh-volume-dir $COMPUTED_ANNOTATION_MESHES_DIR \
+  --out-atlasrelease-id-file $PUSHED_ATLAS_RELEASE_ID_TXT_FILE

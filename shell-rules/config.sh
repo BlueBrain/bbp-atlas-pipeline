@@ -90,3 +90,7 @@ export COMPUTED_REGIONS_METADATA="$WORKING_DIR/regions_metadata.json"
 
 # Path for the directory containing the placement hints
 export COMPUTED_PLACEMENT_HINTS_DIR="$WORKING_DIR/placement_hints"
+
+# This file contains the Nexus Resource ID of the AtlasRelease created by this pipeline.
+# This file is create by push_atlasrelease.py
+export PUSHED_ATLAS_RELEASE_ID_TXT_FILE="$WORKING_DIR/new_atlas_release_id.txt"
