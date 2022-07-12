@@ -12,6 +12,7 @@ directly involved in the composition of their atlasRelease (annotation + templat
 
 import uuid
 import argparse
+import glob
 from kgforge.core import KnowledgeGraphForge
 from kgforge.core import Resource
 import sys
@@ -84,6 +85,7 @@ dataSampleModalities = {
   "POSITION_3D": "position3D",
   "QUANTITY": "quantity",
   "QUATERNION": "quaternion",
+  "DISTANCE": "distance",
 }
 
 dataSampleModalitiesNumberOfComponents = {
@@ -102,6 +104,7 @@ dataSampleModalitiesNumberOfComponents = {
   "POSITION_3D": 3,
   "QUANTITY": 1,
   "QUATERNION": 4,
+  "DISTANCE": 1,
 }
 
 VOLUMETRICDATALAYER_SCHEMAS_ID = "https://neuroshapes.org/dash/volumetricdatalayer"
@@ -346,9 +349,8 @@ def main():
         if len(node["_ascendants"]) == 0:
             root_node = node
             break
-
-
-    # Generating the base payload for the brain annotation volume
+    
+    # Generating the base payload for the direction vector volume
     print("Pushing to Nexus: direction vector volume...")
     direction_vector_volume_payload = generate_payload_volumetric_data_layer(args.direction_vector_volume, 
         direction_vector_volume_id,
@@ -365,9 +367,50 @@ def main():
     nexus_resource_direction_vector_volume.distribution = forge.attach(args.direction_vector_volume, content_type="application/nrrd")
     forge.register(nexus_resource_direction_vector_volume, schema_id=VOLUMETRICDATALAYER_SCHEMAS_ID)
 
-    # TODO the 2 other volumes
+    # Generating the base payload for the orientation field (quaternion) volume
+    print("Pushing to Nexus: orientation field volume...")
+    orientation_field_volume_payload = generate_payload_volumetric_data_layer(args.orientation_field_volume , 
+        orientation_field_volume_id,
+        "BBP Mouse Brain Orientation Field Volume, 25µm",
+        "This raster volume contains orientation field as quaternions",
+        "CellOrientationField",
+        atlas_release_id,
+        srs_id,
+        root_node,
+        "QUATERNION",
+        25,
+    )
+    nexus_resource_orientation_field_volume = Resource.from_json(orientation_field_volume_payload)
+    nexus_resource_orientation_field_volume.distribution = forge.attach(args.orientation_field_volume, content_type="application/nrrd")
+    forge.register(nexus_resource_orientation_field_volume, schema_id=VOLUMETRICDATALAYER_SCHEMAS_ID)
 
+    # Generating the base payload for the placement hints volumes.
+    # There are multiple nrrd files, one for each cortical layer and one for pia
+    placement_hints_nrrd_paths = glob.glob(f"{args.placement_hints_volume_dir}/*.nrrd")
+    print("Pushing to Nexus: placement hints volume...")
+    placement_hints_volume_payload = generate_payload_volumetric_data_layer(placement_hints_nrrd_paths[0] , 
+        placement_hints_volume_id,
+        "BBP Mouse Brain Placement Hints Volumes, 25µm",
+        "This raster volume contains placement hints volumes for all the cortical layers",
+        "PlacementHintsDataLayer",
+        atlas_release_id,
+        srs_id,
+        root_node,
+        "DISTANCE",
+        25,
+    )
+    nexus_resource_orientation_field_volume = Resource.from_json(placement_hints_volume_payload)
+    placemement_hints_distributions = []
+    for nrrd_path in placement_hints_nrrd_paths:
+        placemement_hints_distributions.append(forge.attach(nrrd_path, content_type="application/nrrd"))
 
+    # There is also a validation json file
+    placement_hints_json_paths = glob.glob(f"{args.placement_hints_volume_dir}/*.json")
+    for json_path in placement_hints_json_paths:
+        placemement_hints_distributions.append(forge.attach(json_path, content_type="application/json"))
+
+    nexus_resource_orientation_field_volume.distribution = placemement_hints_distributions
+    forge.register(nexus_resource_orientation_field_volume, schema_id=VOLUMETRICDATALAYER_SCHEMAS_ID)
 
 
 if __name__ == "__main__":
