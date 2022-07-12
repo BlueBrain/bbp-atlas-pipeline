@@ -86,22 +86,38 @@ mkdir -p $WORKING_DIR
 #   --out-hierarchy-jsonld $COMPUTED_ONTOLOGY_MOUSE_CCF_SPLIT_L2L3_JSONLD
 
 
+# echo "📤 pushing onto Nexus..."
+# # reading the token from the file
+# ACCESS_TOKEN=`cat $TOKEN_FILE`
+# python $BASEDIR/push_atlasrelease.py --forge-config $FORGE_CONFIG \
+#   --nexus-env $NEXUS_DESTINATION_ENV \
+#   --nexus-org $NEXUS_DESTINATION_ORG \
+#   --nexus-proj $NEXUS_DESTINATION_PROJ \
+#   --access-token $ACCESS_TOKEN \
+#   --nexus-id-aibs-ccf-srs $NEXUS_ID_AIBS_MOUSE_CCF_SRS \
+#   --hierarchy $COMPUTED_ONTOLOGY_MOUSE_CCF_SPLIT_L2L3 \
+#   --hierarchy-ld $COMPUTED_ONTOLOGY_MOUSE_CCF_SPLIT_L2L3_JSONLD \
+#   --annotation-volume $COMPUTED_ANNOTATION_VOLUME_MOUSE_CCF_V3_BRAIN_SPLIT_L2L3 \
+#   --template-volume $FETCHED_TEMPLATE_VOLUME_MOUSE_CCF_V3 \
+#   --direction-vector-volume $COMPUTED_VOLUME_DIRECTION_VECTOR_ISOCORTEX \
+#   --orientation-field-volume $COMPUTED_VOLUME_ORIENTATION_FIELD_ISOCORTEX \
+#   --placement-hints-volume-dir $COMPUTED_PLACEMENT_HINTS_DIR \
+#   --region-mask-volume-dir $COMPUTED_ANNOTATION_MASKS_DIR \
+#   --region-mesh-volume-dir $COMPUTED_ANNOTATION_MESHES_DIR \
+#   --out-atlasrelease-id-file $PUSHED_ATLAS_RELEASE_ID_TXT_FILE
+
+
 echo "📤 pushing onto Nexus..."
-# reading the token from the file
 ACCESS_TOKEN=`cat $TOKEN_FILE`
-python $BASEDIR/push_atlasrelease.py --forge-config $FORGE_CONFIG \
+ATLAS_RELEASE_ID=`cat $PUSHED_ATLAS_RELEASE_ID_TXT_FILE`
+python $BASEDIR/push_non_mask_volumes.py --forge-config $FORGE_CONFIG \
   --nexus-env $NEXUS_DESTINATION_ENV \
   --nexus-org $NEXUS_DESTINATION_ORG \
   --nexus-proj $NEXUS_DESTINATION_PROJ \
   --access-token $ACCESS_TOKEN \
   --nexus-id-aibs-ccf-srs $NEXUS_ID_AIBS_MOUSE_CCF_SRS \
+  --atlasrelease-id $ATLAS_RELEASE_ID \
   --hierarchy $COMPUTED_ONTOLOGY_MOUSE_CCF_SPLIT_L2L3 \
-  --hierarchy-ld $COMPUTED_ONTOLOGY_MOUSE_CCF_SPLIT_L2L3_JSONLD \
-  --annotation-volume $COMPUTED_ANNOTATION_VOLUME_MOUSE_CCF_V3_BRAIN_SPLIT_L2L3 \
-  --template-volume $FETCHED_TEMPLATE_VOLUME_MOUSE_CCF_V3 \
   --direction-vector-volume $COMPUTED_VOLUME_DIRECTION_VECTOR_ISOCORTEX \
   --orientation-field-volume $COMPUTED_VOLUME_ORIENTATION_FIELD_ISOCORTEX \
   --placement-hints-volume-dir $COMPUTED_PLACEMENT_HINTS_DIR \
-  --region-mask-volume-dir $COMPUTED_ANNOTATION_MASKS_DIR \
-  --region-mesh-volume-dir $COMPUTED_ANNOTATION_MESHES_DIR \
-  --out-atlasrelease-id-file $PUSHED_ATLAS_RELEASE_ID_TXT_FILE
