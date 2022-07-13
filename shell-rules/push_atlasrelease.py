@@ -389,34 +389,6 @@ def parse_args():
         help="The NRRD brain template volume")
 
     parser.add_argument(
-        "--direction-vector-volume",
-        dest="direction_vector_volume",
-        required=True,
-        metavar="<FILE PATH>",
-        help="The NRRD direction vector volume (Eurler angles)")
-
-    parser.add_argument(
-        "--orientation-field-volume",
-        dest="orientation_field_volume",
-        required=True,
-        metavar="<FILE PATH>",
-        help="The NRRD orientation field volume (quaternions)")
-
-    parser.add_argument(
-        "--placement-hints-volume-dir",
-        dest="placement_hints_volume_dir",
-        required=True,
-        metavar="<DIR PATH>",
-        help="The NRRD placement hints volume directory")
-
-    parser.add_argument(
-        "--region-mask-volume-dir",
-        dest="region_mask_volume_dir",
-        required=True,
-        metavar="<DIR PATH>",
-        help="The directory containing the NRRD region masks")
-
-    parser.add_argument(
         "--out-atlasrelease-id-file",
         dest="out_atlasrelease_id_file",
         required=False,

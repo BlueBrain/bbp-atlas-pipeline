@@ -114,11 +114,6 @@ python $BASEDIR/push_atlasrelease.py --forge-config $FORGE_CONFIG \
   --hierarchy-ld $COMPUTED_ONTOLOGY_MOUSE_CCF_SPLIT_L2L3_JSONLD \
   --annotation-volume $COMPUTED_ANNOTATION_VOLUME_MOUSE_CCF_V3_BRAIN_SPLIT_L2L3 \
   --template-volume $FETCHED_TEMPLATE_VOLUME_MOUSE_CCF_V3 \
-  --direction-vector-volume $COMPUTED_VOLUME_DIRECTION_VECTOR_ISOCORTEX \
-  --orientation-field-volume $COMPUTED_VOLUME_ORIENTATION_FIELD_ISOCORTEX \
-  --placement-hints-volume-dir $COMPUTED_PLACEMENT_HINTS_DIR \
-  --region-mask-volume-dir $COMPUTED_ANNOTATION_MASKS_DIR \
-  --region-mesh-volume-dir $COMPUTED_ANNOTATION_MESHES_DIR \
   --out-atlasrelease-id-file $PUSHED_ATLAS_RELEASE_ID_TXT_FILE
 
 
