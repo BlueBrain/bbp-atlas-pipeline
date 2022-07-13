@@ -14,7 +14,11 @@ export NEXUS_ONTOLOGY_ORG="neurosciencegraph"
 export NEXUS_ONTOLOGY_PROJ="datamodels"
 
 # The pipeline will push the generated datasets into:
-export NEXUS_DESTINATION_ENV="https://staging.nise.bbp.epfl.ch/nexus/v1"
+# export NEXUS_DESTINATION_ENV="https://staging.nise.bbp.epfl.ch/nexus/v1"
+# export NEXUS_DESTINATION_ORG="bbp"
+# export NEXUS_DESTINATION_PROJ="atlas"
+
+export NEXUS_DESTINATION_ENV="https://bbp.epfl.ch/nexus/v1"
 export NEXUS_DESTINATION_ORG="bbp"
 export NEXUS_DESTINATION_PROJ="atlas"
 

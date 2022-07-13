@@ -16,6 +16,11 @@ ACCESS_TOKEN=`cat $TOKEN_FILE`
 mkdir -p $WORKING_DIR
 
 
+# --------------------------------------------------------------------------------- #
+#                              FETCHING FROM NEXUS                                  #
+# --------------------------------------------------------------------------------- #
+
+
 # echo "📥 Fetching brain annotation volume..."
 # bba-data-fetch --nexus-env $NEXUS_ATLAS_ENV \
 #   --nexus-token $ACCESS_TOKEN \
@@ -45,6 +50,11 @@ mkdir -p $WORKING_DIR
 #   --nexus-id $NEXUS_ID_ONTOLOGY_MOUSE_CCF \
 #   --favor name:1.json \
 #   --verbose
+
+
+# --------------------------------------------------------------------------------- #
+#                                COMPUTING DATA                                     #
+# --------------------------------------------------------------------------------- #
 
 
 # echo "🤖 Computing direction vectors for isocortex..."
@@ -86,25 +96,30 @@ mkdir -p $WORKING_DIR
 #   --out-hierarchy-jsonld $COMPUTED_ONTOLOGY_MOUSE_CCF_SPLIT_L2L3_JSONLD
 
 
-# echo "📤 pushing AtlasRelease and its components onto Nexus..."
-# # reading the token from the file
-# ACCESS_TOKEN=`cat $TOKEN_FILE`
-# python $BASEDIR/push_atlasrelease.py --forge-config $FORGE_CONFIG \
-#   --nexus-env $NEXUS_DESTINATION_ENV \
-#   --nexus-org $NEXUS_DESTINATION_ORG \
-#   --nexus-proj $NEXUS_DESTINATION_PROJ \
-#   --access-token $ACCESS_TOKEN \
-#   --nexus-id-aibs-ccf-srs $NEXUS_ID_AIBS_MOUSE_CCF_SRS \
-#   --hierarchy $COMPUTED_ONTOLOGY_MOUSE_CCF_SPLIT_L2L3 \
-#   --hierarchy-ld $COMPUTED_ONTOLOGY_MOUSE_CCF_SPLIT_L2L3_JSONLD \
-#   --annotation-volume $COMPUTED_ANNOTATION_VOLUME_MOUSE_CCF_V3_BRAIN_SPLIT_L2L3 \
-#   --template-volume $FETCHED_TEMPLATE_VOLUME_MOUSE_CCF_V3 \
-#   --direction-vector-volume $COMPUTED_VOLUME_DIRECTION_VECTOR_ISOCORTEX \
-#   --orientation-field-volume $COMPUTED_VOLUME_ORIENTATION_FIELD_ISOCORTEX \
-#   --placement-hints-volume-dir $COMPUTED_PLACEMENT_HINTS_DIR \
-#   --region-mask-volume-dir $COMPUTED_ANNOTATION_MASKS_DIR \
-#   --region-mesh-volume-dir $COMPUTED_ANNOTATION_MESHES_DIR \
-#   --out-atlasrelease-id-file $PUSHED_ATLAS_RELEASE_ID_TXT_FILE
+# --------------------------------------------------------------------------------- #
+#                              PUSHING TO NEXUS                                     #
+# --------------------------------------------------------------------------------- #
+
+
+echo "📤 pushing AtlasRelease and its components onto Nexus..."
+# reading the token from the file
+ACCESS_TOKEN=`cat $TOKEN_FILE`
+python $BASEDIR/push_atlasrelease.py --forge-config $FORGE_CONFIG \
+  --nexus-env $NEXUS_DESTINATION_ENV \
+  --nexus-org $NEXUS_DESTINATION_ORG \
+  --nexus-proj $NEXUS_DESTINATION_PROJ \
+  --access-token $ACCESS_TOKEN \
+  --nexus-id-aibs-ccf-srs $NEXUS_ID_AIBS_MOUSE_CCF_SRS \
+  --hierarchy $COMPUTED_ONTOLOGY_MOUSE_CCF_SPLIT_L2L3 \
+  --hierarchy-ld $COMPUTED_ONTOLOGY_MOUSE_CCF_SPLIT_L2L3_JSONLD \
+  --annotation-volume $COMPUTED_ANNOTATION_VOLUME_MOUSE_CCF_V3_BRAIN_SPLIT_L2L3 \
+  --template-volume $FETCHED_TEMPLATE_VOLUME_MOUSE_CCF_V3 \
+  --direction-vector-volume $COMPUTED_VOLUME_DIRECTION_VECTOR_ISOCORTEX \
+  --orientation-field-volume $COMPUTED_VOLUME_ORIENTATION_FIELD_ISOCORTEX \
+  --placement-hints-volume-dir $COMPUTED_PLACEMENT_HINTS_DIR \
+  --region-mask-volume-dir $COMPUTED_ANNOTATION_MASKS_DIR \
+  --region-mesh-volume-dir $COMPUTED_ANNOTATION_MESHES_DIR \
+  --out-atlasrelease-id-file $PUSHED_ATLAS_RELEASE_ID_TXT_FILE
 
 
 # echo "📤 pushing placement hints and orientation volumes onto Nexus..."
@@ -138,16 +153,31 @@ mkdir -p $WORKING_DIR
 #   --region-mask-volume-dir $COMPUTED_ANNOTATION_MASKS_DIR
 
 
-echo "📤 pushing regions meshes onto Nexus..."
-# reading the token from the file
-ACCESS_TOKEN=`cat $TOKEN_FILE`
-ATLAS_RELEASE_ID=`cat $PUSHED_ATLAS_RELEASE_ID_TXT_FILE`
-python $BASEDIR/push_region_meshes.py --forge-config $FORGE_CONFIG \
-  --nexus-env $NEXUS_DESTINATION_ENV \
-  --nexus-org $NEXUS_DESTINATION_ORG \
-  --nexus-proj $NEXUS_DESTINATION_PROJ \
-  --access-token $ACCESS_TOKEN \
-  --nexus-id-aibs-ccf-srs $NEXUS_ID_AIBS_MOUSE_CCF_SRS \
-  --atlasrelease-id $ATLAS_RELEASE_ID \
-  --hierarchy $COMPUTED_ONTOLOGY_MOUSE_CCF_SPLIT_L2L3 \
-  --region-mesh-dir $COMPUTED_ANNOTATION_MESHES_DIR
+# echo "📤 pushing regions meshes onto Nexus..."
+# # reading the token from the file
+# ACCESS_TOKEN=`cat $TOKEN_FILE`
+# ATLAS_RELEASE_ID=`cat $PUSHED_ATLAS_RELEASE_ID_TXT_FILE`
+# python $BASEDIR/push_region_meshes.py --forge-config $FORGE_CONFIG \
+#   --nexus-env $NEXUS_DESTINATION_ENV \
+#   --nexus-org $NEXUS_DESTINATION_ORG \
+#   --nexus-proj $NEXUS_DESTINATION_PROJ \
+#   --access-token $ACCESS_TOKEN \
+#   --nexus-id-aibs-ccf-srs $NEXUS_ID_AIBS_MOUSE_CCF_SRS \
+#   --atlasrelease-id $ATLAS_RELEASE_ID \
+#   --hierarchy $COMPUTED_ONTOLOGY_MOUSE_CCF_SPLIT_L2L3 \
+#   --region-mesh-dir $COMPUTED_ANNOTATION_MESHES_DIR
+
+
+# echo "📤 pushing regions summaries onto Nexus..."
+# # reading the token from the file
+# ACCESS_TOKEN=`cat $TOKEN_FILE`
+# ATLAS_RELEASE_ID=`cat $PUSHED_ATLAS_RELEASE_ID_TXT_FILE`
+# python $BASEDIR/push_region_summaries.py --forge-config $FORGE_CONFIG \
+#   --nexus-env $NEXUS_DESTINATION_ENV \
+#   --nexus-org $NEXUS_DESTINATION_ORG \
+#   --nexus-proj $NEXUS_DESTINATION_PROJ \
+#   --access-token $ACCESS_TOKEN \
+#   --nexus-id-aibs-ccf-srs $NEXUS_ID_AIBS_MOUSE_CCF_SRS \
+#   --atlasrelease-id $ATLAS_RELEASE_ID \
+#   --hierarchy $COMPUTED_ONTOLOGY_MOUSE_CCF_SPLIT_L2L3 \
+#   --region-metadata $COMPUTED_REGIONS_METADATA
