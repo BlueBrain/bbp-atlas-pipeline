@@ -175,7 +175,7 @@ def generate_payload_volumetric_data_layer(filepath, id, name, description, type
             }
         ],
    
-        "endianness": nrrd_header["endian"],
+        "endianness": nrrd_header.get("endian", "little"),
 
         "fileExtension": "nrrd",
         "isRegisteredIn": {
@@ -357,8 +357,8 @@ def parse_args():
         "--nexus-id-aibs-ccf-srs",
         dest="nexus_id_aibs_ccf_srs",
         required=True,
-        metavar="<NAME>",
-        help="Access token (JWT) to push data to Nexus")
+        metavar="<NEXUS ID>",
+        help="Nexus ID of the Spatial Reference System")
 
     parser.add_argument(
         "--hierarchy",
