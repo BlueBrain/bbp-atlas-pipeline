@@ -320,7 +320,7 @@ def main():
         region_mask_volume_payload = generate_payload_volumetric_data_layer(mask_filepath, 
             region_mask_nexus_id,
             f"Mask Volume of {region_node['name']}, 25µm",
-            "This raster volume contains placement hints volumes for all the cortical layers",
+            f"Blue Brain Atlas mask raster volume of the region {region_node['name']}, at resolution 25µm",
             "BrainParcellationMask",
             atlas_release_id,
             srs_id,

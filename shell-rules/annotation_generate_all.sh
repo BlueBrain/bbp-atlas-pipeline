@@ -123,11 +123,26 @@ mkdir -p $WORKING_DIR
 #   --placement-hints-volume-dir $COMPUTED_PLACEMENT_HINTS_DIR
 
 
-echo "📤 pushing regions masks, meshes and summaries onto Nexus..."
+# echo "📤 pushing regions mask onto Nexus..."
+# # reading the token from the file
+# ACCESS_TOKEN=`cat $TOKEN_FILE`
+# ATLAS_RELEASE_ID=`cat $PUSHED_ATLAS_RELEASE_ID_TXT_FILE`
+# python $BASEDIR/push_region_masks.py --forge-config $FORGE_CONFIG \
+#   --nexus-env $NEXUS_DESTINATION_ENV \
+#   --nexus-org $NEXUS_DESTINATION_ORG \
+#   --nexus-proj $NEXUS_DESTINATION_PROJ \
+#   --access-token $ACCESS_TOKEN \
+#   --nexus-id-aibs-ccf-srs $NEXUS_ID_AIBS_MOUSE_CCF_SRS \
+#   --atlasrelease-id $ATLAS_RELEASE_ID \
+#   --hierarchy $COMPUTED_ONTOLOGY_MOUSE_CCF_SPLIT_L2L3 \
+#   --region-mask-volume-dir $COMPUTED_ANNOTATION_MASKS_DIR
+
+
+echo "📤 pushing regions meshes onto Nexus..."
 # reading the token from the file
 ACCESS_TOKEN=`cat $TOKEN_FILE`
 ATLAS_RELEASE_ID=`cat $PUSHED_ATLAS_RELEASE_ID_TXT_FILE`
-python $BASEDIR/push_region_masks.py --forge-config $FORGE_CONFIG \
+python $BASEDIR/push_region_meshes.py --forge-config $FORGE_CONFIG \
   --nexus-env $NEXUS_DESTINATION_ENV \
   --nexus-org $NEXUS_DESTINATION_ORG \
   --nexus-proj $NEXUS_DESTINATION_PROJ \
@@ -135,4 +150,4 @@ python $BASEDIR/push_region_masks.py --forge-config $FORGE_CONFIG \
   --nexus-id-aibs-ccf-srs $NEXUS_ID_AIBS_MOUSE_CCF_SRS \
   --atlasrelease-id $ATLAS_RELEASE_ID \
   --hierarchy $COMPUTED_ONTOLOGY_MOUSE_CCF_SPLIT_L2L3 \
-  --region-mask-volume-dir $COMPUTED_ANNOTATION_MASKS_DIR
+  --region-mesh-dir $COMPUTED_ANNOTATION_MESHES_DIR
