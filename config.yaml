@@ -1,10 +1,10 @@
-WORKING_DIR: ../working_dir
+WORKING_DIR: working_dir
 NEXUS_IDS_FILE: ./nexus_ids.json
 FORGE_CONFIG: ../blue_brain_atlas_nexus_push/forge_configuration/forge_config.yml
 RULES_CONFIG_DIR_TEMPLATES: ./rules_config_dir_templates
 ATLAS_CONFIG_PATH: ./atlasrelease_config_path.json
 RESOLUTION: "25"
-MODULES_VERBOSE: False
+MODULES_VERBOSE: True
 RESOURCE_TAG: "None"  # put None to generate an automatic tag corresponding to the timestamp
 DISPLAY_HELP: False
 
