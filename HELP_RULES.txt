@@ -32,47 +32,36 @@ jonathan.lurie@epfl.ch
 >fetch_gene_gad67 : fetch the gene expression volume corresponding to the genetic marker gad67
 >fetch_gene_gad67_correctednissl : fetch the gene expression volume corresponding to the genetic marker gad67
 >combine_markers_hybrid : Generate and save the combined glia files and the global celltype scaling factors
->combine_markers_realigned : Generate and save the combined glia files and the global celltype scaling factors
 >combine_markers_ccfv2 : Generate and save the combined glia files and the global celltype scaling factors
 >extract_color_map : Extract the mapping of colors to structure ids
 >svg_to_png : Convert svg files into png files
 >compute_average_soma_radius : Compute the overall mouse brain cell density
 >cell_density_hybrid : Compute the overall mouse brain cell density
->cell_density_realigned : Compute the overall mouse brain cell density
 >cell_density_ccfv2 : Compute the overall mouse brain cell density
 >cell_density_ccfv2_correctednissl : Compute the overall mouse brain cell density
 >glia_cell_densities_hybrid : Compute and save the glia cell densities
->glia_cell_densities_realigned : Compute and save the glia cell densities
 >glia_cell_densities_ccfv2 : Compute and save the glia cell densities
 >glia_cell_densities_ccfv2_correctednissl : Compute and save the glia cell densities
 >inhibitory_excitatory_neuron_densities_hybrid : Compute the inhibitory and excitatory neuron densities
->inhibitory_excitatory_neuron_densities_realigned : Compute the inhibitory and excitatory neuron densities
 >inhibitory_excitatory_neuron_densities_ccfv2 : Compute the inhibitory and excitatory neuron densities
 >inhibitory_excitatory_neuron_densities_ccfv2_correctednissl : Compute the inhibitory and excitatory neuron densities
 ====================================================
 >direction_vectors_isocortex_ccfv2 : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood. The output is only for the top regions of the isocortex.
 >direction_vectors_isocortex_ccfv3 : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood. The output is only for the top regions of the isocortex.
 >direction_vectors_isocortex_hybrid : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood. The output is only for the top regions of the isocortex.
->direction_vectors_isocortex_realigned : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood. The output is only for the top regions of the isocortex.
 >direction_vectors_cerebellum : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood. The output is only for some regions of the cerebellum.
 >interpolate_direction_vectors_isocortex_ccfv2 : Interpolate the [NaN, NaN, NaN] direction vectors by non-[NaN, NaN, NaN] ones.
->interpolate_direction_vectors_isocortex_realigned : Interpolate the [NaN, NaN, NaN] direction vectors by non-[NaN, NaN, NaN] ones.
 >split_isocortex_layer_23_ccfv3 : Refine annotations by splitting brain regions 
 >split_isocortex_layer_23_hybrid : Refine annotations by splitting brain regions 
->split_isocortex_layer_23_realigned : Refine annotations by splitting brain regions 
 >split_isocortex_layer_23_ccfv2 : Refine annotations by splitting brain regions 
 >orientation_field_ccfv3 : Turn direction vectors into quaternions interpreted as 3D orientations
 >orientation_field_hybrid : Turn direction vectors into quaternions interpreted as 3D orientations
->orientation_field_realigned : Turn direction vectors into quaternions interpreted as 3D orientations
 >placement_hints_isocortex_ccfv3_l23split : Generate and save the placement hints of different regions of the AIBS mouse brain
 >placement_hints_isocortex_hybrid_l23split : Generate and save the placement hints of different regions of the AIBS mouse brain
->placement_hints_isocortex_realigned_l23split : Generate and save the placement hints of different regions of the AIBS mouse brain
 ======== Optimized inhibitory neuron densities and mtypes ========
 >compile_densities_measurements : Compile the cell density related measurements of mmc3.xlsx and `gaba_papers.xsls` into a CSV file.
->average_densities_realigned : Compute cell densities based on measurements and AIBS region volumes.
 >average_densities_ccfv2 : Compute cell densities based on measurements and AIBS region volumes.
 >average_densities_ccfv2_correctednissl : Compute cell densities based on measurements and AIBS region volumes.
->fit_average_densities_realigned : Estimate average cell densities of brain regions.
 >fit_average_densities_ccfv2 : Estimate average cell densities of brain regions.
 >fit_average_densities_ccfv2_correctednissl : Estimate average cell densities of brain regions.
 >inhibitory_neuron_densities_linprog_ccfv2_correctednissl : Create inhibitory neuron densities for the cell types in the csv file containing the fitted densities. Use algorithm 'lingprog'.
@@ -103,10 +92,6 @@ jonathan.lurie@epfl.ch
 ========================== Push Rules ==========================
 >push_hybrid_v2v3_annotation : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
 >push_hybrid_l23split_annotation : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
->push_realigned_l23split_annotation : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
->push_realigned_l23split_atlasrelease : Create a VolumetricDataLayer resource payload and an atlasRelease resource before pushing them along the volumetric files and the hierarchy file into Nexus
->push_realigned_orientations : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
->push_realigned_placement_hints : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
 >push_cell_densities : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
 >push_neuron_densities : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus
 >push_hybrid_v2v3_volumetric_nrrd_datasets : Create a VolumetricDataLayer resource payload and push it along with the volumetric file into Nexus

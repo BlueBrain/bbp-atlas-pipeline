@@ -137,3 +137,6 @@ dmypy.json
 
 # snakelike stuff
 .snakemake/metadata/
+
+# batch log
+slurm-*.out
