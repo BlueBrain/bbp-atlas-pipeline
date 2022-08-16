@@ -1,4 +1,10 @@
 FROM ubuntu:focal
+
+ARG GITLAB_DEPLOY_TOKEN
+ARG GITLAB_DEPLOY_PASSWORD
+ARG CI_DEPLOY_TOKEN
+ARG CI_DEPLOY_PASSWORD
+
 RUN apt-get update && \
         DEBIAN_FRONTEND="noninteractive" TZ="Europe/Zurich" apt-get install -y tzdata && \
         apt-get install -y --no-install-recommends \
