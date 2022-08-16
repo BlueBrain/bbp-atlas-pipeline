@@ -73,7 +73,6 @@ update-annotation-image:
   before_script:
     - echo $GITLAB_DEPLOY_TOKEN and $GITLAB_DEPLOY_PASSWORD
     - echo $CI_DEPLOY_TOKEN and $CI_DEPLOY_PASSWORD
-    - echo $KANIKO_EXTRA_ARGS
   variables:
     BUILD_PATH: $CI_PROJECT_DIR/annotation
     GITLAB_DEPLOY_TOKEN: $GITLAB_DEPLOY_TOKEN
