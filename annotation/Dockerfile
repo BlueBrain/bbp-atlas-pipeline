@@ -20,19 +20,25 @@ WORKDIR /annotation
 #	cmake ..  &&  make -j  &&  cd ..  && \
 #	export PATH=$PATH:$PWD/build/bin
 
+# test
+RUN echo $GITLAB_DEPLOY_TOKEN
+RUN echo $GITLAB_DEPLOY_PASSWORD
+RUN git clone https://$GITLAB_DEPLOY_TOKEN:$GITLAB_DEPLOY_PASSWORD@bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline.git token
+RUN git clone https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline.git plain
+
 # module load py-token-fetch
-RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_token_fetch.git@develop
+RUN pip install git+https://$GITLAB_DEPLOY_TOKEN:$GITLAB_DEPLOY_PASSWORD@bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_token_fetch.git@develop
 
 # module load py-bba-datafetch
-RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_fetch.git
+RUN pip install git+https://$GITLAB_DEPLOY_TOKEN:$GITLAB_DEPLOY_PASSWORD@bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_fetch.git
 
 # module load py-bba-webexporter
-RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_web_exporter.git
+RUN pip install git+https://$GITLAB_DEPLOY_TOKEN:$GITLAB_DEPLOY_PASSWORD@bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_web_exporter.git
 
 # module load py-data-integrity-check
-RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_integrity_check.git
+RUN pip install git+https://$GITLAB_DEPLOY_TOKEN:$GITLAB_DEPLOY_PASSWORD@bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_integrity_check.git
 
-RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_push.git@develop
+RUN pip install git+https://$GITLAB_DEPLOY_TOKEN:$GITLAB_DEPLOY_PASSWORD@bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_push.git@develop
 
 # module load py-atlas-building-tools
 RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ atlas-building-tools
