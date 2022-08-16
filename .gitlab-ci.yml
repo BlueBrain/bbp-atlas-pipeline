@@ -68,6 +68,7 @@ update-annotation-image:
     - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop"
       changes:
         - annotation/Dockerfile
+        - .gitlab-ci.yml
       when: on_success
   before_script:
     - echo $GITLAB_DEPLOY_TOKEN
