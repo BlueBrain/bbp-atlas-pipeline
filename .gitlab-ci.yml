@@ -69,5 +69,10 @@ update-annotation-image:
       changes:
         - annotation/Dockerfile
       when: on_success
+  before_script:
+    - echo $GITLAB_DEPLOY_TOKEN
+    - echo $GITLAB_DEPLOY_PASSWORD
   variables:
     BUILD_PATH: $CI_PROJECT_DIR/annotation
+    KUBERNETES_MEMORY_LIMIT: 4Gi
+    KUBERNETES_MEMORY_REQUEST: 4Gi
