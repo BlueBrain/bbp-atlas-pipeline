@@ -21,8 +21,7 @@ WORKDIR /annotation
 #	export PATH=$PATH:$PWD/build/bin
 
 # test
-RUN echo $GITLAB_DEPLOY_TOKEN
-RUN echo $GITLAB_DEPLOY_PASSWORD
+RUN echo "$GITLAB_DEPLOY_TOKEN" and "$GITLAB_DEPLOY_PASSWORD"
 RUN git clone https://$GITLAB_DEPLOY_TOKEN:$GITLAB_DEPLOY_PASSWORD@bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline.git token
 RUN git clone https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline.git plain
 
