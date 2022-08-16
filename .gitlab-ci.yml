@@ -58,3 +58,16 @@ deploy-documentation-in-production-openshift:
   variables:
     KANIKO_EXTRA_ARGS: "--build-arg GENERATED_DOCS_PATH=generated/html"
     CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/sphinx-documentation-prod
+
+
+# Build image for annotation pipeline
+update-annotation-image:
+  stage: deploy
+  extends: .build-image-using-kaniko
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop"
+      changes:
+        - annotation/Dockerfile
+      when: on_success
+  variables:
+    BUILD_PATH: $CI_PROJECT_DIR/annotation
