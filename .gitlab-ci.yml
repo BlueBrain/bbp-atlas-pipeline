@@ -71,12 +71,17 @@ update-annotation-image:
         - .gitlab-ci.yml
       when: on_success
   before_script:
-    - echo $GITLAB_DEPLOY_TOKEN and $GITLAB_DEPLOY_PASSWORD
-    - echo $CI_DEPLOY_TOKEN and $CI_DEPLOY_PASSWORD
+    # Tell Git how to re-write BBP GitLab URLs to use a token instead of SSH
+    - export XDG_CONFIG_HOME=${PWD}/local_config
+    - mkdir -p "${XDG_CONFIG_HOME}/git"
+    - |
+      cat <<EOF > "${XDG_CONFIG_HOME}/git/config"
+      [url "https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/"]
+        insteadOf = git@bbpgitlab.epfl.ch:
+      EOF
+    - cat "${XDG_CONFIG_HOME}/git/config"
   variables:
     BUILD_PATH: $CI_PROJECT_DIR/annotation
-    GITLAB_DEPLOY_TOKEN: $GITLAB_DEPLOY_TOKEN
-    GITLAB_DEPLOY_PASSWORD: $GITLAB_DEPLOY_PASSWORD
-    KANIKO_EXTRA_ARGS: "--build-arg GITLAB_DEPLOY_TOKEN=$GITLAB_DEPLOY_TOKEN  --build-arg GITLAB_DEPLOY_PASSWORD=$GITLAB_DEPLOY_PASSWORD  --build-arg CI_DEPLOY_TOKEN=$CI_DEPLOY_TOKEN  --build-arg CI_DEPLOY_PASSWORD=$CI_DEPLOY_PASSWORD  --build-arg CI_JOB_TOKEN=$CI_JOB_TOKEN"
+    KANIKO_EXTRA_ARGS: "--build-arg CI_JOB_TOKEN=$CI_JOB_TOKEN"
     KUBERNETES_MEMORY_LIMIT: 4Gi
     KUBERNETES_MEMORY_REQUEST: 4Gi
