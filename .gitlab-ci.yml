@@ -77,7 +77,7 @@ update-annotation-image:
     - |
       cat <<EOF > "${XDG_CONFIG_HOME}/git/config"
       [url "https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/"]
-        insteadOf = git@bbpgitlab.epfl.ch:
+        insteadOf = https://@bbpgitlab.epfl.ch:
       EOF
     - cat "${XDG_CONFIG_HOME}/git/config"
   variables:
