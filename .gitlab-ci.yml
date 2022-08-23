@@ -8,6 +8,7 @@ stages:
   - generate
   - deploy
   - test
+  - convert_and_deploy
 
 # Generate documentation and stores the artifact under /generated/html
 generate-documentation:
@@ -86,3 +87,16 @@ test_singularity:
     - module use /gpfs/bbp.cscs.ch/apps/hpc/singularity/modules/linux-rhel7-x86_64
     - module load singularityce
     - singularity --version
+
+convert_and_deploy_job:
+  stage:
+    convert_and_deploy
+  tags:
+    - bb5_map
+  variables:
+    bb5_constraint: nvme
+    bb5_cpus_per_task: 2
+    bb5_memory: 4G
+    bb5_duration: "10:00"
+  script:
+    - bash convert_singularity_image.sh
