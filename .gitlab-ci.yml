@@ -78,16 +78,6 @@ update-annotation-image:
     KUBERNETES_MEMORY_LIMIT: 4Gi
     KUBERNETES_MEMORY_REQUEST: 4Gi
 
-test_singularity:
-  stage: test
-  tags:
-    - bb5
-  script:
-    - module load unstable
-    - module use /gpfs/bbp.cscs.ch/apps/hpc/singularity/modules/linux-rhel7-x86_64
-    - module load singularityce
-    - singularity --version
-
 convert_and_deploy_job:
   stage:
     convert_and_deploy
