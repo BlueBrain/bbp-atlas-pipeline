@@ -16,7 +16,7 @@ RUN apt-get -y install pip git
 
 WORKDIR /annotation
 
-COPY .. .
+COPY .. blue_brain_atlas_pipeline/
 
 # Regiodesics
 #RUN git clone https://bbpgitlab.epfl.ch/nse/archive/regiodesics  && \

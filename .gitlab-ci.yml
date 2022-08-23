@@ -7,6 +7,7 @@ include:
 stages:
   - generate
   - deploy
+  - test
 
 # Generate documentation and stores the artifact under /generated/html
 generate-documentation:
@@ -75,3 +76,13 @@ update-annotation-image:
     KANIKO_EXTRA_ARGS: "--build-arg CI_JOB_TOKEN=$CI_JOB_TOKEN"
     KUBERNETES_MEMORY_LIMIT: 4Gi
     KUBERNETES_MEMORY_REQUEST: 4Gi
+
+test_singularity:
+  stage: test
+  tags:
+    - bb5
+  script:
+    - module load unstable
+    - module use /gpfs/bbp.cscs.ch/apps/hpc/singularity/modules/linux-rhel7-x86_64
+    - module load singularityce
+    - singularity --version
