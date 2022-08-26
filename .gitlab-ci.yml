@@ -7,6 +7,8 @@ include:
 stages:
   - generate
   - deploy
+  - test
+  - convert_and_deploy
 
 # Generate documentation and stores the artifact under /generated/html
 generate-documentation:
@@ -58,3 +60,33 @@ deploy-documentation-in-production-openshift:
   variables:
     KANIKO_EXTRA_ARGS: "--build-arg GENERATED_DOCS_PATH=generated/html"
     CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/sphinx-documentation-prod
+
+
+# Build image for annotation pipeline
+update-annotation-image:
+  stage: deploy
+  extends: .build-image-using-kaniko
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop"
+      changes:
+        - annotation/Dockerfile
+        - .gitlab-ci.yml
+      when: on_success
+  variables:
+    BUILD_PATH: $CI_PROJECT_DIR/annotation
+    KANIKO_EXTRA_ARGS: "--build-arg CI_JOB_TOKEN=$CI_JOB_TOKEN"
+    KUBERNETES_MEMORY_LIMIT: 4Gi
+    KUBERNETES_MEMORY_REQUEST: 4Gi
+
+convert_and_deploy_job:
+  stage:
+    convert_and_deploy
+  tags:
+    - bb5_map
+  variables:
+    bb5_constraint: nvme
+    bb5_cpus_per_task: 2
+    bb5_memory: 4G
+    bb5_duration: "10:00"
+  script:
+    - bash convert_singularity_image.sh

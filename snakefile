@@ -1297,6 +1297,7 @@ rule direction_vectors_isocortex_ccfv2:
         {params.app} --annotation-path {input.parcellation_volume} \
             --hierarchy-path {input.hierarchy} \
             --output-path {output} \
+            --algorithm shading-blur-gradient \
             2>&1 | tee {log}
         """
 
@@ -1316,6 +1317,7 @@ rule direction_vectors_isocortex_ccfv3:
         {params.app} --annotation-path {input.parcellation_volume} \
             --hierarchy-path {input.hierarchy} \
             --output-path {output} \
+            --algorithm shading-blur-gradient \
             2>&1 | tee {log}
         """
 
@@ -1335,6 +1337,7 @@ rule direction_vectors_isocortex_hybrid:
         {params.app} --annotation-path {input.parcellation_volume} \
             --hierarchy-path {input.hierarchy} \
             --output-path {output} \
+            --algorithm shading-blur-gradient \
             2>&1 | tee {log}
         """
 
@@ -1353,6 +1356,7 @@ rule direction_vectors_cerebellum:
         """
         {params.app} --annotation-path {input.parcellation_volume} \
             --output-path {output} \
+            --algorithm shading-blur-gradient \
             2>&1 | tee {log}
         """
 
@@ -1376,6 +1380,7 @@ rule interpolate_direction_vectors_isocortex_ccfv2:
             --metadata-path f"{rules_config_dir}/isocortex_metadata.json" \
             --nans \
             --output-path {output} \
+            --algorithm shading-blur-gradient \
             2>&1 | tee {log}
         """
 
