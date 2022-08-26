@@ -29,22 +29,22 @@ COPY .. blue_brain_atlas_pipeline/
 RUN git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/".insteadOf https://bbpgitlab.epfl.ch/
 
 # module load py-token-fetch
-RUN pip install git+https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_token_fetch.git@develop
+RUN pip install git+https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_token_fetch.git@v0.1.1
 
 # module load py-bba-datafetch
-RUN pip install git+https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_fetch.git
+RUN pip install git+https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_fetch.git@v0.1.0
 
 # module load py-bba-webexporter
-RUN pip install git+https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_web_exporter.git
+RUN pip install git+https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_web_exporter.git@v0.1.5
 
 # module load py-data-integrity-check
-RUN pip install git+https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_integrity_check.git
+RUN pip install git+https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_integrity_check.git@v0.1.0
 
-RUN pip install git+https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_push.git@develop
+RUN pip install git+https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_push.git@v0.1.0
 
 RUN git config --global --remove-section url."https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/"
 
 # module load py-atlas-building-tools
-RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ atlas-building-tools
+RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ atlas-building-tools==0.1.9
 
-RUN pip install snakemake
+RUN pip install snakemake==7.12.1

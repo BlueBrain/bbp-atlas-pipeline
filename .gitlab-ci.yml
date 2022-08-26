@@ -7,8 +7,7 @@ include:
 stages:
   - generate
   - deploy
-  - test
-  - convert_and_deploy
+  - convert_and_deployToBB5
 
 # Generate documentation and stores the artifact under /generated/html
 generate-documentation:
@@ -80,7 +79,7 @@ update-annotation-image:
 
 convert_and_deploy_job:
   stage:
-    convert_and_deploy
+    convert_and_deployToBB5
   tags:
     - bb5_map
   variables:
