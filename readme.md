@@ -60,18 +60,29 @@ The Atlas Modules : [https://bbpteam.epfl.ch/project/spaces/display/BBKG/Atlas+M
 
 _Note: For computation time reason and ease of installation, it is recommended to run the pipeline on BB5._
 
-### Scheduler core
+### Docker image
+A Docker image containing all the pipeline dependecies is automatically built at any change in the relevant files:  
+`bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:latest`
 
+It can be used with  
+`docker run bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:latest`
+
+or converted into an **Apptainer** image with  
+`apptainer pull --docker-login docker://bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:latest`
+
+Alternatively, one can manually install the scheduler and the other package needed as described next.
+
+### Scheduler core
 The pipeline is orchestrated by SnakeMake and the snakefile in the root folder of this repository. 
 This means SnakeMake must be installed in one of the following ways:
 
-- Snakemake is available as a BB5 module that can be loaded doing :
+- Snakemake is available as a BB5 module that can be loaded doing:  
 `module load unstable Snakemake`
 
-- Conda can be used as explained here : https://snakemake.readthedocs.io/en/stable/getting_started/installation.html. Once Snakemake has been installed in an isolated conda environment, you can use it and install the other pipeline dependencies after activating it:
+- Conda can be used as explained here : https://snakemake.readthedocs.io/en/stable/getting_started/installation.html. Once Snakemake has been installed in an isolated conda environment, you can use it and install the other pipeline dependencies after activating it:  
 `conda activate <your_snakemake_environment>`
 
-- It is also possible to install it using pip:
+- It is also possible to install it using pip:  
 `pip install snakemake`
 
 _Note: this uses Python 3.6 or more recent._
@@ -135,8 +146,8 @@ In a terminal, first cd the workflow folder:
 
 Then, based on whether the whole pipeline or just a subpart of it needs to be launched, it can be handy to have a list of the tasks:
 
-- `generate_annotation_pipeline_datasets` : Global rule to generate and check the integrity of every products of the annotation pipeline.
-- `push_annotation_pipeline_datasets` : Global rule to generate, check and push into Nexus every products of the annotation pipeline.
+- `generate_annotation_pipeline_datasets`: global rule to generate and check the integrity of every products of the annotation pipeline.
+- `push_annotation_pipeline_datasets`: global rule to generate, check and push into Nexus every products of the annotation pipeline.
 
 _Note: the pipeline framework (Snakemake) resolves the data dependencies and automatically schedules the tasks to be launched when data are missing. Hence, there is no need to launch all the tasks manually, only the target one._
 
@@ -167,6 +178,7 @@ Every Snakemake CL arguments are listed and described in the Snakemake official 
 
 ## Authors and Contributors :
 
+* Leonardo Cristella: <leonardo.cristella@epfl.ch>
 * Nabil Alibou: <nabil.alibou@epfl.ch>
 * Jonathan Lurie: <jonathan.lurie@epfl.ch>
 
