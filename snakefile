@@ -93,27 +93,28 @@ L.logger.addHandler(logfile_handler)
 APPS = {
     "bba-data-fetch": "bba-data-fetch",
     "parcellationexport": "parcellationexport",
-    "atlas-building-tools combination combine-annotations": "atlas-building-tools combination combine-annotations",
-    "atlas-building-tools combination combine-markers": "atlas-building-tools combination combine-markers",
+    "atlas-building-tools combination combine-annotations": "atlas-densities combination combine-annotations",
+    "atlas-building-tools combination combine-markers": "atlas-densities combination combine-markers",
     "atlas-building-tools cell-detection svg-to-png": "atlas-building-tools cell-detection svg-to-png",
     "atlas-building-tools cell-detection extract-color-map": "atlas-building-tools cell-detection extract-color-map",
     "atlas-building-tools cell-detection compute-average-soma-radius": "atlas-building-tools cell-detection compute-average-soma-radius",
-    "atlas-building-tools cell-densities cell-density": "atlas-building-tools cell-densities cell-density",
-    "atlas-building-tools cell-densities glia-cell-densities": "atlas-building-tools cell-densities glia-cell-densities",
-    "atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities": "atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities",
-    "atlas-building-tools cell-densities compile-measurements": "atlas-building-tools cell-densities compile-measurements",
-    "atlas-building-tools cell-densities measurements-to-average-densities": "atlas-building-tools cell-densities measurements-to-average-densities",
-    "atlas-building-tools cell-densities fit-average-densities": "atlas-building-tools cell-densities fit-average-densities",
-    "atlas-building-tools cell-densities inhibitory-neuron-densities": "atlas-building-tools cell-densities inhibitory-neuron-densities",
-    "atlas-building-tools mtype-densities create-from-profile": "atlas-building-tools mtype-densities create-from-profile",
-    "atlas-building-tools mtype-densities create-from-probability-map": "atlas-building-tools mtype-densities create-from-probability-map",
+    "atlas-building-tools cell-densities cell-density": "atlas-densities cell-densities cell-density",
+    "atlas-building-tools cell-densities glia-cell-densities": "atlas-densities cell-densities glia-cell-densities",
+    "atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities": "atlas-densities cell-densities inhibitory-and-excitatory-neuron-densities",
+    "atlas-building-tools cell-densities compile-measurements": "atlas-densities cell-densities compile-measurements",
+    "atlas-building-tools cell-densities measurements-to-average-densities": "atlas-densities cell-densities measurements-to-average-densities",
+    "atlas-building-tools cell-densities fit-average-densities": "atlas-densities cell-densities fit-average-densities",
+    "atlas-building-tools cell-densities fit-average-densities": "atlas-densities cell-densities fit-average-densities",
+    "atlas-building-tools cell-densities inhibitory-neuron-densities": "atlas-densities cell-densities inhibitory-neuron-densities",
+    "atlas-building-tools mtype-densities create-from-profile": "atlas-densities mtype-densities create-from-profile",
+    "atlas-building-tools mtype-densities create-from-probability-map": "atlas-densities mtype-densities create-from-probability-map",
     "brainbuilder cells positions-and-orientations": "brainbuilder cells positions-and-orientations",
-    "atlas-building-tools direction-vectors isocortex": "atlas-building-tools direction-vectors isocortex",
-    "atlas-building-tools direction-vectors cerebellum": "atlas-building-tools direction-vectors cerebellum",
-    "atlas-building-tools direction-vectors interpolate": "atlas-building-tools direction-vectors interpolate",
-    "atlas-building-tools orientation-field": "atlas-building-tools orientation-field",
-    "atlas-building-tools region-splitter split-isocortex-layer-23": "atlas-building-tools region-splitter split-isocortex-layer-23",
-    "atlas-building-tools placement-hints isocortex": "atlas-building-tools placement-hints isocortex",
+    "atlas-building-tools direction-vectors isocortex": "atlas-direction-vectors direction-vectors isocortex",
+    "atlas-building-tools direction-vectors cerebellum": "atlas-direction-vectors direction-vectors cerebellum",
+    "atlas-building-tools direction-vectors interpolate": "atlas-direction-vectors direction-vectors interpolate",
+    "atlas-building-tools orientation-field": "atlas-direction-vectors orientation-field",
+    "atlas-building-tools region-splitter split-isocortex-layer-23": "atlas-splitter region-splitter split-isocortex-layer-23",
+    "atlas-building-tools placement-hints isocortex": "atlas-placement-hints placement-hints isocortex",
     "bba-data-integrity-check nrrd-integrity": "bba-data-integrity-check nrrd-integrity",
     "bba-data-integrity-check meshes-obj-integrity": "bba-data-integrity-check meshes-obj-integrity",
     "bba-data-integrity-check atlas-sonata-integrity": "bba-data-integrity-check atlas-sonata-integrity",
@@ -887,6 +888,50 @@ rule fetch_gene_gad67_correctednissl:
             2>&1 | tee {log}
         """
 
+##>fetch_isocortex_metadata : fetch isocortex metadata
+rule fetch_isocortex_metadata:
+    output:
+        f"{rules_config_dir}/isocortex_metadata.json"
+    params:
+        nexus_id=NEXUS_IDS["metadata"]["isocortex"],
+        app=APPS["bba-data-fetch"],
+        token = myTokenFetcher.getAccessToken()
+    log:
+        f"{LOG_DIR}/fetch_isocortex_metadata.log"
+    shell:
+        """
+        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+            --nexus-token {params.token} \
+            --nexus-org {NEXUS_ATLAS_ORG} \
+            --nexus-proj {NEXUS_ATLAS_PROJ} \
+            --out {output} \
+            --nexus-id {params.nexus_id} \
+            --verbose \
+            2>&1 | tee {log}
+        """
+
+##>fetch_isocortex_23_metadata : fetch isocortex 23 metadata
+rule fetch_isocortex_23_metadata:
+    output:
+        f"{rules_config_dir}/isocortex_23_metadata.json"
+    params:
+        nexus_id=NEXUS_IDS["metadata"]["isocortex_23"],
+        app=APPS["bba-data-fetch"],
+        token = myTokenFetcher.getAccessToken()
+    log:
+        f"{LOG_DIR}/fetch_isocortex_23_metadata.log"
+    shell:
+        """
+        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+            --nexus-token {params.token} \
+            --nexus-org {NEXUS_ATLAS_ORG} \
+            --nexus-proj {NEXUS_ATLAS_PROJ} \
+            --out {output} \
+            --nexus-id {params.nexus_id} \
+            --verbose \
+            2>&1 | tee {log}
+        """
+
 # ##>gene_expression_volume : Compute the overall mouse brain cell density
 #rule gene_expression_volume:
 #    input:
@@ -1518,6 +1563,8 @@ rule placement_hints_isocortex_ccfv3_l23split:
 
 ##>compile_densities_measurements : Compile the cell density related measurements of mmc3.xlsx and `gaba_papers.xsls` into a CSV file.
 rule compile_densities_measurements:
+    input:
+        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
     output:
         measurements_csv = f"{WORKING_DIR}/measurements.csv",
         homogenous_regions_csv = f"{WORKING_DIR}/homogenous_regions.csv"
@@ -1527,7 +1574,8 @@ rule compile_densities_measurements:
         f"{LOG_DIR}/compile_densities_measurements.log"
     shell:
         """
-        {params.app} --measurements-output-path {output.measurements_csv} \
+        {params.app} --hierarchy-path {input.hierarchy} \
+            --measurements-output-path {output.measurements_csv} \
             --homogenous-regions-output-path {output.homogenous_regions_csv} \
             2>&1 | tee {log}
         """
@@ -1666,6 +1714,31 @@ rule inhibitory_neuron_densities_linprog_ccfv2_correctednissl:
             2>&1 | tee {log}
         """
 
+##>inhibitory_neuron_densities_ccfv2_correctednissl : Create inhibitory neuron densities for the cell types in the csv file containing the fitted densities.
+rule inhibitory_neuron_densities_ccfv2_correctednissl:
+    input:
+        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
+        parcellation_volume=rules.fetch_brain_parcellation_ccfv2.output,
+        neuron_density = rules.glia_cell_densities_ccfv2_correctednissl.output.neuron_density,
+        average_densities = rules.fit_average_densities_ccfv2_correctednissl.output.fitted_densities,
+    output:
+        neuron_densities = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['neuron_densities_ccfv2_correctednissl']}"),
+        inhibitory_neuron_density = f"{CELL_POSITIONS_CCFV2_CORRECTEDNISSL_CONFIG_FILE['inputDensityVolumePath']['inhibitory_neuron']}",
+        excitatory_neuron_density = f"{CELL_POSITIONS_CCFV2_CORRECTEDNISSL_CONFIG_FILE['inputDensityVolumePath']['excitatory_neuron']}",
+    params:
+        app=APPS["atlas-building-tools cell-densities inhibitory-neuron-densities"]
+    log:
+        f"{LOG_DIR}/inhibitory_neuron_densities_ccfv2_correctednissl.log"
+    shell:
+        """
+        {params.app} --annotation-path {input.parcellation_volume} \
+            --hierarchy-path {input.hierarchy} \
+            --neuron-density-path {input.neuron_density} \
+            --average-densities-path {input.average_density} \
+            --output-dir {output.neuron_densities} \
+            2>&1 | tee {log}
+        """
+
 ##>inhibitory_neuron_densities_preserveprop_ccfv2_correctednissl : Create inhibitory neuron densities for the cell types in the csv file containing the fitted densities. Use algorithm 'keep-proportions'.
 rule inhibitory_neuron_densities_preserveprop_ccfv2_correctednissl:
     input:
@@ -1695,7 +1768,7 @@ rule create_mtypes_densities_from_profile_ccfv2_correctednissl:
     input:
         hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
         parcellation_volume=rules.fetch_brain_parcellation_ccfv2.output,
-        metadata_file = f"{rules_config_dir}/isocortex_metadata.json",
+        metadata_file=rules.fetch_isocortex_metadata.output,
         direction_vectors=rules.interpolate_direction_vectors_isocortex_ccfv2.output,
         mtypes_config = f"{MTYPES_PROFILE_CCFV2_CORRECTEDNISSL_CONFIG_}",
     output:
@@ -1720,7 +1793,7 @@ rule create_mtypes_densities_from_probability_map_ccfv2_correctednissl:
     input:
         hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
         parcellation_volume=rules.fetch_brain_parcellation_ccfv2.output,
-        metadata_file = f"{rules_config_dir}/isocortex_23_metadata.json",
+        metadata_file=rules.fetch_isocortex_23_metadata.output,
         mtypes_config = f"{MTYPES_PROBABILITY_MAP_CORRECTEDNISSL_CONFIG_}",
     output:
         directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['mtypes_densities_probability_map_ccfv2_correctednissl']}")

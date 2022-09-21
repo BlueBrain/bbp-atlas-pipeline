@@ -30,7 +30,7 @@
       "GeneExpressionVolumetricDataLayer": {
         "aldh1l1": "https://bbp.epfl.ch/neurosciencegraph/data/9e2c3aa7-3b19-4da6-9623-f864368326e6",
         "cnp": "https://bbp.epfl.ch/neurosciencegraph/data/dfaaece4-04b9-49c9-9561-6141f4e9c848",
-        "mbp": "https://bbp.epfl.ch/neurosciencegraph/data/96db5934-e9ef-47e8-bc66-3624509ddaeb",
+        "mbp": "https://bbp.epfl.ch/neurosciencegraph/data/d05b318f-266c-4f15-8ee1-e1d320d79783",
         "gad": "https://bbp.epfl.ch/neurosciencegraph/data/50b8e911-6d97-4a82-910b-325273cafed6",
         "gfap": "https://bbp.epfl.ch/neurosciencegraph/data/a7b63363-742e-4671-826f-3a2b82db17c6",
         "nrn1": "https://bbp.epfl.ch/neurosciencegraph/data/6951d06f-6be9-45f5-a2f3-d4001af9cca5",
@@ -50,5 +50,9 @@
         "annotation_stack_ccfv2_coronal": "https://bbp.epfl.ch/neurosciencegraph/data/d45f1a66-e663-4991-bda9-3ee8bc447061"
       }
     }
+  },
+  "metadata" :{
+    "isocortex": "https://bbp.epfl.ch/neurosciencegraph/data/6a593672-9e7d-45aa-8740-19d79da9b3d3",
+    "isocortex_23": "https://bbp.epfl.ch/neurosciencegraph/data/cf344609-7809-4996-9305-6490caf737f6"
   }
 }
