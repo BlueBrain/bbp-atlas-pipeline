@@ -14,7 +14,7 @@ RUN apt-get update && \
 
 RUN apt-get -y install pip git
 
-WORKDIR /annotation
+WORKDIR /pipeline
 
 COPY .. blue_brain_atlas_pipeline/
 
