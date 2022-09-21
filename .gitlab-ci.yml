@@ -68,7 +68,8 @@ update-annotation-image:
   rules:
     - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop"
       changes:
-        - annotation/Dockerfile
+        - snakefile
+        - Dockerfile
         - .gitlab-ci.yml
       when: on_success
   variables:
@@ -80,6 +81,8 @@ update-annotation-image:
 convert_and_deploy_job:
   stage:
     convert_and_deployToBB5
+  needs: ["update-annotation-image"]
+  when: on_success
   tags:
     - bb5_map
   variables:
