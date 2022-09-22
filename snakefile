@@ -108,6 +108,7 @@ APPS = {
     "atlas-building-tools cell-densities inhibitory-neuron-densities": "atlas-densities cell-densities inhibitory-neuron-densities",
     "atlas-building-tools mtype-densities create-from-profile": "atlas-densities mtype-densities create-from-profile",
     "atlas-building-tools mtype-densities create-from-probability-map": "atlas-densities mtype-densities create-from-probability-map",
+    "celltransplant mtype-densities create-from-probability-map": "celltransplant",
     "brainbuilder cells positions-and-orientations": "brainbuilder cells positions-and-orientations",
     "atlas-building-tools direction-vectors isocortex": "atlas-direction-vectors direction-vectors isocortex",
     "atlas-building-tools direction-vectors cerebellum": "atlas-direction-vectors direction-vectors cerebellum",
@@ -891,7 +892,7 @@ rule fetch_gene_gad67_correctednissl:
 ##>fetch_isocortex_metadata : fetch isocortex metadata
 rule fetch_isocortex_metadata:
     output:
-        f"{rules_config_dir}/isocortex_metadata.json"
+        f"{WORKING_DIR}/isocortex_metadata.json"
     params:
         nexus_id=NEXUS_IDS["metadata"]["isocortex"],
         app=APPS["bba-data-fetch"],
@@ -913,7 +914,7 @@ rule fetch_isocortex_metadata:
 ##>fetch_isocortex_23_metadata : fetch isocortex 23 metadata
 rule fetch_isocortex_23_metadata:
     output:
-        f"{rules_config_dir}/isocortex_23_metadata.json"
+        f"{WORKING_DIR}/isocortex_23_metadata.json"
     params:
         nexus_id=NEXUS_IDS["metadata"]["isocortex_23"],
         app=APPS["bba-data-fetch"],
@@ -1410,7 +1411,8 @@ rule interpolate_direction_vectors_isocortex_ccfv2:
     input:
         parcellation_volume=rules.fetch_brain_parcellation_ccfv2.output,
         hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
-        direction_vectors=rules.direction_vectors_isocortex_ccfv2.output
+        direction_vectors=rules.direction_vectors_isocortex_ccfv2.output,
+        metadata = rules.fetch_isocortex_metadata.output
     output:
         f"{WORKING_DIR}/interpolated_direction_vectors_isocortex_ccfv2.nrrd"
     params:
@@ -1422,7 +1424,7 @@ rule interpolate_direction_vectors_isocortex_ccfv2:
         {params.app} --annotation-path {input.parcellation_volume} \
             --hierarchy-path {input.hierarchy} \
             --direction-vectors-path {input.direction_vectors} \
-            --metadata-path f"{rules_config_dir}/isocortex_metadata.json" \
+            --metadata-path {input.metadata} \
             --nans \
             --output-path {output} \
             --algorithm shading-blur-gradient \
@@ -1810,6 +1812,35 @@ rule create_mtypes_densities_from_probability_map_ccfv2_correctednissl:
             --output-dir {output} \
             2>&1 | tee {log}
         """
+
+
+## =========================================================================================
+## ======================== TRANSPLANT DENSITIES ===========================================
+## =========================================================================================
+
+##>transplant_mtypes_densities_from_probability_map_correctednissl : Transplant neuron density nrrd files for the mtypes listed in the probability mapping csv file.
+rule transplant_mtypes_densities_from_probability_map_correctednissl:
+    input:
+        hierarchy = rules.fetch_ccf_brain_region_hierarchy.output,
+        src_parcellation_volume = rules.fetch_brain_parcellation_ccfv2.output,
+        dst_parcellation_volume = rules.fetch_brain_parcellation_ccfv3.output,
+        src_cell_volume = rules.create_mtypes_densities_from_probability_map_ccfv2_correctednissl.output
+    output:
+        directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['mtypes_densities_probability_map_transplant_correctednissl']}")
+    params:
+        app=APPS["celltransplant mtype-densities create-from-probability-map"]
+    log:
+        f"{LOG_DIR}/transplant_mtypes_densities_from_probability_map_correctednissl.log"
+    shell:
+        """
+        {params.app} --hierarchy {input.hierarchy} \
+            --src-annot-volume {input.src_parcellation_volume} \
+            --dst-annot-volume {input.dst_parcellation_volume} \
+            --src-cell-volume {input.src_cell_volume} \
+            --dst-cell-volume {output} \
+            2>&1 | tee {log}
+        """
+
 
 ## =========================================================================================
 ## ======================== EXPORT MASKS,MESHES,SUMMARIES,CELLRECORDS ======================

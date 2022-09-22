@@ -24,6 +24,7 @@ GeneratedDatasetPath:
     inhibitory_neuron_densities_preserveprop_ccfv2_correctednissl: {WORKING_DIR}/inhibitory_neuron_densities_preserveprop_ccfv2_correctednissl
     mtypes_densities_profile_ccfv2_correctednissl: {WORKING_DIR}/mtypes_densities_profile_ccfv2_correctednissl
     mtypes_densities_probability_map_ccfv2_correctednissl: {WORKING_DIR}/mtypes_densities_probability_map_ccfv2_correctednissl
+    mtypes_densities_probability_map_transplant_correctednissl: {WORKING_DIR}/mtypes_densities_probability_map_transplant_correctednissl
     brain_region_mask_ccfv3_l23split: {WORKING_DIR}/brain_region_mask_ccfv3_l23split
     brain_region_masks_hybrid: {WORKING_DIR}/brain_region_masks_hybrid
     brain_region_masks_hybrid_l23split: {WORKING_DIR}/brain_region_masks_hybrid_l23split
