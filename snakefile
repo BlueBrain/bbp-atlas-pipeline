@@ -29,7 +29,7 @@ from blue_brain_token_fetch.Token_refresher import TokenFetcher
 configfile: "config.yaml"
 
 #Launch the automatic token refreshing
-myTokenFetcher = TokenFetcher()
+myTokenFetcher = TokenFetcher(keycloak_config_file="./keycloak_config.yml")
 
 # placing the config values into local variable
 WORKING_DIR = config["WORKING_DIR"]
