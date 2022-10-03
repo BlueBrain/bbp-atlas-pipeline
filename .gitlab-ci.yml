@@ -73,6 +73,7 @@ update-pipeline-image:
         - snakefile
         - Dockerfile
         - .gitlab-ci.yml
+        - .keycloak_config.yml
       when: on_success
   variables:
     BUILD_PATH: $CI_PROJECT_DIR
