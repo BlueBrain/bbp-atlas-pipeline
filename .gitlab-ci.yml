@@ -32,6 +32,9 @@ update-pipeline-image:
     KANIKO_EXTRA_ARGS: "--build-arg CI_JOB_TOKEN=$CI_JOB_TOKEN --build-arg BBP_CA_CERT='${BBP_CA_CERT}'"
     KUBERNETES_MEMORY_LIMIT: 4Gi
     KUBERNETES_MEMORY_REQUEST: 4Gi
+  before_script:
+    - export IFS=''
+
 
 convert_and_deploy_job:
   stage:
