@@ -1,6 +1,7 @@
 FROM ubuntu:focal
 
 ARG CI_JOB_TOKEN
+ARG BBP_CA_CERT
 
 RUN apt-get update && \
         DEBIAN_FRONTEND="noninteractive" TZ="Europe/Zurich" apt-get install -y tzdata && \
@@ -48,3 +49,7 @@ RUN git config --global --remove-section url."https://gitlab-ci-token:${CI_JOB_T
 RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ atlas-building-tools==0.1.9
 
 RUN pip install snakemake==7.12.1
+
+RUN CA_BUNDLE=$(python3 -c "import certifi; print(certifi.where())")
+RUN cat $BBP_CA_CERT >> $CA_BUNDLE
+
