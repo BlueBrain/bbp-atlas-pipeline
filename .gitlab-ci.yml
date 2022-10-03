@@ -29,7 +29,7 @@ update-pipeline-image:
       when: on_success
   variables:
     BUILD_PATH: $CI_PROJECT_DIR
-    KANIKO_EXTRA_ARGS: "--build-arg CI_JOB_TOKEN=$CI_JOB_TOKEN --build-arg BBP_CA_CERT=$BBP_CA_CERT"
+    KANIKO_EXTRA_ARGS: "--build-arg CI_JOB_TOKEN=$CI_JOB_TOKEN --build-arg BBP_CA_CERT=${BBP_CA_CERT}"
     KUBERNETES_MEMORY_LIMIT: 4Gi
     KUBERNETES_MEMORY_REQUEST: 4Gi
 
