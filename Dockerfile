@@ -50,10 +50,7 @@ RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ atlas-buildi
 
 RUN pip install snakemake==7.12.1
 
-RUN CA_BUNDLE=$(python3 -c "import certifi; print(certifi.where())")
-RUN echo $($CA_BUNDLE)
-RUN echo $(ls $CA_BUNDLE)
+RUN CA_BUNDLE=$(python3 -c "import certifi; print(certifi.where())");echo $CA_BUNDLE; ls $CA_BUNDLE
 RUN echo $($BBP_CA_CERT)
-RUN echo $(ls $BBP_CA_CERT)
 RUN cat ${BBP_CA_CERT} >> $CA_BUNDLE
 
