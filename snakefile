@@ -28,7 +28,7 @@ from blue_brain_token_fetch.Token_refresher import TokenFetcher
 # loading the config
 configfile: "config.yaml"
 
-#Launch the automatic token refreshing
+# Launch the automatic token refreshing
 myTokenFetcher = TokenFetcher(keycloak_config_file="./keycloak_config.yml")
 
 # placing the config values into local variable
@@ -1427,7 +1427,7 @@ rule interpolate_direction_vectors_isocortex_ccfv2:
             --metadata-path {input.metadata} \
             --nans \
             --output-path {output} \
-            --algorithm shading-blur-gradient \
+            #--algorithm shading-blur-gradient \
             2>&1 | tee {log}
         """
 
@@ -2068,7 +2068,6 @@ rule push_celldensity_pipeline_datasets:
     input:
         densities_transplanted = rules.transplant_mtypes_densities_from_probability_map_correctednissl.output,
         hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
-        annotation_ccfv3_split=rules.split_isocortex_layer_23_ccfv3.output.annotation_l23split,
         push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
     params:
         app1=APPS["bba-data-push push-volumetric"].split(),
@@ -2084,8 +2083,7 @@ rule push_celldensity_pipeline_datasets:
             --nexus-org {NEXUS_DESTINATION_ORG} \
             --nexus-proj {NEXUS_DESTINATION_PROJ} \
             --nexus-token {params.token} \
-        {params.app1[1]} --dataset-path {input.annotation_ccfv3_split} \
-            --dataset-path {input.densities_transplanted} \
+        {params.app1[1]} --dataset-path {input.densities_transplanted} \
             --hierarchy-path {input.hierarchy} \
             --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
             --config-path {input.push_dataset_config} \
