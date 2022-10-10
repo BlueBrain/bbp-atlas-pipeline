@@ -114,7 +114,7 @@ APPS = {
     "atlas-building-tools direction-vectors cerebellum": "atlas-direction-vectors direction-vectors cerebellum",
     "atlas-building-tools direction-vectors interpolate": "atlas-direction-vectors direction-vectors interpolate",
     "atlas-building-tools orientation-field": "atlas-direction-vectors orientation-field",
-    "atlas-building-tools region-splitter split-isocortex-layer-23": "atlas-splitter region-splitter split-isocortex-layer-23",
+    "atlas-building-tools region-splitter split-isocortex-layer-23": "atlas-splitter split-isocortex-layer-23",
     "atlas-building-tools placement-hints isocortex": "atlas-placement-hints placement-hints isocortex",
     "bba-data-integrity-check nrrd-integrity": "bba-data-integrity-check nrrd-integrity",
     "bba-data-integrity-check meshes-obj-integrity": "bba-data-integrity-check meshes-obj-integrity",
@@ -2054,5 +2054,42 @@ rule push_annotation_pipeline_datasets:
             --link-regions-path {output.link_regions} \
             --provenance-metadata-path {PROVENANCE_METADATA_PATH} \
             --resource-tag {params.resource_tag} \
+            2>&1 | tee {log}
+        """
+
+
+## =========================================================================================
+## ============================= CELL DENSITY PIPELINE USER RULES ============================
+## =========================================================================================
+
+
+##>push_celldensity_pipeline_datasets : Global rule to generate and push into Nexus every products of the cell density pipeline
+rule push_celldensity_pipeline_datasets:
+    input:
+        densities_transplanted = rules.transplant_mtypes_densities_from_probability_map_correctednissl.output,
+        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
+        annotation_ccfv3_split=rules.split_isocortex_layer_23_ccfv3.output.annotation_l23split,
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
+    params:
+        app1=APPS["bba-data-push push-volumetric"].split(),
+        token = myTokenFetcher.getAccessToken(),
+        create_provenance_json = write_json(PROVENANCE_METADATA_PATH, PROVENANCE_METADATA, rule_name = "push_celldensity_pipeline_datasets"),
+        resource_tag = RESOURCE_TAG
+    log:
+        f"{LOG_DIR}/push_celldensity_pipeline_datasets.log"
+    shell:
+        """
+        {params.app1[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app1[1]} --dataset-path {input.annotation_ccfv3_split} \
+            --dataset-path {input.densities_transplanted} \
+            --hierarchy-path {input.hierarchy} \
+            --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
+            --config-path {input.push_dataset_config} \
+            --provenance-metadata-path {PROVENANCE_METADATA_PATH} \
+            --resource-tag {params.resource_tag}
             2>&1 | tee {log}
         """
