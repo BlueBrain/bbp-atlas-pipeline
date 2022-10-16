@@ -1,11 +1,11 @@
 #!/bin/bash -l
 #SBATCH -N 1			# Number of nodes
 
-#SBATCH -p prod			# Submit to the production 'partition'
-#SBATCH -t 24:00:00		# Set 24 hours time limit
+#SBATCH -p prod		# Submit to the production 'partition'
+##SBATCH -t 24:00:00		# Set 24 hours time limit
 
-##SBATCH --qos=longjob		# Allows to run a job up to 3 days
-##SBATCH -t 72:00:00		# Set 24 hours time limit
+#SBATCH --qos=longjob		# Allows to run a job up to 3 days
+#SBATCH -t 72:00:00		# Set 24 hours time limit
 
 #SBATCH -C "knl"		# Constraint the job to run on nodes without SSDs. If you want SSD, use only "nvme". If you want KNLs then "knl"
 #SBATCH --exclusive		# only if you want to allocate whole node
@@ -18,7 +18,9 @@ FILE=snakefile
 #FILE=snakefile_noMaskMesh
 
 #TARGET=generate_annotation_pipeline_datasets
-TARGET=push_annotation_pipeline_datasets
+#TARGET=push_annotation_pipeline_datasets
+#TARGET=create_mtypes_densities_from_probability_map_ccfv2_l23split_correctednissl
+TARGET=push_celldensity_transplant_l23split_pipeline_datasets
 
 module load unstable
 

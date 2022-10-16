@@ -93,7 +93,7 @@ L.logger.addHandler(logfile_handler)
 APPS = {
     "bba-data-fetch": "bba-data-fetch",
     "parcellationexport": "parcellationexport",
-    "atlas-building-tools combination combine-annotations": "atlas-densities combination combine-annotations",
+    "atlas-building-tools combination combine-annotations": "atlas-densities combination combine-v2-v3-annotations",
     "atlas-building-tools combination combine-markers": "atlas-densities combination combine-markers",
     "atlas-building-tools cell-detection svg-to-png": "atlas-building-tools cell-detection svg-to-png",
     "atlas-building-tools cell-detection extract-color-map": "atlas-building-tools cell-detection extract-color-map",
@@ -182,20 +182,32 @@ for file in files_list:
     except FileExistsError:
         pass
 
-with open(f"{rules_config_dir}/combine_markers_hybrid_config.yaml", "r") as file:
-    COMBINE_MARKERS_HYBRID_CONFIG_FILE = yaml.safe_load(file.read().strip())
-
 with open(f"{rules_config_dir}/combine_markers_ccfv2_config.yaml", "r") as file:
     COMBINE_MARKERS_CCFV2_CONFIG_FILE = yaml.safe_load(file.read().strip())
 
-with open(f"{rules_config_dir}/cell_positions_hybrid_config.yaml", "r") as file:
-    CELL_POSITIONS_HYBRID_CONFIG_FILE = yaml.safe_load(file.read().strip())
+with open(f"{rules_config_dir}/combine_markers_ccfv2_l23split_config.yaml", "r") as file:
+    COMBINE_MARKERS_CCFV2_L23SPLIT_CONFIG_FILE = yaml.safe_load(file.read().strip())
+
+with open(f"{rules_config_dir}/combine_markers_hybrid_config.yaml", "r") as file:
+    COMBINE_MARKERS_HYBRID_CONFIG_FILE = yaml.safe_load(file.read().strip())
+
+with open(f"{rules_config_dir}/combine_markers_hybrid_l23split_config.yaml", "r") as file:
+    COMBINE_MARKERS_HYBRID_L23SPLIT_CONFIG_FILE = yaml.safe_load(file.read().strip())
 
 with open(f"{rules_config_dir}/cell_positions_ccfv2_config.yaml", "r") as file:
     CELL_POSITIONS_CCFV2_CONFIG_FILE = yaml.safe_load(file.read().strip())
 
 with open(f"{rules_config_dir}/cell_positions_ccfv2_correctednissl_config.yaml", "r") as file:
     CELL_POSITIONS_CCFV2_CORRECTEDNISSL_CONFIG_FILE = yaml.safe_load(file.read().strip())
+
+with open(f"{rules_config_dir}/cell_positions_ccfv2_l23split_correctednissl_config.yaml", "r") as file:
+    CELL_POSITIONS_CCFV2_L23SPLIT_CORRECTEDNISSL_CONFIG_FILE = yaml.safe_load(file.read().strip())
+
+with open(f"{rules_config_dir}/cell_positions_hybrid_config.yaml", "r") as file:
+    CELL_POSITIONS_HYBRID_CONFIG_FILE = yaml.safe_load(file.read().strip())
+
+with open(f"{rules_config_dir}/cell_positions_hybrid_l23split_correctednissl_config.yaml", "r") as file:
+    CELL_POSITIONS_HYBRID_L23SPLIT_CORRECTEDNISSL_CONFIG_FILE = yaml.safe_load(file.read().strip())
 
 with open(f"{rules_config_dir}/push_dataset_config.yaml", "r") as file:
     PUSH_DATASET_CONFIG_FILE = yaml.safe_load(file.read().strip())
@@ -206,6 +218,7 @@ MTYPES_PROFILE_CCFV2_CONFIG_ = f"{rules_config_dir}/mtypes_profile_ccfv2_config.
 MTYPES_PROFILE_CCFV2_CORRECTEDNISSL_CONFIG_ = f"{rules_config_dir}/mtypes_profile_ccfv2_correctednissl_config.yaml"
 MTYPES_PROBABILITY_MAP_CONFIG_ = f"{rules_config_dir}/mtypes_probability_map_config.yaml"
 MTYPES_PROBABILITY_MAP_CORRECTEDNISSL_CONFIG_ = f"{rules_config_dir}/mtypes_probability_map_correctednissl_config.yaml"
+MTYPES_PROBABILITY_MAP_CORRECTEDNISSL_LINPROG_CCFV2_L23SPLIT_CONFIG_ = f"{rules_config_dir}/mtypes_probability_map_correctednissl_linprog_ccfv2_l23split_config_template.yaml"
 
 def write_json(asso_json_path, dict, **kwargs):
     file_path_update = open(asso_json_path, 'w')
@@ -495,7 +508,7 @@ rule combine_annotations:
         f"{LOG_DIR}/combine_annotations.log"
     shell:
         """
-        {params.app} --hierarchy {input.hierarchy} \
+        {params.app} --hierarchy-path {input.hierarchy} \
             --brain-annotation-ccfv2 {input.brain_ccfv2} \
             --fiber-annotation-ccfv2 {input.fiber_ccfv2} \
             --brain-annotation-ccfv3 {input.brain_ccfv3} \
@@ -952,6 +965,242 @@ rule fetch_isocortex_23_metadata:
 #            2>&1 | tee {log}
 #        """
 
+## =========================================================================================
+## =============================== ANNOTATION PIPELINE PART 1.1 ============================
+## =========================================================================================
+
+##>direction_vectors_isocortex_ccfv2 : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood. The output is only for the top regions of the isocortex.
+rule direction_vectors_isocortex_ccfv2:
+    input:
+        parcellation_volume=rules.fetch_brain_parcellation_ccfv2.output,
+        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output
+    output:
+        f"{WORKING_DIR}/direction_vectors_isocortex_ccfv2.nrrd"
+    params:
+        app=APPS["atlas-building-tools direction-vectors isocortex"]
+    log:
+        f"{LOG_DIR}/direction_vectors_isocortex_ccfv2.log"
+    shell:
+        """
+        {params.app} --annotation-path {input.parcellation_volume} \
+            --hierarchy-path reference_atlas_v2/annotation_combined_25.nrrd \
+            --output-path {output} \
+            --algorithm shading-blur-gradient \
+            2>&1 | tee {log}
+        """ #touch {output}"""
+
+##>direction_vectors_isocortex_ccfv3 : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood. The output is only for the top regions of the isocortex.
+rule direction_vectors_isocortex_ccfv3:
+    input:
+        parcellation_volume=rules.fetch_brain_parcellation_ccfv3.output,
+        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output
+    output:
+        f"{WORKING_DIR}/direction_vectors_isocortex_ccfv3.nrrd"
+    params:
+        app=APPS["atlas-building-tools direction-vectors isocortex"]
+    log:
+        f"{LOG_DIR}/direction_vectors_isocortex_ccfv3.log"
+    shell:
+        """{params.app} --annotation-path {input.parcellation_volume} \
+            --hierarchy-path {input.hierarchy} \
+            --output-path {output} \
+            --algorithm shading-blur-gradient \
+            2>&1 | tee {log}
+        """
+
+##>direction_vectors_isocortex_hybrid : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood. The output is only for the top regions of the isocortex.
+rule direction_vectors_isocortex_hybrid:
+    input:
+        parcellation_volume=rules.combine_annotations.output,
+        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output
+    output:
+        f"{WORKING_DIR}/direction_vectors_isocortex_hybrid.nrrd"
+    params:
+        app=APPS["atlas-building-tools direction-vectors isocortex"]
+    log:
+        f"{LOG_DIR}/direction_vectors_isocortex_hybrid.log"
+    shell:
+        """{params.app} --annotation-path {input.parcellation_volume} \
+            --hierarchy-path {input.hierarchy} \
+            --output-path {output} \
+            --algorithm shading-blur-gradient \
+            2>&1 | tee {log}
+        """
+
+##>direction_vectors_cerebellum : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood. The output is only for some regions of the cerebellum.
+rule direction_vectors_cerebellum:
+    input:
+        parcellation_volume=rules.fetch_brain_parcellation_ccfv2.output
+    output:
+        f"{WORKING_DIR}/direction_vectors_cerebellum.nrrd"
+    params:
+        app=APPS["atlas-building-tools direction-vectors cerebellum"]
+    log:
+        f"{LOG_DIR}/direction_vectors_cerebellum.log"
+    shell:
+        """
+        {params.app} --annotation-path {input.parcellation_volume} \
+            --output-path {output} \
+            --algorithm shading-blur-gradient \
+            2>&1 | tee {log}
+        """
+
+##>interpolate_direction_vectors_isocortex_ccfv2 : Interpolate the [NaN, NaN, NaN] direction vectors by non-[NaN, NaN, NaN] ones.
+rule interpolate_direction_vectors_isocortex_ccfv2:
+    input:
+        parcellation_volume=rules.fetch_brain_parcellation_ccfv2.output,
+        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
+        direction_vectors=rules.direction_vectors_isocortex_ccfv2.output,
+        metadata = rules.fetch_isocortex_metadata.output
+    output:
+        f"{WORKING_DIR}/interpolated_direction_vectors_isocortex_ccfv2.nrrd"
+    params:
+        app=APPS["atlas-building-tools direction-vectors interpolate"]
+    log:
+        f"{LOG_DIR}/interpolate_direction_vectors_isocortex_ccfv2.log"
+    shell:
+        """
+        {params.app} --annotation-path {input.parcellation_volume} \
+            --hierarchy-path {input.hierarchy} \
+            --direction-vectors-path {input.direction_vectors} \
+            --metadata-path {input.metadata} \
+            --nans \
+            --output-path {output} \
+            #--algorithm shading-blur-gradient \
+            2>&1 | tee {log}
+        """ #touch {output}
+        #"""
+
+
+##>split_isocortex_layer_23_ccfv2 : Refine annotations by splitting brain regions
+rule split_isocortex_layer_23_ccfv2:
+    input:
+        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
+        parcellation_volume=rules.fetch_brain_parcellation_ccfv2.output,
+        direction_vectors=rules.interpolate_direction_vectors_isocortex_ccfv2.output
+    output:
+        hierarchy_l23split=f"{PUSH_DATASET_CONFIG_FILE['HierarchyJson']['hierarchy_l23split']}",
+        annotation_l23split=f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['annotation_ccfv2_l23split']}"
+    params:
+        app=APPS["atlas-building-tools region-splitter split-isocortex-layer-23"]
+    log:
+        f"{LOG_DIR}/split_isocortex_layer_23_ccfv2.log"
+    shell:
+        """
+        {params.app} --hierarchy-path {input.hierarchy} \
+            --annotation-path {input.parcellation_volume} \
+            --direction-vectors-path {input.direction_vectors} \
+            --output-hierarchy-path {output.hierarchy_l23split} \
+            --output-annotation-path {output.annotation_l23split} \
+            2>&1 | tee {log}
+        """
+
+##>split_isocortex_layer_23_ccfv3 : Refine annotations by splitting brain regions
+rule split_isocortex_layer_23_ccfv3:
+    input:
+        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
+        parcellation_volume=rules.fetch_brain_parcellation_ccfv3.output,
+        direction_vectors=rules.direction_vectors_isocortex_ccfv3.output
+    output:
+        hierarchy_l23split=f"{PUSH_DATASET_CONFIG_FILE['HierarchyJson']['hierarchy_l23split']}",
+        annotation_l23split=f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['annotation_ccfv3_l23split']}"
+    params:
+        app=APPS["atlas-building-tools region-splitter split-isocortex-layer-23"]
+    log:
+        f"{LOG_DIR}/split_isocortex_layer_23_ccfv3.log"
+    shell:
+        """
+        {params.app} --hierarchy-path {input.hierarchy} \
+            --annotation-path {input.parcellation_volume} \
+            --direction-vectors-path {input.direction_vectors} \
+            --output-hierarchy-path {output.hierarchy_l23split} \
+            --output-annotation-path {output.annotation_l23split} \
+            2>&1 | tee {log}
+        """
+
+##>split_isocortex_layer_23_hybrid : Refine annotations by splitting brain regions
+rule split_isocortex_layer_23_hybrid:
+    input:
+        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
+        parcellation_volume=rules.combine_annotations.output,
+        direction_vectors=rules.direction_vectors_isocortex_hybrid.output
+    output:
+        hierarchy_l23split=f"{PUSH_DATASET_CONFIG_FILE['HierarchyJson']['hierarchy_l23split']}",
+        annotation_l23split=f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['annotation_hybrid_l23split']}"
+    params:
+        app=APPS["atlas-building-tools region-splitter split-isocortex-layer-23"]
+    log:
+        f"{LOG_DIR}/split_isocortex_layer_23_hybrid.log"
+    shell:
+        """
+        {params.app} --hierarchy-path {input.hierarchy} \
+            --annotation-path {input.parcellation_volume} \
+            --direction-vectors-path {input.direction_vectors} \
+            --output-hierarchy-path {output.hierarchy_l23split} \
+            --output-annotation-path {output.annotation_l23split} \
+            2>&1 | tee {log}
+        """
+
+
+##>combine_markers_ccfv2 : Generate and save the combined glia files and the global celltype scaling factors
+rule combine_markers_ccfv2:
+    input:
+        aldh1l1 = rules.fetch_gene_aldh1l1.output,
+        cnp = rules.fetch_gene_cnp.output,
+        mbp = rules.fetch_gene_mbp.output,
+        gfap = rules.fetch_gene_gfap.output,
+        s100b = rules.fetch_gene_s100b.output,
+        tmem119 = rules.fetch_gene_tmem119.output,
+        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
+        parcellation_volume=rules.fetch_brain_parcellation_ccfv2.output,
+        markers_config_file = f"{rules_config_dir}/combine_markers_ccfv2_config.yaml"
+    output:
+        oligodendrocyte_volume = f"{COMBINE_MARKERS_CCFV2_CONFIG_FILE['outputCellTypeVolumePath']['oligodendrocyte']}",
+        astrocyte_volume = f"{COMBINE_MARKERS_CCFV2_CONFIG_FILE['outputCellTypeVolumePath']['astrocyte']}",
+        microglia_volume = f"{COMBINE_MARKERS_CCFV2_CONFIG_FILE['outputCellTypeVolumePath']['microglia']}",
+        glia_volume = f"{COMBINE_MARKERS_CCFV2_CONFIG_FILE['outputOverallGliaVolumePath']}",
+        cell_proportion = f"{COMBINE_MARKERS_CCFV2_CONFIG_FILE['outputCellTypeProportionsPath']}"
+    params:
+        app=APPS["atlas-building-tools combination combine-markers"]
+    log:
+        f"{LOG_DIR}/combine_markers_ccfv2.log"
+    shell:
+        """
+        {params.app} --hierarchy-path {input.hierarchy} \
+            --annotation-path {input.parcellation_volume} \
+            --config {input.markers_config_file} \
+            2>&1 | tee {log}
+        """
+
+##>combine_markers_ccfv2_l23split : Generate and save the combined glia files and the global celltype scaling factors
+rule combine_markers_ccfv2_l23split:
+    input:
+        aldh1l1 = rules.fetch_gene_aldh1l1.output,
+        cnp = rules.fetch_gene_cnp.output,
+        mbp = rules.fetch_gene_mbp.output,
+        gfap = rules.fetch_gene_gfap.output,
+        s100b = rules.fetch_gene_s100b.output,
+        tmem119 = rules.fetch_gene_tmem119.output,
+        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
+        parcellation_volume=rules.fetch_brain_parcellation_ccfv2.output,
+        markers_config_file = f"{rules_config_dir}/combine_markers_ccfv2_l23split_config.yaml"
+    output:
+        oligodendrocyte_volume = f"{COMBINE_MARKERS_CCFV2_L23SPLIT_CONFIG_FILE['outputCellTypeVolumePath']['oligodendrocyte']}",
+        astrocyte_volume = f"{COMBINE_MARKERS_CCFV2_L23SPLIT_CONFIG_FILE['outputCellTypeVolumePath']['astrocyte']}",
+        microglia_volume = f"{COMBINE_MARKERS_CCFV2_L23SPLIT_CONFIG_FILE['outputCellTypeVolumePath']['microglia']}",
+        glia_volume = f"{COMBINE_MARKERS_CCFV2_L23SPLIT_CONFIG_FILE['outputOverallGliaVolumePath']}",
+        cell_proportion = f"{COMBINE_MARKERS_CCFV2_L23SPLIT_CONFIG_FILE['outputCellTypeProportionsPath']}"
+    params:
+        app=APPS["atlas-building-tools combination combine-markers"]
+    log:
+        f"{LOG_DIR}/combine_markers_ccfv2_l23split.log"
+    shell:
+        """{params.app} --hierarchy-path {input.hierarchy} \
+            --annotation-path {input.parcellation_volume} \
+            --config {input.markers_config_file} \
+            2>&1 | tee {log}
+        """
+
 ##>combine_markers_hybrid : Generate and save the combined glia files and the global celltype scaling factors
 rule combine_markers_hybrid:
     input:
@@ -981,10 +1230,9 @@ rule combine_markers_hybrid:
             --config {input.markers_config_file} \
             2>&1 | tee {log}
         """
-
         
-##>combine_markers_ccfv2 : Generate and save the combined glia files and the global celltype scaling factors
-rule combine_markers_ccfv2:
+##>combine_markers_hybrid_l23split : Generate and save the combined glia files and the global celltype scaling factors
+rule combine_markers_hybrid_l23split:
     input:
         aldh1l1 = rules.fetch_gene_aldh1l1.output,
         cnp = rules.fetch_gene_cnp.output,
@@ -992,19 +1240,19 @@ rule combine_markers_ccfv2:
         gfap = rules.fetch_gene_gfap.output,
         s100b = rules.fetch_gene_s100b.output,
         tmem119 = rules.fetch_gene_tmem119.output,
-        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
-        parcellation_volume=rules.fetch_brain_parcellation_ccfv2.output,
-        markers_config_file = f"{rules_config_dir}/combine_markers_ccfv2_config.yaml"
+        hierarchy=rules.split_isocortex_layer_23_hybrid.output.hierarchy_l23split,
+        parcellation_volume=rules.split_isocortex_layer_23_hybrid.output.annotation_l23split,
+        markers_config_file = f"{rules_config_dir}/combine_markers_hybrid_l23split_config.yaml"
     output:
-        oligodendrocyte_volume = f"{COMBINE_MARKERS_CCFV2_CONFIG_FILE['outputCellTypeVolumePath']['oligodendrocyte']}",
-        astrocyte_volume = f"{COMBINE_MARKERS_CCFV2_CONFIG_FILE['outputCellTypeVolumePath']['astrocyte']}",
-        microglia_volume = f"{COMBINE_MARKERS_CCFV2_CONFIG_FILE['outputCellTypeVolumePath']['microglia']}",
-        glia_volume = f"{COMBINE_MARKERS_CCFV2_CONFIG_FILE['outputOverallGliaVolumePath']}",
-        cell_proportion = f"{COMBINE_MARKERS_CCFV2_CONFIG_FILE['outputCellTypeProportionsPath']}"
+        oligodendrocyte_volume = f"{COMBINE_MARKERS_HYBRID_L23SPLIT_CONFIG_FILE['outputCellTypeVolumePath']['oligodendrocyte']}",
+        astrocyte_volume = f"{COMBINE_MARKERS_HYBRID_L23SPLIT_CONFIG_FILE['outputCellTypeVolumePath']['astrocyte']}",
+        microglia_volume = f"{COMBINE_MARKERS_HYBRID_L23SPLIT_CONFIG_FILE['outputCellTypeVolumePath']['microglia']}",
+        glia_volume = f"{COMBINE_MARKERS_HYBRID_L23SPLIT_CONFIG_FILE['outputOverallGliaVolumePath']}",
+        cell_proportion = f"{COMBINE_MARKERS_HYBRID_L23SPLIT_CONFIG_FILE['outputCellTypeProportionsPath']}"
     params:
         app=APPS["atlas-building-tools combination combine-markers"]
     log:
-        f"{LOG_DIR}/combine_markers_ccfv2.log"
+        f"{LOG_DIR}/combine_markers_hybrid_l23split.log"
     shell:
         """
         {params.app} --hierarchy-path {input.hierarchy} \
@@ -1069,26 +1317,6 @@ rule compute_average_soma_radius:
             2>&1 | tee {log}
         """
 
-##>cell_density_hybrid : Compute the overall mouse brain cell density
-rule cell_density_hybrid:
-    input:
-        hierarchy = rules.fetch_ccf_brain_region_hierarchy.output,
-        parcellation_volume = rules.combine_annotations.output,
-        nissl_volume = rules.fetch_nissl_stained_volume.output
-    output:
-        f"{WORKING_DIR}/cell_density_hybrid.nrrd"
-    params:
-        app=APPS["atlas-building-tools cell-densities cell-density"]
-    log:
-        f"{LOG_DIR}/cell_density_hybrid.log"
-    shell:
-        """
-        {params.app} --annotation-path {input.parcellation_volume} \
-            --hierarchy-path {input.hierarchy} \
-            --nissl-path {input.nissl_volume} \
-            --output-path {output} \
-            2>&1 | tee {log}
-        """
         
 ##>cell_density_ccfv2 : Compute the overall mouse brain cell density
 rule cell_density_ccfv2:
@@ -1110,7 +1338,49 @@ rule cell_density_ccfv2:
             --output-path {output} \
             2>&1 | tee {log}
         """
-        
+
+##>cell_density_hybrid : Compute the overall mouse brain cell density
+rule cell_density_hybrid:
+    input:
+        hierarchy = rules.fetch_ccf_brain_region_hierarchy.output,
+        parcellation_volume = rules.combine_annotations.output,
+        nissl_volume = rules.fetch_nissl_stained_volume.output
+    output:
+        f"{WORKING_DIR}/cell_density_hybrid.nrrd"
+    params:
+        app=APPS["atlas-building-tools cell-densities cell-density"]
+    log:
+        f"{LOG_DIR}/cell_density_hybrid.log"
+    shell:
+        """
+        {params.app} --annotation-path {input.parcellation_volume} \
+            --hierarchy-path {input.hierarchy} \
+            --nissl-path {input.nissl_volume} \
+            --output-path {output} \
+            2>&1 | tee {log}
+        """
+
+##>cell_density_ccfv2_l23split_correctednissl : Compute the overall mouse brain cell density
+rule cell_density_ccfv2_l23split_correctednissl:
+    input:
+        hierarchy=rules.split_isocortex_layer_23_ccfv2.output.hierarchy_l23split,
+        parcellation_volume=rules.split_isocortex_layer_23_ccfv2.output.annotation_l23split,
+        nissl_volume = rules.fetch_corrected_nissl_stained_volume.output
+    output:
+        f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['overall_cell_density_ccfv2_l23split_correctednissl']}"
+    params:
+        app=APPS["atlas-building-tools cell-densities cell-density"]
+    log:
+        f"{LOG_DIR}/cell_density_ccfv2_l23split_correctednissl.log"
+    shell:
+        """
+        {params.app} --annotation-path {input.parcellation_volume} \
+            --hierarchy-path {input.hierarchy} \
+            --nissl-path {input.nissl_volume} \
+            --output-path {output} \
+            2>&1 | tee {log}
+        """
+ 
 ##>cell_density_ccfv2_correctednissl : Compute the overall mouse brain cell density
 rule cell_density_ccfv2_correctednissl:
     input:
@@ -1129,6 +1399,137 @@ rule cell_density_ccfv2_correctednissl:
             --hierarchy-path {input.hierarchy} \
             --nissl-path {input.nissl_volume} \
             --output-path {output} \
+            2>&1 | tee {log}
+        """
+
+##>cell_density_hybrid_l23split_correctednissl : Compute the overall mouse brain cell density
+rule cell_density_hybrid_l23split_correctednissl:
+    input:
+        hierarchy=rules.split_isocortex_layer_23_hybrid.output.hierarchy_l23split,
+        parcellation_volume=rules.split_isocortex_layer_23_hybrid.output.annotation_l23split,
+        nissl_volume = rules.fetch_corrected_nissl_stained_volume.output
+    output:
+        f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['overall_cell_density_hybrid_l23split_correctednissl']}"
+    params:
+        app=APPS["atlas-building-tools cell-densities cell-density"]
+    log:
+        f"{LOG_DIR}/cell_density_hybrid_l23split_correctednissl.log"
+    shell:
+        """
+        {params.app} --annotation-path {input.parcellation_volume} \
+            --hierarchy-path {input.hierarchy} \
+            --nissl-path {input.nissl_volume} \
+            --output-path {output} \
+            2>&1 | tee {log}
+        """
+
+
+##>glia_cell_densities_ccfv2 : Compute and save the glia cell densities
+rule glia_cell_densities_ccfv2:
+    input:
+        hierarchy = rules.fetch_ccf_brain_region_hierarchy.output,
+        parcellation_volume = rules.fetch_brain_parcellation_ccfv2.output,
+        overall_cell_density = rules.cell_density_ccfv2.output,
+        glia_density = rules.combine_markers_ccfv2.output.glia_volume,
+        astro_density = rules.combine_markers_ccfv2.output.astrocyte_volume,
+        oligo_density = rules.combine_markers_ccfv2.output.oligodendrocyte_volume,
+        microglia_density = rules.combine_markers_ccfv2.output.microglia_volume,
+        glia_proportion = rules.combine_markers_ccfv2.output.cell_proportion
+    output:
+        #cell_densities = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['cell_densities_ccfv2']}"),
+        glia_density = f"{WORKING_DIR}/cell_densities_ccfv2/glia_density.nrrd",
+        astrocyte_density = f"{CELL_POSITIONS_CCFV2_CONFIG_FILE['inputDensityVolumePath']['astrocyte']}",
+        oligodendrocyte_density = f"{CELL_POSITIONS_CCFV2_CONFIG_FILE['inputDensityVolumePath']['oligodendrocyte']}",
+        microglia_density = f"{CELL_POSITIONS_CCFV2_CONFIG_FILE['inputDensityVolumePath']['microglia']}",
+        neuron_density = f"{WORKING_DIR}/cell_densities_ccfv2/neuron_density.nrrd"
+    params:
+        app=APPS["atlas-building-tools cell-densities glia-cell-densities"],
+        out=f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['cell_densities_ccfv2']}"
+    log:
+        f"{LOG_DIR}/glia_cell_densities_ccfv2.log"
+    shell:
+        """
+        {params.app} --annotation-path {input.parcellation_volume} \
+            --hierarchy-path {input.hierarchy} \
+            --cell-density-path {input.overall_cell_density} \
+            --glia-density-path {input.glia_density} \
+            --astrocyte-density-path {input.astro_density} \
+            --oligodendrocyte-density-path {input.oligo_density} \
+            --microglia-density-path {input.microglia_density} \
+            --glia-proportions-path {input.glia_proportion} \
+            --output-dir {params.out}
+            2>&1 | tee {log}
+        """
+                   #--output-dir {output.cell_densities} \
+ 
+##>glia_cell_densities_ccfv2_correctednissl : Compute and save the glia cell densities
+rule glia_cell_densities_ccfv2_correctednissl:
+    input:
+        hierarchy = rules.fetch_ccf_brain_region_hierarchy.output,
+        parcellation_volume = rules.fetch_brain_parcellation_ccfv2.output,
+        overall_cell_density = rules.cell_density_ccfv2_correctednissl.output,
+        glia_density = rules.combine_markers_ccfv2.output.glia_volume,
+        astro_density = rules.combine_markers_ccfv2.output.astrocyte_volume,
+        oligo_density = rules.combine_markers_ccfv2.output.oligodendrocyte_volume,
+        microglia_density = rules.combine_markers_ccfv2.output.microglia_volume,
+        glia_proportion = rules.combine_markers_ccfv2.output.cell_proportion
+    output:
+        glia_density = f"{WORKING_DIR}/cell_densities_ccfv2_correctednissl/glia_density.nrrd",
+        astrocyte_density = f"{CELL_POSITIONS_CCFV2_CORRECTEDNISSL_CONFIG_FILE['inputDensityVolumePath']['astrocyte']}",
+        oligodendrocyte_density = f"{CELL_POSITIONS_CCFV2_CORRECTEDNISSL_CONFIG_FILE['inputDensityVolumePath']['oligodendrocyte']}",
+        microglia_density = f"{CELL_POSITIONS_CCFV2_CORRECTEDNISSL_CONFIG_FILE['inputDensityVolumePath']['microglia']}",
+        neuron_density = f"{WORKING_DIR}/cell_densities_ccfv2_correctednissl/neuron_density.nrrd"
+    params:
+        app = APPS["atlas-building-tools cell-densities glia-cell-densities"],
+        outdir = f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['cell_densities_ccfv2_correctednissl']}"
+    log:
+        f"{LOG_DIR}/glia_cell_densities_ccfv2_correctednissl.log"
+    shell:
+        """
+        {params.app} --annotation-path {input.parcellation_volume} \
+            --hierarchy-path {input.hierarchy} \
+            --cell-density-path {input.overall_cell_density} \
+            --glia-density-path {input.glia_density} \
+            --astrocyte-density-path {input.astro_density} \
+            --oligodendrocyte-density-path {input.oligo_density} \
+            --microglia-density-path {input.microglia_density} \
+            --glia-proportions-path {input.glia_proportion} \
+            --output-dir {params.outdir} \
+            2>&1 | tee {log}
+        """
+
+##>glia_cell_densities_ccfv2_l23split_correctednissl : Compute and save the glia cell densities
+rule glia_cell_densities_ccfv2_l23split_correctednissl:
+    input:
+        hierarchy=rules.split_isocortex_layer_23_ccfv2.output.hierarchy_l23split,
+        parcellation_volume=rules.split_isocortex_layer_23_ccfv2.output.annotation_l23split,
+        overall_cell_density = rules.cell_density_ccfv2_l23split_correctednissl.output,
+        glia_density = rules.combine_markers_ccfv2_l23split.output.glia_volume,
+        astro_density = rules.combine_markers_ccfv2_l23split.output.astrocyte_volume,
+        oligo_density = rules.combine_markers_ccfv2_l23split.output.oligodendrocyte_volume,
+        microglia_density = rules.combine_markers_ccfv2_l23split.output.microglia_volume,
+        glia_proportion = rules.combine_markers_ccfv2_l23split.output.cell_proportion
+    output:
+        glia_density = f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['cell_densities_ccfv2_l23split_correctednissl']}/glia_density.nrrd",
+        astrocyte_density = f"{CELL_POSITIONS_CCFV2_L23SPLIT_CORRECTEDNISSL_CONFIG_FILE['inputDensityVolumePath']['astrocyte']}",
+        oligodendrocyte_density = f"{CELL_POSITIONS_CCFV2_L23SPLIT_CORRECTEDNISSL_CONFIG_FILE['inputDensityVolumePath']['oligodendrocyte']}",
+        microglia_density = f"{CELL_POSITIONS_CCFV2_L23SPLIT_CORRECTEDNISSL_CONFIG_FILE['inputDensityVolumePath']['microglia']}",
+        neuron_density = f"{WORKING_DIR}/cell_densities_ccfv2_l23split_correctednissl/neuron_density.nrrd"
+    params:
+        app=APPS["atlas-building-tools cell-densities glia-cell-densities"],
+        out=f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['cell_densities_ccfv2_l23split_correctednissl']}"
+    log:
+        f"{LOG_DIR}/glia_cell_densities_ccfv2_l23split_correctednissl.log"
+    shell:
+        """{params.app} --annotation-path {input.parcellation_volume} \
+            --hierarchy-path {input.hierarchy} \
+            --cell-density-path {input.overall_cell_density} \
+            --glia-density-path {input.glia_density} \
+            --astrocyte-density-path {input.astro_density} \
+            --oligodendrocyte-density-path {input.oligo_density} \
+            --microglia-density-path {input.microglia_density} \
+            --glia-proportions-path {input.glia_proportion} \
+            --output-dir {params.out} \
             2>&1 | tee {log}
         """
 
@@ -1168,65 +1569,28 @@ rule glia_cell_densities_hybrid:
             2>&1 | tee {log}
         """
 
-        
-##>glia_cell_densities_ccfv2 : Compute and save the glia cell densities
-rule glia_cell_densities_ccfv2:
+##>glia_cell_densities_hybrid_l23split_correctednissl : Compute and save the glia cell densities
+rule glia_cell_densities_hybrid_l23split_correctednissl:
     input:
-        hierarchy = rules.fetch_ccf_brain_region_hierarchy.output,
-        parcellation_volume = rules.fetch_brain_parcellation_ccfv2.output,
-        overall_cell_density = rules.cell_density_ccfv2.output,
-        glia_density = rules.combine_markers_ccfv2.output.glia_volume,
-        astro_density = rules.combine_markers_ccfv2.output.astrocyte_volume,
-        oligo_density = rules.combine_markers_ccfv2.output.oligodendrocyte_volume,
-        microglia_density = rules.combine_markers_ccfv2.output.microglia_volume,
-        glia_proportion = rules.combine_markers_ccfv2.output.cell_proportion
+        hierarchy=rules.split_isocortex_layer_23_hybrid.output.hierarchy_l23split,
+        parcellation_volume=rules.split_isocortex_layer_23_hybrid.output.annotation_l23split,
+        overall_cell_density = rules.cell_density_hybrid_l23split_correctednissl.output,
+        glia_density = rules.combine_markers_hybrid_l23split.output.glia_volume,
+        astro_density = rules.combine_markers_hybrid_l23split.output.astrocyte_volume,
+        oligo_density = rules.combine_markers_hybrid_l23split.output.oligodendrocyte_volume,
+        microglia_density = rules.combine_markers_hybrid_l23split.output.microglia_volume,
+        glia_proportion = rules.combine_markers_hybrid_l23split.output.cell_proportion
     output:
-        cell_densities = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['cell_densities_ccfv2']}"),
-        glia_density = f"{WORKING_DIR}/cell_densities_ccfv2/glia_density.nrrd",
-        astrocyte_density = f"{CELL_POSITIONS_CCFV2_CONFIG_FILE['inputDensityVolumePath']['astrocyte']}",
-        oligodendrocyte_density = f"{CELL_POSITIONS_CCFV2_CONFIG_FILE['inputDensityVolumePath']['oligodendrocyte']}",
-        microglia_density = f"{CELL_POSITIONS_CCFV2_CONFIG_FILE['inputDensityVolumePath']['microglia']}",
-        neuron_density = f"{WORKING_DIR}/cell_densities_ccfv2/neuron_density.nrrd"
+        cell_densities = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['cell_densities_hybrid_l23split_correctednissl']}"),
+        glia_density = f"{WORKING_DIR}/cell_densities_hybrid_l23split_correctednissl/glia_density.nrrd",
+        astrocyte_density = f"{CELL_POSITIONS_HYBRID_L23SPLIT_CORRECTEDNISSL_CONFIG_FILE['inputDensityVolumePath']['astrocyte']}",
+        oligodendrocyte_density = f"{CELL_POSITIONS_HYBRID_L23SPLIT_CORRECTEDNISSL_CONFIG_FILE['inputDensityVolumePath']['oligodendrocyte']}",
+        microglia_density = f"{CELL_POSITIONS_HYBRID_L23SPLIT_CORRECTEDNISSL_CONFIG_FILE['inputDensityVolumePath']['microglia']}",
+        neuron_density = f"{WORKING_DIR}/cell_densities_hybrid_l23split_correctednissl/neuron_density.nrrd"
     params:
         app=APPS["atlas-building-tools cell-densities glia-cell-densities"]
     log:
-        f"{LOG_DIR}/glia_cell_densities_ccfv2.log"
-    shell:
-        """
-        {params.app} --annotation-path {input.parcellation_volume} \
-            --hierarchy-path {input.hierarchy} \
-            --cell-density-path {input.overall_cell_density} \
-            --glia-density-path {input.glia_density} \
-            --astrocyte-density-path {input.astro_density} \
-            --oligodendrocyte-density-path {input.oligo_density} \
-            --microglia-density-path {input.microglia_density} \
-            --glia-proportions-path {input.glia_proportion} \
-            --output-dir {output.cell_densities} \
-            2>&1 | tee {log}
-        """
-        
-##>glia_cell_densities_ccfv2_correctednissl : Compute and save the glia cell densities
-rule glia_cell_densities_ccfv2_correctednissl:
-    input:
-        hierarchy = rules.fetch_ccf_brain_region_hierarchy.output,
-        parcellation_volume = rules.fetch_brain_parcellation_ccfv2.output,
-        overall_cell_density = rules.cell_density_ccfv2_correctednissl.output,
-        glia_density = rules.combine_markers_ccfv2.output.glia_volume,
-        astro_density = rules.combine_markers_ccfv2.output.astrocyte_volume,
-        oligo_density = rules.combine_markers_ccfv2.output.oligodendrocyte_volume,
-        microglia_density = rules.combine_markers_ccfv2.output.microglia_volume,
-        glia_proportion = rules.combine_markers_ccfv2.output.cell_proportion
-    output:
-        cell_densities = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['cell_densities_ccfv2_correctednissl']}"),
-        glia_density = f"{WORKING_DIR}/cell_densities_ccfv2_correctednissl/glia_density.nrrd",
-        astrocyte_density = f"{CELL_POSITIONS_CCFV2_CORRECTEDNISSL_CONFIG_FILE['inputDensityVolumePath']['astrocyte']}",
-        oligodendrocyte_density = f"{CELL_POSITIONS_CCFV2_CORRECTEDNISSL_CONFIG_FILE['inputDensityVolumePath']['oligodendrocyte']}",
-        microglia_density = f"{CELL_POSITIONS_CCFV2_CORRECTEDNISSL_CONFIG_FILE['inputDensityVolumePath']['microglia']}",
-        neuron_density = f"{WORKING_DIR}/cell_densities_ccfv2_correctednissl/neuron_density.nrrd"
-    params:
-        app=APPS["atlas-building-tools cell-densities glia-cell-densities"]
-    log:
-        f"{LOG_DIR}/glia_cell_densities_ccfv2_correctednissl.log"
+        f"{LOG_DIR}/glia_cell_densities_hybrid_l23split_correctednissl.log"
     shell:
         """
         {params.app} --annotation-path {input.parcellation_volume} \
@@ -1268,7 +1632,6 @@ rule inhibitory_excitatory_neuron_densities_hybrid:
             2>&1 | tee {log}
         """
 
-        
 ##>inhibitory_excitatory_neuron_densities_ccfv2 : Compute the inhibitory and excitatory neuron densities
 rule inhibitory_excitatory_neuron_densities_ccfv2:
     input:
@@ -1323,179 +1686,10 @@ rule inhibitory_excitatory_neuron_densities_ccfv2_correctednissl:
             2>&1 | tee {log}
         """
 
+
 ## =========================================================================================
-## =============================== ANNOTATION PIPELINE PART 1 ==============================
+## =============================== ANNOTATION PIPELINE PART 1.2 ============================
 ## =========================================================================================
-
-##>direction_vectors_isocortex_ccfv2 : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood. The output is only for the top regions of the isocortex.
-rule direction_vectors_isocortex_ccfv2:
-    input:
-        parcellation_volume=rules.fetch_brain_parcellation_ccfv2.output,
-        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output
-    output:
-        f"{WORKING_DIR}/direction_vectors_isocortex_ccfv2.nrrd"
-    params:
-        app=APPS["atlas-building-tools direction-vectors isocortex"]
-    log:
-        f"{LOG_DIR}/direction_vectors_isocortex_ccfv2.log"
-    shell:
-        """
-        {params.app} --annotation-path {input.parcellation_volume} \
-            --hierarchy-path {input.hierarchy} \
-            --output-path {output} \
-            --algorithm shading-blur-gradient \
-            2>&1 | tee {log}
-        """
-
-##>direction_vectors_isocortex_ccfv3 : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood. The output is only for the top regions of the isocortex.
-rule direction_vectors_isocortex_ccfv3:
-    input:
-        parcellation_volume=rules.fetch_brain_parcellation_ccfv3.output,
-        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output
-    output:
-        f"{WORKING_DIR}/direction_vectors_isocortex_ccfv3.nrrd"
-    params:
-        app=APPS["atlas-building-tools direction-vectors isocortex"]
-    log:
-        f"{LOG_DIR}/direction_vectors_isocortex_ccfv3.log"
-    shell:
-        """
-        {params.app} --annotation-path {input.parcellation_volume} \
-            --hierarchy-path {input.hierarchy} \
-            --output-path {output} \
-            --algorithm shading-blur-gradient \
-            2>&1 | tee {log}
-        """
-
-##>direction_vectors_isocortex_hybrid : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood. The output is only for the top regions of the isocortex.
-rule direction_vectors_isocortex_hybrid:
-    input:
-        parcellation_volume=rules.combine_annotations.output,
-        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output
-    output:
-        f"{WORKING_DIR}/direction_vectors_isocortex_hybrid.nrrd"
-    params:
-        app=APPS["atlas-building-tools direction-vectors isocortex"]
-    log:
-        f"{LOG_DIR}/direction_vectors_isocortex_hybrid.log"
-    shell:
-        """
-        {params.app} --annotation-path {input.parcellation_volume} \
-            --hierarchy-path {input.hierarchy} \
-            --output-path {output} \
-            --algorithm shading-blur-gradient \
-            2>&1 | tee {log}
-        """
-
-
-##>direction_vectors_cerebellum : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood. The output is only for some regions of the cerebellum.
-rule direction_vectors_cerebellum:
-    input:
-        parcellation_volume=rules.fetch_brain_parcellation_ccfv2.output
-    output:
-        f"{WORKING_DIR}/direction_vectors_cerebellum.nrrd"
-    params:
-        app=APPS["atlas-building-tools direction-vectors cerebellum"]
-    log:
-        f"{LOG_DIR}/direction_vectors_cerebellum.log"
-    shell:
-        """
-        {params.app} --annotation-path {input.parcellation_volume} \
-            --output-path {output} \
-            --algorithm shading-blur-gradient \
-            2>&1 | tee {log}
-        """
-
-##>interpolate_direction_vectors_isocortex_ccfv2 : Interpolate the [NaN, NaN, NaN] direction vectors by non-[NaN, NaN, NaN] ones.
-rule interpolate_direction_vectors_isocortex_ccfv2:
-    input:
-        parcellation_volume=rules.fetch_brain_parcellation_ccfv2.output,
-        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
-        direction_vectors=rules.direction_vectors_isocortex_ccfv2.output,
-        metadata = rules.fetch_isocortex_metadata.output
-    output:
-        f"{WORKING_DIR}/interpolated_direction_vectors_isocortex_ccfv2.nrrd"
-    params:
-        app=APPS["atlas-building-tools direction-vectors interpolate"]
-    log:
-        f"{LOG_DIR}/interpolate_direction_vectors_isocortex_ccfv2.log"
-    shell:
-        """
-        {params.app} --annotation-path {input.parcellation_volume} \
-            --hierarchy-path {input.hierarchy} \
-            --direction-vectors-path {input.direction_vectors} \
-            --metadata-path {input.metadata} \
-            --nans \
-            --output-path {output} \
-            #--algorithm shading-blur-gradient \
-            2>&1 | tee {log}
-        """
-
-
-##>split_isocortex_layer_23_ccfv3 : Refine annotations by splitting brain regions 
-rule split_isocortex_layer_23_ccfv3:
-    input:
-        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
-        parcellation_volume=rules.fetch_brain_parcellation_ccfv3.output,
-        direction_vectors=rules.direction_vectors_isocortex_ccfv3.output
-    output:
-        hierarchy_l23split=f"{PUSH_DATASET_CONFIG_FILE['HierarchyJson']['hierarchy_l23split']}",
-        annotation_l23split=f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['annotation_ccfv3_l23split']}"
-    params:
-        app=APPS["atlas-building-tools region-splitter split-isocortex-layer-23"]
-    log:
-        f"{LOG_DIR}/split_isocortex_layer_23_ccfv3.log"
-    shell:
-        """
-        {params.app} --hierarchy-path {input.hierarchy} \
-            --annotation-path {input.parcellation_volume} \
-            --direction-vectors-path {input.direction_vectors} \
-            --output-hierarchy-path {output.hierarchy_l23split} \
-            --output-annotation-path {output.annotation_l23split} \
-            2>&1 | tee {log}
-        """
-
-##>split_isocortex_layer_23_hybrid : Refine annotations by splitting brain regions 
-rule split_isocortex_layer_23_hybrid:
-    input:
-        parcellation_volume=rules.combine_annotations.output,
-        direction_vectors=rules.direction_vectors_isocortex_hybrid.output
-    output:
-        annotation_l23split=f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['annotation_hybrid_l23split']}"
-    params:
-        app=APPS["atlas-building-tools region-splitter split-isocortex-layer-23"]
-    log:
-        f"{LOG_DIR}/split_isocortex_layer_23_hybrid.log"
-    shell:
-        """
-        {params.app} --annotation-path {input.parcellation_volume} \
-            --direction-vectors-path {input.direction_vectors} \
-            --output-annotation-path {output.annotation_l23split} \
-            2>&1 | tee {log}
-        """
-
-        
-##>split_isocortex_layer_23_ccfv2 : Refine annotations by splitting brain regions 
-rule split_isocortex_layer_23_ccfv2:
-    input:
-        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
-        parcellation_volume=rules.fetch_brain_parcellation_ccfv2.output,
-        direction_vectors=rules.interpolate_direction_vectors_isocortex_ccfv2.output
-    output:
-        annotation_l23split=f"annotation_ccfv2_l23split.nrrd"
-    params:
-        app=APPS["atlas-building-tools region-splitter split-isocortex-layer-23"]
-    log:
-        f"{LOG_DIR}/split_isocortex_layer_23_ccfv2.log"
-    shell:
-        """
-        {params.app} --hierarchy-path {input.hierarchy} \
-            --annotation-path {input.parcellation_volume} \
-            --direction-vectors-path {input.direction_vectors} \
-            --output-hierarchy-path {output.hierarchy_l23split} \
-            --output-annotation-path {output.annotation_l23split} \
-            2>&1 | tee {log}
-        """
 
 ##>orientation_field_ccfv3 : Turn direction vectors into quaternions interpreted as 3D orientations
 rule orientation_field_ccfv3:
@@ -1565,8 +1759,6 @@ rule placement_hints_isocortex_ccfv3_l23split:
 
 ##>compile_densities_measurements : Compile the cell density related measurements of mmc3.xlsx and `gaba_papers.xsls` into a CSV file.
 rule compile_densities_measurements:
-    input:
-        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
     output:
         measurements_csv = f"{WORKING_DIR}/measurements.csv",
         homogenous_regions_csv = f"{WORKING_DIR}/homogenous_regions.csv"
@@ -1576,7 +1768,7 @@ rule compile_densities_measurements:
         f"{LOG_DIR}/compile_densities_measurements.log"
     shell:
         """
-        {params.app} --hierarchy-path {input.hierarchy} \
+        {params.app} \
             --measurements-output-path {output.measurements_csv} \
             --homogenous-regions-output-path {output.homogenous_regions_csv} \
             2>&1 | tee {log}
@@ -1633,6 +1825,54 @@ rule average_densities_ccfv2_correctednissl:
             2>&1 | tee {log}
         """
 
+##>average_densities_ccfv2_l23split_correctednissl : Compute cell densities based on measurements and AIBS region volumes.
+rule average_densities_ccfv2_l23split_correctednissl:
+    input:
+        hierarchy=rules.split_isocortex_layer_23_ccfv2.output.hierarchy_l23split,
+        parcellation_volume=rules.split_isocortex_layer_23_ccfv2.output.annotation_l23split,
+        overall_cell_density = rules.cell_density_ccfv2_l23split_correctednissl.output,
+        neuron_density = rules.glia_cell_densities_ccfv2_l23split_correctednissl.output.neuron_density,
+        measurements_csv = rules.compile_densities_measurements.output.measurements_csv,
+    output:
+        f"{WORKING_DIR}/average_cell_densities_ccfv2_l23split_correctednissl.csv"
+    params:
+        app=APPS["atlas-building-tools cell-densities measurements-to-average-densities"]
+    log:
+        f"{LOG_DIR}/average_densities_ccfv2_l23split_correctednissl.log"
+    shell:
+        """{params.app} --hierarchy-path {input.hierarchy} \
+            --annotation-path {input.parcellation_volume} \
+            --cell-density-path {input.overall_cell_density} \
+            --neuron-density-path {input.neuron_density} \
+            --measurements-path {input.measurements_csv} \
+            --output-path {output} \
+            2>&1 | tee {log}
+        """
+
+##>average_densities_hybrid_l23split_correctednissl : Compute cell densities based on measurements and AIBS region volumes.
+rule average_densities_hybrid_l23split_correctednissl:
+    input:
+        hierarchy=rules.split_isocortex_layer_23_hybrid.output.hierarchy_l23split,
+        parcellation_volume=rules.split_isocortex_layer_23_hybrid.output.annotation_l23split,
+        overall_cell_density = rules.cell_density_hybrid_l23split_correctednissl.output,
+        neuron_density = rules.glia_cell_densities_hybrid_l23split_correctednissl.output.neuron_density,
+        measurements_csv = rules.compile_densities_measurements.output.measurements_csv,
+    output:
+        f"{WORKING_DIR}/average_cell_densities_hybrid_l23split_correctednissl.csv"
+    params:
+        app=APPS["atlas-building-tools cell-densities measurements-to-average-densities"]
+    log:
+        f"{LOG_DIR}/average_densities_hybrid_l23split_correctednissl.log"
+    shell:
+        """{params.app} --hierarchy-path {input.hierarchy} \
+            --annotation-path {input.parcellation_volume} \
+            --cell-density-path {input.overall_cell_density} \
+            --neuron-density-path {input.neuron_density} \
+            --measurements-path {input.measurements_csv} \
+            --output-path {output} \
+            2>&1 | tee {log}
+        """
+
         
 ##>fit_average_densities_ccfv2 : Estimate average cell densities of brain regions.
 rule fit_average_densities_ccfv2:
@@ -1651,8 +1891,7 @@ rule fit_average_densities_ccfv2:
     log:
         f"{LOG_DIR}/fit_average_densities_ccfv2.log"
     shell:
-        """
-        {params.app} --hierarchy-path {input.hierarchy} \
+        """{params.app} --hierarchy-path {input.hierarchy} \
             --annotation-path {input.parcellation_volume} \
             --average-densities-path {input.average_densities} \
             --neuron-density-path {input.neuron_density} \
@@ -1666,12 +1905,13 @@ rule fit_average_densities_ccfv2:
 ##>fit_average_densities_ccfv2_correctednissl : Estimate average cell densities of brain regions.
 rule fit_average_densities_ccfv2_correctednissl:
     input:
+        rules.fetch_gene_pv_correctednissl.output,
         hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
         parcellation_volume=rules.fetch_brain_parcellation_ccfv2.output,
         neuron_density = rules.glia_cell_densities_ccfv2_correctednissl.output.neuron_density,
         average_densities =rules.average_densities_ccfv2_correctednissl.output,
         gene_config = f"{AVERAGE_DENSITIES_CORRECTEDNISSL_CONFIG_FILE}",
-        homogenous_regions_csv = f"{WORKING_DIR}/homogenous_regions.csv"
+        homogenous_regions_csv = f"{WORKING_DIR}/homogenous_regions.csv",
     output:
         fitted_densities = f"{WORKING_DIR}/fitted_densities_ccfv2_correctednissl.csv",
         fitting_maps = f"{WORKING_DIR}/fitting_maps_ccfv2_correctednissl.json"
@@ -1680,8 +1920,7 @@ rule fit_average_densities_ccfv2_correctednissl:
     log:
         f"{LOG_DIR}/fit_average_densities_ccfv2_correctednissl.log"
     shell:
-        """
-        {params.app} --hierarchy-path {input.hierarchy} \
+        """{params.app} --hierarchy-path {input.hierarchy} \
             --annotation-path {input.parcellation_volume} \
             --average-densities-path {input.average_densities} \
             --neuron-density-path {input.neuron_density} \
@@ -1692,7 +1931,69 @@ rule fit_average_densities_ccfv2_correctednissl:
             2>&1 | tee {log}
         """
 
-##>inhibitory_neuron_densities_linprog_ccfv2_correctednissl : Create inhibitory neuron densities for the cell types in the csv file containing the fitted densities. Use algorithm 'lingprog'.
+##>fit_average_densities_ccfv2_l23split_correctednissl : Estimate average cell densities of brain regions.
+rule fit_average_densities_ccfv2_l23split_correctednissl:
+    input:
+        rules.fetch_gene_pv_correctednissl.output,
+        rules.fetch_gene_sst_correctednissl.output,
+        rules.fetch_gene_vip_correctednissl.output,
+        rules.fetch_gene_gad67_correctednissl.output,
+        hierarchy=rules.split_isocortex_layer_23_ccfv2.output.hierarchy_l23split,
+        parcellation_volume=rules.split_isocortex_layer_23_ccfv2.output.annotation_l23split,
+        neuron_density = rules.glia_cell_densities_ccfv2_l23split_correctednissl.output.neuron_density,
+        average_densities =rules.average_densities_ccfv2_l23split_correctednissl.output,
+        gene_config = f"{AVERAGE_DENSITIES_CORRECTEDNISSL_CONFIG_FILE}",
+        homogenous_regions_csv = f"{WORKING_DIR}/homogenous_regions.csv",
+    output:
+        fitted_densities = f"{WORKING_DIR}/fitted_densities_ccfv2_l23split_correctednissl.csv",
+        fitting_maps = f"{WORKING_DIR}/fitting_maps_ccfv2_l23split_correctednissl.json"
+    params:
+        app=APPS["atlas-building-tools cell-densities fit-average-densities"]
+    log:
+        f"{LOG_DIR}/fit_average_densities_ccfv2_l23split_correctednissl.log"
+    shell:
+        """{params.app} --hierarchy-path {input.hierarchy} \
+            --annotation-path {input.parcellation_volume} \
+            --average-densities-path {input.average_densities} \
+            --neuron-density-path {input.neuron_density} \
+            --gene-config-path {input.gene_config} \
+            --homogenous-regions-path {input.homogenous_regions_csv} \
+            --fitted-densities-output-path {output.fitted_densities} \
+            --fitting-maps-output-path {output.fitting_maps} \
+            2>&1 | tee {log}
+        """
+
+##>fit_average_densities_hybrid_l23split_correctednissl : Estimate average cell densities of brain regions.
+rule fit_average_densities_hybrid_l23split_correctednissl:
+    input:
+        rules.fetch_gene_pv_correctednissl.output,
+        hierarchy=rules.split_isocortex_layer_23_hybrid.output.hierarchy_l23split,
+        parcellation_volume=rules.split_isocortex_layer_23_hybrid.output.annotation_l23split,
+        neuron_density = rules.glia_cell_densities_hybrid_l23split_correctednissl.output.neuron_density,
+        average_densities =rules.average_densities_hybrid_l23split_correctednissl.output,
+        gene_config = f"{AVERAGE_DENSITIES_CORRECTEDNISSL_CONFIG_FILE}",
+        homogenous_regions_csv = f"{WORKING_DIR}/homogenous_regions.csv"
+    output:
+        fitted_densities = f"{WORKING_DIR}/fitted_densities_hybrid_l23split_correctednissl.csv",
+        fitting_maps = f"{WORKING_DIR}/fitting_maps_hybrid_l23split_correctednissl.json"
+    params:
+        app=APPS["atlas-building-tools cell-densities fit-average-densities"]
+    log:
+        f"{LOG_DIR}/fit_average_densities_hybrid_l23split_correctednissl.log"
+    shell:
+        """{params.app} --hierarchy-path {input.hierarchy} \
+            --annotation-path {input.parcellation_volume} \
+            --average-densities-path {input.average_densities} \
+            --neuron-density-path {input.neuron_density} \
+            --gene-config-path {input.gene_config} \
+            --homogenous-regions-path {input.homogenous_regions_csv} \
+            --fitted-densities-output-path {output.fitted_densities} \
+            --fitting-maps-output-path {output.fitting_maps} \
+            2>&1 | tee {log}
+        """
+
+
+##>inhibitory_neuron_densities_linprog_ccfv2_correctednissl : Create inhibitory neuron densities for the cell types in the csv file containing the fitted densities. Use default algorithm 'lingprog'.
 rule inhibitory_neuron_densities_linprog_ccfv2_correctednissl:
     input:
         hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
@@ -1706,38 +2007,12 @@ rule inhibitory_neuron_densities_linprog_ccfv2_correctednissl:
     log:
         f"{LOG_DIR}/inhibitory_neuron_densities_linprog_ccfv2_correctednissl.log"
     shell:
-        """
-        {params.app} --hierarchy-path {input.hierarchy} \
+        """{params.app} --hierarchy-path {input.hierarchy} \
             --annotation-path {input.parcellation_volume} \
             --neuron-density-path {input.neuron_density} \
             --average-densities-path {input.average_densities} \
             --algorithm linprog \
             --output-dir {output} \
-            2>&1 | tee {log}
-        """
-
-##>inhibitory_neuron_densities_ccfv2_correctednissl : Create inhibitory neuron densities for the cell types in the csv file containing the fitted densities.
-rule inhibitory_neuron_densities_ccfv2_correctednissl:
-    input:
-        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
-        parcellation_volume=rules.fetch_brain_parcellation_ccfv2.output,
-        neuron_density = rules.glia_cell_densities_ccfv2_correctednissl.output.neuron_density,
-        average_densities = rules.fit_average_densities_ccfv2_correctednissl.output.fitted_densities,
-    output:
-        neuron_densities = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['neuron_densities_ccfv2_correctednissl']}"),
-        inhibitory_neuron_density = f"{CELL_POSITIONS_CCFV2_CORRECTEDNISSL_CONFIG_FILE['inputDensityVolumePath']['inhibitory_neuron']}",
-        excitatory_neuron_density = f"{CELL_POSITIONS_CCFV2_CORRECTEDNISSL_CONFIG_FILE['inputDensityVolumePath']['excitatory_neuron']}",
-    params:
-        app=APPS["atlas-building-tools cell-densities inhibitory-neuron-densities"]
-    log:
-        f"{LOG_DIR}/inhibitory_neuron_densities_ccfv2_correctednissl.log"
-    shell:
-        """
-        {params.app} --annotation-path {input.parcellation_volume} \
-            --hierarchy-path {input.hierarchy} \
-            --neuron-density-path {input.neuron_density} \
-            --average-densities-path {input.average_density} \
-            --output-dir {output.neuron_densities} \
             2>&1 | tee {log}
         """
 
@@ -1755,8 +2030,7 @@ rule inhibitory_neuron_densities_preserveprop_ccfv2_correctednissl:
     log:
         f"{LOG_DIR}/inhibitory_neuron_densities_preserveprop_ccfv2_correctednissl.log"
     shell:
-        """
-        {params.app} --hierarchy-path {input.hierarchy} \
+        """{params.app} --hierarchy-path {input.hierarchy} \
             --annotation-path {input.parcellation_volume} \
             --neuron-density-path {input.neuron_density} \
             --average-densities-path {input.average_densities} \
@@ -1764,6 +2038,53 @@ rule inhibitory_neuron_densities_preserveprop_ccfv2_correctednissl:
             --output-dir {output} \
             2>&1 | tee {log}
         """
+
+##>inhibitory_neuron_densities_linprog_ccfv2_l23split_correctednissl : Create inhibitory neuron densities for the cell types in the csv file containing the fitted densities. Use default algorithm 'lingprog'.
+rule inhibitory_neuron_densities_linprog_ccfv2_l23split_correctednissl:
+    input:
+        hierarchy=rules.split_isocortex_layer_23_ccfv2.output.hierarchy_l23split,
+        parcellation_volume=rules.split_isocortex_layer_23_ccfv2.output.annotation_l23split,
+        neuron_density = rules.glia_cell_densities_ccfv2_l23split_correctednissl.output.neuron_density,
+        average_densities = rules.fit_average_densities_ccfv2_l23split_correctednissl.output.fitted_densities,
+    output:
+        directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['inhibitory_neuron_densities_linprog_ccfv2_l23split_correctednissl']}")
+    params:
+        app=APPS["atlas-building-tools cell-densities inhibitory-neuron-densities"]
+    log:
+        f"{LOG_DIR}/inhibitory_neuron_densities_linprog_ccfv2_l23split_correctednissl.log"
+    shell:
+        """params.app} --hierarchy-path {input.hierarchy} \
+            --annotation-path {input.parcellation_volume} \
+            --neuron-density-path {input.neuron_density} \
+            --average-densities-path {input.average_densities} \
+            --algorithm linprog \
+            --output-dir {output} \
+            2>&1 | tee {log}
+        """
+
+##>inhibitory_neuron_densities_linprog_hybrid_l23split_correctednissl : Create inhibitory neuron densities for the cell types in the csv file containing the fitted densities. Use default algorithm 'lingprog'.
+rule inhibitory_neuron_densities_linprog_hybrid_l23split_correctednissl:
+    input:
+        hierarchy=rules.split_isocortex_layer_23_hybrid.output.hierarchy_l23split,
+        parcellation_volume=rules.split_isocortex_layer_23_hybrid.output.annotation_l23split,
+        neuron_density = rules.glia_cell_densities_hybrid_l23split_correctednissl.output.neuron_density,
+        average_densities = rules.fit_average_densities_hybrid_l23split_correctednissl.output.fitted_densities,
+    output:
+        directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['inhibitory_neuron_densities_linprog_hybrid_l23split_correctednissl']}")
+    params:
+        app=APPS["atlas-building-tools cell-densities inhibitory-neuron-densities"]
+    log:
+        f"{LOG_DIR}/inhibitory_neuron_densities_linprog_hybrid_l23split_correctednissl.log"
+    shell:
+        """{params.app} --hierarchy-path {input.hierarchy} \
+            --annotation-path {input.parcellation_volume} \
+            --neuron-density-path {input.neuron_density} \
+            --average-densities-path {input.average_densities} \
+            --algorithm linprog \
+            --output-dir {output} \
+            2>&1 | tee {log}
+        """
+
 
 ##>create_mtypes_densities_from_profile_ccfv2_correctednissl : Create neuron density nrrd files for the mtypes listed in the mapping tsv file.
 rule create_mtypes_densities_from_profile_ccfv2_correctednissl:
@@ -1780,8 +2101,7 @@ rule create_mtypes_densities_from_profile_ccfv2_correctednissl:
     log:
         f"{LOG_DIR}/create_mtypes_densities_from_profile_ccfv2_correctednissl.log"
     shell:
-        """
-        {params.app} --hierarchy-path {input.hierarchy} \
+        """{params.app} --hierarchy-path {input.hierarchy} \
             --annotation-path {input.parcellation_volume} \
             --metadata-path {input.metadata_file} \
             --direction-vectors-path {input.direction_vectors} \
@@ -1789,13 +2109,37 @@ rule create_mtypes_densities_from_profile_ccfv2_correctednissl:
             --output-dir {output} \
             2>&1 | tee {log}
         """
-        
+
+##>create_mtypes_densities_from_profile_hybrid_l23split_correctednissl : Create neuron density nrrd files for the mtypes listed in the mapping tsv file.
+rule create_mtypes_densities_from_profile_hybrid_l23split_correctednissl:
+    input:
+        hierarchy=rules.split_isocortex_layer_23_hybrid.output.hierarchy_l23split,
+        parcellation_volume=rules.split_isocortex_layer_23_hybrid.output.annotation_l23split,
+        metadata_file=rules.fetch_isocortex_23_metadata.output,
+        direction_vectors=rules.interpolate_direction_vectors_isocortex_ccfv2.output,
+        mtypes_config = f"{MTYPES_PROFILE_CCFV2_CORRECTEDNISSL_CONFIG_}",
+    output:
+        directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['mtypes_densities_profile_hybrid_l23split_correctednissl']}")
+    params:
+        app=APPS["atlas-building-tools mtype-densities create-from-profile"]
+    log:
+        f"{LOG_DIR}/create_mtypes_densities_from_profile_hybrid_l23split_correctednissl.log"
+    shell:
+        """{params.app} --hierarchy-path {input.hierarchy} \
+            --annotation-path {input.parcellation_volume} \
+            --metadata-path {input.metadata_file} \
+            --direction-vectors-path {input.direction_vectors} \
+            --mtypes-config-path {input.mtypes_config} \
+            --output-dir {output} \
+            2>&1 | tee {log}
+        """
+
 ##>create_mtypes_densities_from_probability_map_ccfv2_correctednissl : Create neuron density nrrd files for the mtypes listed in the probability mapping csv file.
 rule create_mtypes_densities_from_probability_map_ccfv2_correctednissl:
     input:
         hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
         parcellation_volume=rules.fetch_brain_parcellation_ccfv2.output,
-        metadata_file=rules.fetch_isocortex_23_metadata.output,
+        metadata_file=rules.fetch_isocortex_metadata.output,
         mtypes_config = f"{MTYPES_PROBABILITY_MAP_CORRECTEDNISSL_CONFIG_}",
     output:
         directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['mtypes_densities_probability_map_ccfv2_correctednissl']}")
@@ -1804,8 +2148,52 @@ rule create_mtypes_densities_from_probability_map_ccfv2_correctednissl:
     log:
         f"{LOG_DIR}/create_mtypes_densities_from_probability_map_ccfv2_correctednissl.log"
     shell:
+        """{params.app} --hierarchy-path {input.hierarchy} \
+            --annotation-path {input.parcellation_volume} \
+            --metadata-path {input.metadata_file} \
+            --mtypes-config-path {input.mtypes_config} \
+            --output-dir {output} \
+            2>&1 | tee {log}
         """
-        {params.app} --hierarchy-path {input.hierarchy} \
+
+##>create_mtypes_densities_from_probability_map_ccfv2_l23split_correctednissl : Create neuron density nrrd files for the mtypes listed in the probability mapping csv file.
+rule create_mtypes_densities_from_probability_map_ccfv2_l23split_correctednissl:
+    input:
+        rules.inhibitory_neuron_densities_linprog_ccfv2_l23split_correctednissl.output,
+        hierarchy=rules.split_isocortex_layer_23_ccfv2.output.hierarchy_l23split,
+        parcellation_volume=rules.split_isocortex_layer_23_ccfv2.output.annotation_l23split,
+        metadata_file=rules.fetch_isocortex_23_metadata.output,
+        mtypes_config = f"{MTYPES_PROBABILITY_MAP_CORRECTEDNISSL_LINPROG_CCFV2_L23SPLIT_CONFIG_}",
+    output:
+        directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['mtypes_densities_probability_map_ccfv2_l23split_correctednissl']}")
+    params:
+        app=APPS["atlas-building-tools mtype-densities create-from-probability-map"]
+    log:
+        f"{LOG_DIR}/create_mtypes_densities_from_probability_map_ccfv2_correctednissl.log"
+    shell:
+        """{params.app} --hierarchy-path {input.hierarchy} \
+            --annotation-path {input.parcellation_volume} \
+            --metadata-path {input.metadata_file} \
+            --mtypes-config-path {input.mtypes_config} \
+            --output-dir {output} \
+            2>&1 | tee {log}
+        """
+
+##>create_mtypes_densities_from_probability_map_hybrid_l23split_correctednissl : Create neuron density nrrd files for the mtypes listed in the probability mapping csv file.
+rule create_mtypes_densities_from_probability_map_hybrid_l23split_correctednissl:
+    input:
+        hierarchy=rules.split_isocortex_layer_23_hybrid.output.hierarchy_l23split,
+        parcellation_volume=rules.split_isocortex_layer_23_hybrid.output.annotation_l23split,
+        metadata_file=rules.fetch_isocortex_23_metadata.output,
+        mtypes_config = f"{MTYPES_PROBABILITY_MAP_CORRECTEDNISSL_CONFIG_}",
+    output:
+        directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['mtypes_densities_probability_map_hybrid_l23split_correctednissl']}")
+    params:
+        app=APPS["atlas-building-tools mtype-densities create-from-probability-map"]
+    log:
+        f"{LOG_DIR}/create_mtypes_densities_from_probability_map_hybrid_l23split_correctednissl.log"
+    shell:
+        """{params.app} --hierarchy-path {input.hierarchy} \
             --annotation-path {input.parcellation_volume} \
             --metadata-path {input.metadata_file} \
             --mtypes-config-path {input.mtypes_config} \
@@ -1832,8 +2220,51 @@ rule transplant_mtypes_densities_from_probability_map_correctednissl:
     log:
         f"{LOG_DIR}/transplant_mtypes_densities_from_probability_map_correctednissl.log"
     shell:
+        """{params.app} --hierarchy {input.hierarchy} \
+            --src-annot-volume {input.src_parcellation_volume} \
+            --dst-annot-volume {input.dst_parcellation_volume} \
+            --src-cell-volume {input.src_cell_volume} \
+            --dst-cell-volume {output} \
+            2>&1 | tee {log}
         """
-        {params.app} --hierarchy {input.hierarchy} \
+
+##>transplant_mtypes_densities_from_profile_correctednissl : Transplant neuron density nrrd files for the mtypes listed in the probability mapping csv file.
+rule transplant_mtypes_densities_from_profile_correctednissl:
+    input:
+        hierarchy = rules.fetch_ccf_brain_region_hierarchy.output,
+        src_parcellation_volume = rules.fetch_brain_parcellation_ccfv2.output,
+        dst_parcellation_volume = rules.fetch_brain_parcellation_ccfv3.output,
+        src_cell_volume = rules.create_mtypes_densities_from_profile_ccfv2_correctednissl.output
+    output:
+        directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['mtypes_densities_probability_map_transplant_correctednissl']}")
+    params:
+        app=APPS["celltransplant mtype-densities create-from-probability-map"]
+    log:
+        f"{LOG_DIR}/transplant_mtypes_densities_from_profile_correctednissl.log"
+    shell:
+        """{params.app} --hierarchy {input.hierarchy} \
+            --src-annot-volume {input.src_parcellation_volume} \
+            --dst-annot-volume {input.dst_parcellation_volume} \
+            --src-cell-volume {input.src_cell_volume} \
+            --dst-cell-volume {output} \
+            2>&1 | tee {log}
+        """
+
+##>transplant_mtypes_densities_from_probability_map_l23split_correctednissl : Transplant neuron density nrrd files for the mtypes listed in the probability mapping csv file.
+rule transplant_mtypes_densities_from_probability_map_l23split_correctednissl:
+    input:
+        hierarchy=rules.split_isocortex_layer_23_ccfv2.output.hierarchy_l23split,
+        src_parcellation_volume=rules.split_isocortex_layer_23_ccfv2.output.annotation_l23split,
+        dst_parcellation_volume=rules.split_isocortex_layer_23_ccfv3.output.annotation_l23split,
+        src_cell_volume = rules.create_mtypes_densities_from_probability_map_ccfv2_l23split_correctednissl.output
+    output:
+        directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['mtypes_densities_probability_map_l23split_transplant_correctednissl']}")
+    params:
+        app=APPS["celltransplant mtype-densities create-from-probability-map"]
+    log:
+        f"{LOG_DIR}/transplant_mtypes_densities_from_probability_map_ccfv2_l23split_correctednissl.log"
+    shell:
+        """{params.app} --hierarchy {input.hierarchy} \
             --src-annot-volume {input.src_parcellation_volume} \
             --dst-annot-volume {input.dst_parcellation_volume} \
             --src-cell-volume {input.src_cell_volume} \
@@ -1861,8 +2292,7 @@ rule export_brain_region_ccfv3_l23split:
     log:
         f"{LOG_DIR}/export_brain_region_ccfv3_l23split.log"
     shell:
-        """
-        {params.app} --hierarchy {input.hierarchy} \
+        """{params.app} --hierarchy {input.hierarchy} \
             --parcellation-volume {input.parcellation_volume} \
             --out-mesh-dir {output.mesh_dir} \
             --out-mask-dir {output.mask_dir} \
@@ -1887,8 +2317,7 @@ rule cell_records:
     log:
         f"{LOG_DIR}/cell_records.log"
     shell:
-        """
-        {params.app} --annotation-path {input.parcellation_volume} \
+        """{params.app} --annotation-path {input.parcellation_volume} \
             --orientation-path {input.orientation_file} \
             --config-path {input.cell_densities_config_file} \
             --output-path {output} \
@@ -1915,8 +2344,7 @@ rule check_annotation_pipeline_volume_datasets:
     log:
         f"{LOG_DIR}/check_annotation_pipeline_volume_datasets.log"
     shell:
-        """
-        {params.app} --input-dataset {input.annotation_ccfv3_split} \
+        """{params.app} --input-dataset {input.annotation_ccfv3_split} \
             --input-dataset {input.orientation_ccfv3} \
             --input-dataset {input.direction_vectors_ccfv3} \
             --input-dataset {input.placement_hints_ccfv3_split} \
@@ -1937,12 +2365,10 @@ rule check_annotation_pipeline_mesh_datasets:
     log:
         f"{LOG_DIR}/check_annotation_pipeline_mesh_datasets.log"
     shell:
-        """
-        {params.app} --input-dataset {input.mesh_ccfv3_split} \
+        """{params.app} --input-dataset {input.mesh_ccfv3_split} \
             --report-path {output} \
             2>&1 | tee {log}
         """
-
 
 ##>check_annotation_pipeline : Verify that the report files generated by the module verifying the annotation pipeline datasets integrity do not contain any issues before starting to push datasets into Nexus. These are contained in the folder data_check_report.
 rule check_annotation_pipeline:
@@ -2063,10 +2489,11 @@ rule push_annotation_pipeline_datasets:
 ## =========================================================================================
 
 
-##>push_celldensity_pipeline_datasets : Global rule to generate and push into Nexus every products of the cell density pipeline
-rule push_celldensity_pipeline_datasets:
+##>push_celldensity_transplant_pipeline_datasets : Global rule to generate and push into Nexus every products of the cell density pipeline
+rule push_celldensity_transplant_pipeline_datasets:
     input:
-        densities_transplanted = rules.transplant_mtypes_densities_from_probability_map_correctednissl.output,
+        #densities_from_profile_transplanted = rules.transplant_mtypes_densities_from_profile_correctednissl.output,
+        densities_from_probability_map_transplanted = rules.transplant_mtypes_densities_from_probability_map_correctednissl.output,
         hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
         push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
     params:
@@ -2083,7 +2510,8 @@ rule push_celldensity_pipeline_datasets:
             --nexus-org {NEXUS_DESTINATION_ORG} \
             --nexus-proj {NEXUS_DESTINATION_PROJ} \
             --nexus-token {params.token} \
-        {params.app1[1]} --dataset-path {input.densities_transplanted} \
+        {params.app1[1]} \
+            --dataset-path {input.densities_from_probability_map_transplanted} \
             --hierarchy-path {input.hierarchy} \
             --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
             --config-path {input.push_dataset_config} \
@@ -2091,3 +2519,37 @@ rule push_celldensity_pipeline_datasets:
             --resource-tag {params.resource_tag}
             2>&1 | tee {log}
         """
+
+##>push_celldensity_transplant_l23split_pipeline_datasets : Global rule to generate and push into Nexus every products of the cell density pipeline
+rule push_celldensity_transplant_l23split_pipeline_datasets:
+    input:
+        densities_from_probability_map = rules.create_mtypes_densities_from_probability_map_ccfv2_l23split_correctednissl.output,
+        #densities_from_profile_transplanted = rules.transplant_mtypes_densities_from_profile_correctednissl.output,
+        #densities_from_probability_map_transplanted = rules.transplant_mtypes_densities_from_probability_map_l23split_correctednissl.output,
+        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
+    params:
+        app1=APPS["bba-data-push push-volumetric"].split(),
+        token = myTokenFetcher.getAccessToken(),
+        create_provenance_json = write_json(PROVENANCE_METADATA_PATH, PROVENANCE_METADATA, rule_name = "push_celldensity_pipeline_datasets"),
+        resource_tag = RESOURCE_TAG
+    log:
+        f"{LOG_DIR}/push_celldensity_pipeline_datasets.log"
+    shell:
+        """
+        {params.app1[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app1[1]} \
+            --dataset-path {input.densities_from_probability_map} \
+            --hierarchy-path {input.hierarchy} \
+            --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
+            --config-path {input.push_dataset_config} \
+            --provenance-metadata-path {PROVENANCE_METADATA_PATH} \
+            --resource-tag {params.resource_tag}
+            2>&1 | tee {log}
+        """
+            #--dataset-path {input.densities_from_profile_transplanted} \
+

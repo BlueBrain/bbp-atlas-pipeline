@@ -6,6 +6,7 @@ GeneratedDatasetPath:
   VolumetricFile:
     average_template_25: {WORKING_DIR}/average_template_25.nrrd
     annotation_hybrid: {WORKING_DIR}/annotation_v2v3_hybrid.nrrd
+    annotation_ccfv2_l23split: {WORKING_DIR}/annotation_ccfv2_l23split.nrrd
     annotation_ccfv3_l23split: {WORKING_DIR}/annotation_ccfv3_l23split.nrrd
     annotation_hybrid_l23split: {WORKING_DIR}/annotation_hybrid_l23split.nrrd
     direction_vectors_isocortex_ccfv3: {WORKING_DIR}/direction_vectors_isocortex_ccfv3.nrrd
@@ -14,17 +15,27 @@ GeneratedDatasetPath:
     placement_hints_ccfv3_l23split: {WORKING_DIR}/placement_hints_ccfv3_l23split
     placement_hints_hybrid_l23split: {WORKING_DIR}/placement_hints_hybrid_l23split
     overall_cell_density_ccfv2_correctednissl: {WORKING_DIR}/overall_cell_density_ccfv2_correctednissl.nrrd
+    overall_cell_density_ccfv2_l23split_correctednissl: {WORKING_DIR}/overall_cell_density_ccfv2_l23split_correctednissl
+    overall_cell_density_hybrid_l23split_correctednissl: {WORKING_DIR}/overall_cell_density_hybrid_l23split_correctednissl.nrrd
     cell_densities_hybrid: {WORKING_DIR}/cell_densities_hybrid
+    cell_densities_hybrid_l23split_correctednissl: {WORKING_DIR}/cell_densities_hybrid_l23split_correctednissl
     cell_densities_ccfv2: {WORKING_DIR}/cell_densities_ccfv2
     cell_densities_ccfv2_correctednissl: {WORKING_DIR}/cell_densities_ccfv2_correctednissl
+    cell_densities_ccfv2_l23split_correctednissl: {WORKING_DIR}/cell_densities_ccfv2_l23split_correctednissl
     neuron_densities_hybrid: {WORKING_DIR}/neuron_densities_hybrid
     neuron_densities_ccfv2: {WORKING_DIR}/neuron_densities_ccfv2
     neuron_densities_ccfv2_correctednissl: {WORKING_DIR}/neuron_densities_ccfv2_correctednissl
     inhibitory_neuron_densities_linprog_ccfv2_correctednissl: {WORKING_DIR}/inhibitory_neuron_densities_linprog_ccfv2_correctednissl
+    inhibitory_neuron_densities_linprog_ccfv2_l23split_correctednissl: {WORKING_DIR}/inhibitory_neuron_densities_linprog_ccfv2_l23split_correctednissl
+    inhibitory_neuron_densities_linprog_hybrid_l23split_correctednissl: {WORKING_DIR}/ inhibitory_neuron_densities_linprog_hybrid_l23split_correctednissl
     inhibitory_neuron_densities_preserveprop_ccfv2_correctednissl: {WORKING_DIR}/inhibitory_neuron_densities_preserveprop_ccfv2_correctednissl
     mtypes_densities_profile_ccfv2_correctednissl: {WORKING_DIR}/mtypes_densities_profile_ccfv2_correctednissl
+    mtypes_densities_profile_hybrid_l23split_correctednissl: {WORKING_DIR}/mtypes_densities_profile_hybrid_l23split_correctednissl
     mtypes_densities_probability_map_ccfv2_correctednissl: {WORKING_DIR}/mtypes_densities_probability_map_ccfv2_correctednissl
+    mtypes_densities_probability_map_ccfv2_l23split_correctednissl: {WORKING_DIR}/mtypes_densities_probability_map_ccfv2_l23split_correctednissl
+    mtypes_densities_probability_map_hybrid_l23split_correctednissl: {WORKING_DIR}/mtypes_densities_probability_map_hybrid_l23split_correctednissl
     mtypes_densities_probability_map_transplant_correctednissl: {WORKING_DIR}/mtypes_densities_probability_map_transplant_correctednissl
+    mtypes_densities_probability_map_l23split_transplant_correctednissl: {WORKING_DIR}/mtypes_densities_probability_map_l23split_transplant_correctednissl
     brain_region_mask_ccfv3_l23split: {WORKING_DIR}/brain_region_mask_ccfv3_l23split
     brain_region_masks_hybrid: {WORKING_DIR}/brain_region_masks_hybrid
     brain_region_masks_hybrid_l23split: {WORKING_DIR}/brain_region_masks_hybrid_l23split

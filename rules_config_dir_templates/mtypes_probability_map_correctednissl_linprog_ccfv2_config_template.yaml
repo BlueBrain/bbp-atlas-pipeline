@@ -1,0 +1,6 @@
+probabilityMapPath: {WORKING_DIR}/rules_config_dir/mtypes/probability_map.csv
+molecularTypeDensityPaths:
+    gad67: {WORKING_DIR}/inhibitory_neuron_densities_linprog_ccfv2_correctednissl/gad67+_density.nrrd
+    pv: {WORKING_DIR}/inhibitory_neuron_densities_linprog_ccfv2_correctednissl/pv+_density.nrrd
+    sst: {WORKING_DIR}/inhibitory_neuron_densities_linprog_ccfv2_correctednissl/sst+_density.nrrd
+    vip: {WORKING_DIR}/inhibitory_neuron_densities_linprog_ccfv2_correctednissl/vip+_density.nrrd
