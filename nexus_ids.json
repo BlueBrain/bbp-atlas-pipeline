@@ -53,6 +53,7 @@
   },
   "metadata" :{
     "isocortex": "https://bbp.epfl.ch/neurosciencegraph/data/6a593672-9e7d-45aa-8740-19d79da9b3d3",
-    "isocortex_23": "https://bbp.epfl.ch/neurosciencegraph/data/6b711d4c-ff0b-4e87-89b7-5390fc0fc4d0"
+    "isocortex_23": "https://bbp.epfl.ch/neurosciencegraph/data/6b711d4c-ff0b-4e87-89b7-5390fc0fc4d0",
+    "probability_map": "https://bbp.epfl.ch/neurosciencegraph/data/c67fa26d-064c-4f9f-a381-7489fb5837bc"
   }
 }
