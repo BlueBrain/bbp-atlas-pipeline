@@ -400,7 +400,7 @@ rule fetch_brain_parcellation_ccfv3:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["brain_ccfv3"],
         app=APPS["bba-data-fetch"],
         token = myTokenFetcher.getAccessToken(),
-        derivation = PROVENANCE_METADATA["input_dataset_used"].update({"brain_parcellation_ccfv3" : {"id":NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["brain_ccfv3"], "type":"BrainParcellationDataLayer"}})
+        derivation = PROVENANCE_METADATA_V2["input_dataset_used"].update({"brain_parcellation_ccfv3" : {"id":NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["brain_ccfv3"], "type":"BrainParcellationDataLayer"}})
     log:
         f"{LOG_DIR}/fetch_brain_parcellation_ccfv3.log"
     shell:
@@ -2314,18 +2314,18 @@ rule create_mtypes_densities_from_probability_map_ccfv2_l23split_correctednissl:
         hierarchy=rules.split_isocortex_layer_23_ccfv2.output.hierarchy_l23split,
         parcellation_volume=rules.split_isocortex_layer_23_ccfv2.output.annotation_l23split,
         metadata_file=rules.fetch_isocortex_23_metadata.output,
-        mtypes_config = f"{MTYPES_PROBABILITY_MAP_CORRECTEDNISSL_LINPROG_CCFV2_L23SPLIT_CONFIG_}",
     output:
         directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['mtypes_densities_probability_map_ccfv2_l23split_correctednissl']}")
     params:
-        app=APPS["atlas-building-tools mtype-densities create-from-probability-map"]
+        app=APPS["atlas-building-tools mtype-densities create-from-probability-map"],
+        mtypes_config = f"{MTYPES_PROBABILITY_MAP_CORRECTEDNISSL_LINPROG_CCFV2_L23SPLIT_CONFIG_}",
     log:
         f"{LOG_DIR}/create_mtypes_densities_from_probability_map_ccfv2_correctednissl.log"
     shell:
         """{params.app} --hierarchy-path {input.hierarchy} \
             --annotation-path {input.parcellation_volume} \
             --metadata-path {input.metadata_file} \
-            --mtypes-config-path {input.mtypes_config} \
+            --mtypes-config-path {params.mtypes_config} \
             --output-dir {output} \
             2>&1 | tee {log}
         """
@@ -2790,7 +2790,7 @@ rule push_celldensity_transplant_pipeline_datasets:
     params:
         app1=APPS["bba-data-push push-volumetric"].split(),
         token = myTokenFetcher.getAccessToken(),
-        create_provenance_json = write_json(PROVENANCE_METADATA_V2_PATH, PROVENANCE_METADATA_V2, rule_name = "push_celldensity_pipeline_datasets"),
+        create_provenance_json = write_json(PROVENANCE_METADATA_V3_PATH, PROVENANCE_METADATA_V3, rule_name = "push_celldensity_pipeline_datasets"),
         resource_tag = RESOURCE_TAG
     log:
         f"{LOG_DIR}/push_celldensity_pipeline_datasets.log"
@@ -2806,7 +2806,7 @@ rule push_celldensity_transplant_pipeline_datasets:
             --hierarchy-path {input.hierarchy} \
             --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
             --config-path {input.push_dataset_config} \
-            --provenance-metadata-path {PROVENANCE_METADATA_V2_PATH} \
+            --provenance-metadata-path {PROVENANCE_METADATA_V3_PATH} \
             --resource-tag {params.resource_tag}
             2>&1 | tee {log}
         """
@@ -2816,13 +2816,18 @@ rule push_celldensity_transplant_l23split_pipeline_datasets:
     input:
         #densities_from_probability_map = rules.create_mtypes_densities_from_probability_map_ccfv2_l23split_correctednissl.output,
         #densities_from_profile_transplanted = rules.transplant_mtypes_densities_from_profile_correctednissl.output,
-        densities_from_probability_map_transplanted = rules.transplant_mtypes_densities_from_probability_map_l23split_correctednissl.output,
-        hierarchy=rules.split_isocortex_layer_23_ccfv2.output.hierarchy_l23split,
+        densities_from_probability_map = rules.transplant_mtypes_densities_from_probability_map_l23split_correctednissl.output,
+        inhibitory_neuron_densities = rules.transplant_inhibitory_neuron_densities_linprog_l23split_correctednissl.output,
+        glia_cell_densities = rules.transplant_glia_cell_densities_l23split_correctednissl.output,
+        annotation_ccfv3_split = rules.split_isocortex_layer_23_ccfv3.output.annotation_l23split,
+        direction_vectors = rules.direction_vectors_isocortex_ccfv3.output,
+        hierarchy = rules.split_isocortex_layer_23_ccfv2.output.hierarchy_l23split,
+        hierarchy_jsonld=rules.export_brain_region_ccfv2_l23split.output.hierarchy_jsonld,
         push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
     params:
         app1=APPS["bba-data-push push-volumetric"].split(),
         token = myTokenFetcher.getAccessToken(),
-        create_provenance_json = write_json(PROVENANCE_METADATA_V2_PATH, PROVENANCE_METADATA_V2, rule_name = "push_celldensity_pipeline_datasets"),
+        create_provenance_json = write_json(PROVENANCE_METADATA_V3_PATH, PROVENANCE_METADATA_V3, rule_name = "push_celldensity_pipeline_datasets"),
         resource_tag = RESOURCE_TAG
     log:
         f"{LOG_DIR}/push_celldensity_pipeline_datasets.log"
@@ -2834,11 +2839,15 @@ rule push_celldensity_transplant_l23split_pipeline_datasets:
             --nexus-proj {NEXUS_DESTINATION_PROJ} \
             --nexus-token {params.token} \
         {params.app1[1]} \
-            --dataset-path {input.densities_from_probability_map} \
+            --dataset-path {input.inhibitory_neuron_densities} \
+            --dataset-path {input.glia_cell_densities} \
+            --dataset-path {input.annotation_ccfv3_split} \
+            --dataset-path {input.direction_vectors} \
             --hierarchy-path {input.hierarchy} \
+            --hierarchy-jsonld-path {input.hierarchy_jsonld} \
             --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
             --config-path {input.push_dataset_config} \
-            --provenance-metadata-path {PROVENANCE_METADATA_V2_PATH} \
+            --provenance-metadata-path {PROVENANCE_METADATA_V3_PATH} \
             --resource-tag {params.resource_tag}
             2>&1 | tee {log}
         """

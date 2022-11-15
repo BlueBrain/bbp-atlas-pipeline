@@ -28,6 +28,7 @@ GeneratedDatasetPath:
     cell_densities_ccfv2: {WORKING_DIR}/cell_densities_ccfv2
     cell_densities_ccfv2_correctednissl: {WORKING_DIR}/cell_densities_ccfv2_correctednissl
     cell_densities_ccfv2_l23split_correctednissl: {WORKING_DIR}/cell_densities_ccfv2_l23split_correctednissl
+    cell_densities_ccfv3_correctednissl: {WORKING_DIR}/cell_densities_ccfv3_correctednissl
     glia_cell_densities_l23split_transplant_correctednissl: {WORKING_DIR}/glia_cell_densities_l23split_transplant_correctednissl
     neuron_densities_hybrid: {WORKING_DIR}/neuron_densities_hybrid
     neuron_densities_ccfv2: {WORKING_DIR}/neuron_densities_ccfv2
