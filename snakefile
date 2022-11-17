@@ -41,6 +41,7 @@ MODULES_VERBOSE = config["MODULES_VERBOSE"]
 DISPLAY_HELP = config["DISPLAY_HELP"]
 RESOURCE_TAG = config["RESOURCE_TAG"]
 ATLAS_CONFIG_PATH = config["ATLAS_CONFIG_PATH"]
+NEW_ATLAS = config["NEW_ATLAS"]
 PROVENANCE_METADATA_V2_PATH = f"{WORKING_DIR}/provenance_metadata_v2.json"
 PROVENANCE_METADATA_V3_PATH = f"{WORKING_DIR}/provenance_metadata_v3.json"
 
@@ -80,15 +81,14 @@ if not os.path.exists(snakemake_run_logs):
         L.error(f"creation of the directory {snakemake_run_logs} failed")
 
 # Pipeline logs
-logfile = os.path.abspath(
-            os.path.join(
-                snakemake_run_logs, 
-                datetime.now().isoformat().replace(":", "-")
-                + ".log"
-            )
-          )
+logfile = os.path.abspath(os.path.join(
+    snakemake_run_logs,
+    datetime.now().isoformat().replace(":", "-") + ".log"))
 logfile_handler = logging.FileHandler(logfile)
 L.logger.addHandler(logfile_handler)
+
+if NEW_ATLAS:
+    print("\nYou requested a new atlas release\n")
 
 # All the apps must be listed here so that we can fetch all the versions
 APPS = {
@@ -2740,6 +2740,7 @@ rule push_annotation_pipeline_v2_datasets:
             --dataset-path {input.direction_vectors} \
             --hierarchy-path {input.hierarchy} \
             --hierarchy-jsonld-path {input.hierarchy_jsonld} \
+            --new-atlas {NEW_ATLAS} \
             --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
             --config-path {input.push_dataset_config} \
             --link-regions-path {output.link_regions} \
@@ -2804,6 +2805,7 @@ rule push_celldensity_transplant_pipeline_datasets:
         {params.app1[1]} \
             --dataset-path {input.densities_from_probability_map_transplanted} \
             --hierarchy-path {input.hierarchy} \
+            --new-atlas {NEW_ATLAS} \
             --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
             --config-path {input.push_dataset_config} \
             --provenance-metadata-path {PROVENANCE_METADATA_V3_PATH} \
@@ -2845,11 +2847,12 @@ rule push_celldensity_transplant_l23split_pipeline_datasets:
             --dataset-path {input.direction_vectors} \
             --hierarchy-path {input.hierarchy} \
             --hierarchy-jsonld-path {input.hierarchy_jsonld} \
+            --new-atlas {NEW_ATLAS} \
             --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
             --config-path {input.push_dataset_config} \
             --provenance-metadata-path {PROVENANCE_METADATA_V3_PATH} \
             --resource-tag {params.resource_tag}
             2>&1 | tee {log}
         """
-            #--dataset-path {input.densities_from_profile_transplanted} \
-
+#            --dataset-path {input.densities_from_probability_map} \
+#

@@ -3,6 +3,7 @@ NEXUS_IDS_FILE: ./nexus_ids.json
 FORGE_CONFIG: ./forge-config.yml
 RULES_CONFIG_DIR_TEMPLATES: ./rules_config_dir_templates
 ATLAS_CONFIG_PATH: ./atlasrelease_config_path.json
+NEW_ATLAS: False
 RESOLUTION: "25"
 MODULES_VERBOSE: True
 RESOURCE_TAG: "None"  # put None to generate an automatic tag corresponding to the timestamp
