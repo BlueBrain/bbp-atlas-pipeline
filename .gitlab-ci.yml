@@ -39,7 +39,8 @@ update-pipeline-image:
 convert_and_deploy_job:
   stage:
     convert_and_deployToBB5
-  needs: ["update-pipeline-image"]
+  needs:
+    - update-pipeline-image
   when: on_success
   tags:
     - bb5_map
