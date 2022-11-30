@@ -15,10 +15,7 @@ stages:
 
 # Executes deployment of project documentation to bbp-dke-staging Openshift
 
-# Build image for pipeline
-update-pipeline-image:
-  stage: deploy
-  extends: .build-image-using-kaniko
+.deploy_rules:
   rules:
     - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop"
       changes:
@@ -27,6 +24,13 @@ update-pipeline-image:
         - .gitlab-ci.yml
         - .keycloak_config.yml
       when: on_success
+
+# Build image for pipeline
+update-pipeline-image:
+  stage: deploy
+  extends: .build-image-using-kaniko
+  rules:
+    - !reference [.deploy_rules, rules]
   variables:
     BUILD_PATH: $CI_PROJECT_DIR
     KANIKO_EXTRA_ARGS: "--build-arg CI_JOB_TOKEN=$CI_JOB_TOKEN --build-arg BBP_CA_CERT='$BBP_CA_CERT'"
@@ -41,6 +45,8 @@ convert_and_deploy_job:
     convert_and_deployToBB5
   needs:
     - update-pipeline-image
+  rules:
+    - !reference [.deploy_rules, rules]
   when: on_success
   tags:
     - bb5_map
