@@ -1,6 +1,80 @@
-> Alternatively to runing the pipeline with Snakemake, it is also possible to generate the data using the scripts in the [shell-rules](shell-rules). This method was later developped in order to be more lightweight.
-
 # Blue Brain Atlas Pipeline
+
+## Installation
+
+_Note: For computation time reason and ease of installation, it is recommended to run the pipeline on BB5._
+
+### Singularity image on BB5
+A CI/CD job creates a Singularity image from the Docker image described below, and deploys it on BB5:  
+`/gpfs/bbp.cscs.ch/data/project/proj83/singularity-images/blue_brain_atlas_pipeline.sif`
+
+so that one can run the corresponding container with  
+`singularity shell /gpfs/bbp.cscs.ch/data/project/proj83/singularity-images/blue_brain_atlas_pipeline.sif`
+
+and access the pipeline files at  
+`Singularity> cd /pipeline/blue_brain_atlas_pipeline/`
+
+Go to [Launch the pipeline](#launch-the-pipeline) for the instructions to run the pipeline.
+
+### Docker image
+A Docker image containing all the pipeline dependecies is automatically built anytime a change is pushed in the relevant files:  
+`bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:latest`
+
+It can be used with  
+`docker run bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:latest`
+
+or converted into an **Apptainer** image with  
+`apptainer pull --docker-login docker://bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:latest`
+
+Alternatively, one can manually install the scheduler and the other package needed as described next.
+
+### Scheduler core
+The pipeline is orchestrated by SnakeMake and the snakefile in the root folder of this repository.
+This means SnakeMake must be installed in one of the following ways:
+
+- Snakemake is available as a BB5 module that can be loaded doing  
+`module load unstable snakemake`
+
+- Conda can be used as explained here : https://snakemake.readthedocs.io/en/stable/getting_started/installation.html. Once Snakemake has been installed in an isolated conda environment, you can use it and install the other pipeline dependencies after activating it:  
+`conda activate <your_snakemake_environment>`
+
+- It is also possible to install it using pip:  
+`pip install snakemake`
+
+_Note: this uses Python 3.6 or more recent._
+
+### Other dependencies
+
+Each module to run as part of the pipeline can be seen as a dependency of this pipeline. Then each module may come with it’s own dependencies (if installed with Conda, Pip or loaded on BB5) or, on some cases, module-level dependencies will have to be installed manually.
+
+List of modules used by the annotation pipeline:
+
+- [bba-datafetch](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-fetch)
+- [atlas-building-tools direction-vectors isocortex](https://bbpteam.epfl.ch/project/spaces/display/BBKG/direction-vectors)
+- [atlas-building-tools orientation-field](https://bbpteam.epfl.ch/project/spaces/display/BBKG/orientation-field)
+- [atlas-building-tools region-splitter split-isocortex-layer-23](https://bbpteam.epfl.ch/project/spaces/display/BBKG/region-splitter)
+- [atlas-building-tools placement-hints isocortex](https://bbpteam.epfl.ch/project/spaces/display/BBKG/placement-hints)
+- [parcellationexport](https://bbpteam.epfl.ch/project/spaces/display/BBKG/parcellationexport)
+- [bba-data-integrity-check nrrd-integrity](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-check)
+- [bba-data-integrity-check meshes-obj-integrity](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-check)
+- [bba-data-push push-volumetric](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-push)
+- [bba-data-push push-meshes](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-push)
+- [bba-data-push push-regionsummary](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-push)
+
+The packages are available as bb5 module using :
+
+```
+module load unstable py-atlas-building-tools \
+py-bba-datafetch \
+py-token-fetch \
+py-data-integrity-check \
+py-nexusforge py-bba-webexporter
+```
+
+Or it can be installed following the ‘Installation’ section in their confluence documentation linked higher.
+
+The CLI bba-data-push is not available as a BB5 module yet. You can install it by following the process detailed in the Installation section of the confluence documentation [here](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-push).
+
 
 ## Introduction
 
@@ -56,64 +130,6 @@ The Allen Mouse CCF Compatible Data : [https://bbpteam.epfl.ch/project/spaces/di
 The Atlas Modules : [https://bbpteam.epfl.ch/project/spaces/display/BBKG/Atlas+Modules](https://bbpteam.epfl.ch/project/spaces/display/BBKG/Atlas+Modules)
 
 
-## Installation
-
-_Note: For computation time reason and ease of installation, it is recommended to run the pipeline on BB5._
-
-### Docker image
-A Docker image containing all the pipeline dependecies is automatically built at any change in the relevant files:  
-`bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:latest`
-
-It can be used with  
-`docker run bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:latest`
-
-or converted into an **Apptainer** image with  
-`apptainer pull --docker-login docker://bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:latest`
-
-Alternatively, one can manually install the scheduler and the other package needed as described next.
-
-### Scheduler core
-The pipeline is orchestrated by SnakeMake and the snakefile in the root folder of this repository. 
-This means SnakeMake must be installed in one of the following ways:
-
-- Snakemake is available as a BB5 module that can be loaded doing:  
-`module load unstable Snakemake`
-
-- Conda can be used as explained here : https://snakemake.readthedocs.io/en/stable/getting_started/installation.html. Once Snakemake has been installed in an isolated conda environment, you can use it and install the other pipeline dependencies after activating it:  
-`conda activate <your_snakemake_environment>`
-
-- It is also possible to install it using pip:  
-`pip install snakemake`
-
-_Note: this uses Python 3.6 or more recent._
-
-### Other dependencies
-
-Each module to run as part of the pipeline can be seen as a dependency of this pipeline. Then each module may come with it’s own dependencies (if installed with Conda, Pip or loaded on BB5) or, on some cases, module-level dependencies will have to be installed manually.
-
-List of modules used by the annotation pipeline:
-
-- [bba-datafetch](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-fetch)
-- [atlas-building-tools direction-vectors isocortex](https://bbpteam.epfl.ch/project/spaces/display/BBKG/direction-vectors)
-- [atlas-building-tools orientation-field](https://bbpteam.epfl.ch/project/spaces/display/BBKG/orientation-field)
-- [atlas-building-tools region-splitter split-isocortex-layer-23](https://bbpteam.epfl.ch/project/spaces/display/BBKG/region-splitter)
-- [atlas-building-tools placement-hints isocortex](https://bbpteam.epfl.ch/project/spaces/display/BBKG/placement-hints)
-- [parcellationexport](https://bbpteam.epfl.ch/project/spaces/display/BBKG/parcellationexport)
-- [bba-data-integrity-check nrrd-integrity](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-check)
-- [bba-data-integrity-check meshes-obj-integrity](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-check)
-- [bba-data-push push-volumetric](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-push)
-- [bba-data-push push-meshes](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-push)
-- [bba-data-push push-regionsummary](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-push)
-
-The packages are available as bb5 module using :
-
-`module load unstable py-atlas-building-tools py-bba-datafetch py-token-fetch py-data-integrity-check py-nexusforge py-bba-webexporter`
-
-Or it can be installed following the ‘Installation’ section in their confluence documentation linked higher.
-
-The CLI bba-data-push is not available as a BB5 module yet. You can install it by following the process detailed in the Installation section of the confluence documentation [here](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-push).
-
-
 ## Configuration
 
 The configuration of the pipeline is written in the file 'config.yaml'.
@@ -139,6 +155,8 @@ If you do not want to modify the config file, you can still overload the config 
 
 
 ## Launch the pipeline
+
+> Alternatively to running the pipeline with SnakeMake, it is also possible to use the scripts in the [shell-rules](shell-rules). This method was later developed to be more lightweight.
 
 In a terminal, first cd the workflow folder:
 
