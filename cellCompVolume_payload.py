@@ -1,5 +1,6 @@
-def create_payload(forge, atlas_release_id):
+import json
 
+def create_payload(forge, atlas_release_id, output_file):
     # Density resources annotated with Mtypes without layers are note released
     query_layer = f"""
     SELECT DISTINCT ?s
@@ -15,7 +16,7 @@ def create_payload(forge, atlas_release_id):
     }}
     """
     all_resources_with_layer = forge.sparql(query_layer, limit=1000, debug=False)
-    resources = [forge.retrieve(id = r.s) for r in tqdm(all_resources_wiht_layer)]
+    resources = [forge.retrieve(id = r.s) for r in all_resources_with_layer]
     print(f"{len(resources)} ME-type dentisities with layer found")
 
     # Get Generic{Excitatory,Inhibitory}Neuron
@@ -34,7 +35,7 @@ def create_payload(forge, atlas_release_id):
         }}
         """
         generic_resources = forge.sparql(query_gen, limit=1000, debug=False)
-        assert len(generic_resource) == 1
+        assert len(generic_resources) == 1
         generic_resource = forge.retrieve(id = generic_resources[0].s)
         resources.append(generic_resource)
 
@@ -58,17 +59,16 @@ def create_payload(forge, atlas_release_id):
     grouped_by_metype = {"hasPart": []}
     for m_id, m in mtype_to_etype.items():
         m_content = {"@id": m_id, "label": m["label"], "about": ["https://neuroshapes.org/MType"], "hasPart": []}    
-        for kv, vv in m.items():
-            if kv != "label":
-                kv_content = {"@id": kv, "label": vv["label"], "about": ["https://neuroshapes.org/EType"], "hasPart": []}
-                for kvv, vvv in vv.items():
-                    if kvv != "label":
-                        kv_content["hasPart"].append( {"@id": kvv, "@type": vvv["type"], "_rev": vvv["_rev"]} )
-                        m_content["hasPart"].append( kv_content )
+        for e_id, e in m.items():
+            if e_id != "label":
+                e_content = {"@id": e_id, "label": e["label"], "about": ["https://neuroshapes.org/EType"], "hasPart": []}
+                for res_id, res in e.items():
+                    if res_id != "label":
+                        e_content["hasPart"].append( {"@id": res_id, "@type": res["type"], "_rev": res["_rev"]} )
+                        m_content["hasPart"].append( e_content )
         grouped_by_metype["hasPart"].append(m_content)
 
-    local_file_name = "./cellCompositionVolume_distribution.json"
-    with open(local_file_name, "w") as f:
+    with open(output_file, "w") as f:
         json.dump(grouped_by_metype, f)
 
-    return payload
+    return output_file

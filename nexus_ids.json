@@ -1,4 +1,8 @@
 {
+  "AtlasRelease": {
+    "prod": "https://bbp.epfl.ch/neurosciencegraph/data/4906ab85-694f-469d-962f-c0174e901885",
+    "staging": "https://bbp.epfl.ch/neurosciencegraph/data/brainatlasrelease/c96c71a8-4c0d-4bc1-8a1a-141d9ed6693d"
+  },
   "ParcellationOntology": {
     "allen_mouse_ccf": "http://bbp.epfl.ch/neurosciencegraph/ontologies/core/mba_brainregion_corrected"
   },

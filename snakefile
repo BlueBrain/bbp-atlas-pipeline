@@ -1,8 +1,9 @@
 ##
-##Snakemake - Cell Atlas Pipeline
+## Snakemake - Cell Atlas Pipeline
 ##
-##nabil.alibou@epfl.ch
-##jonathan.lurie@epfl.ch
+## nabil.alibou@epfl.ch
+## jonathan.lurie@epfl.ch
+## leonardo.cristella@epfl.ch
 ##
 
 import os
@@ -124,7 +125,9 @@ APPS = {
     "bba-data-push push-volumetric": "bba-data-push push-volumetric",
     "bba-data-push push-meshes": "bba-data-push push-meshes",
     "bba-data-push push-cellrecords": "bba-data-push push-cellrecords",
-    "bba-data-push push-regionsummary": "bba-data-push push-regionsummary"
+    "bba-data-push push-regionsummary": "bba-data-push push-regionsummary",
+    "bba-data-push push-cellcomposition": "bba-data-push push-cellcomposition",
+    "cwl-registry": "cwl-registry"
 }
 #"gene-expression-volume create-volumes": "gene-expression-volume create-volumes",
 
@@ -348,7 +351,7 @@ rule fetch_ccf_brain_region_hierarchy:
             2>&1 | tee {log}
         """
 
-##>fetch_brain_parcellation_ccfv2 :  fetch the CCF v2 brain parcellation volume in the given resolution
+##>fetch_brain_parcellation_ccfv2 : fetch the CCF v2 brain parcellation volume in the given resolution
 rule fetch_brain_parcellation_ccfv2:
     output:
         f"{WORKING_DIR}/brain_parcellation_ccfv2.nrrd"
@@ -2488,13 +2491,13 @@ rule export_brain_region_ccfv2_l23split:
     log:
         f"{LOG_DIR}/export_brain_region_ccfv2_l23split.log"
     shell:
-        #"""{params.app} --hierarchy {input.hierarchy} \
-        #    --parcellation-volume {input.parcellation_volume} \
-        #    --out-mesh-dir {output.mesh_dir} \
-        #    --out-mask-dir {output.mask_dir} \
-        #    --out-metadata {output.json_metadata_parcellations} \
-        #    --out-hierarchy-jsonld {output.hierarchy_jsonld} \
-        #    2>&1 | tee {log}
+        """{params.app} --hierarchy {input.hierarchy} \
+            --parcellation-volume {input.parcellation_volume} \
+            --out-mesh-dir {output.mesh_dir} \
+            --out-mask-dir {output.mask_dir} \
+            --out-metadata {output.json_metadata_parcellations} \
+            --out-hierarchy-jsonld {output.hierarchy_jsonld} \
+            2>&1 | tee {log}
         """
 
 ##>export_brain_region_ccfv3_l23split : export a mesh, a volumetric mask and a region summary json file for every brain region available in the ccfv3 isocortex layer 2-3 split brain parcellation volume. Create a hierarchy JSONLD file from the input hierarchy JSON file as well. Note: not only the leaf regions are exported but also the above regions that are combinaisons of leaves
@@ -2851,8 +2854,86 @@ rule push_celldensity_transplant_l23split_pipeline_datasets:
             --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
             --config-path {input.push_dataset_config} \
             --provenance-metadata-path {PROVENANCE_METADATA_V3_PATH} \
-            --resource-tag {params.resource_tag}
+            --resource-tag {params.resource_tag} \
             2>&1 | tee {log}
         """
 #            --dataset-path {input.densities_from_probability_map} \
-#
+
+atlas_release_id = NEXUS_IDS["AtlasRelease"]["prod" if "staging" not in NEXUS_DESTINATION_ENV else "staging"]
+
+##>create_cellCompositionVolume_payload :
+rule create_cellCompositionVolume_payload:
+    output:
+        payload = f"{WORKING_DIR}/cellCompositionVolume_payload.json"
+    log:
+        f"{LOG_DIR}/create_cellCompositionVolume_payload.log"
+    run:
+        with open(log[0], "w") as logfile:
+            #sys.path.append("/gpfs/bbp.cscs.ch/home/lcristel/BBP/atlas_pipelines/kgforge/lib/python3.9/site-packages")
+            from kgforge.core import KnowledgeGraphForge
+            forge = KnowledgeGraphForge(FORGE_CONFIG, bucket = "/".join([NEXUS_DESTINATION_ORG, NEXUS_DESTINATION_PROJ]), endpoint = NEXUS_DESTINATION_ENV, token = myTokenFetcher.getAccessToken())
+            from cellCompVolume_payload import create_payload
+            logfile.write(f"Creating CellCompositionVolume payload for atlasRelease {atlas_release_id} in {NEXUS_DESTINATION_ENV}")
+            create_payload(forge, atlas_release_id, output.payload)
+            logfile.write(f"CellCompositionVolume payload created: {output.payload}")
+
+##>create_cellCompositionSummary_payload :
+rule create_cellCompositionSummary_payload:
+    input:
+        hierarchy = rules.split_isocortex_layer_23_ccfv2.output.hierarchy_l23split,
+        annotation_split = rules.split_isocortex_layer_23_ccfv2.output.annotation_l23split,
+        cellCompositionVolume = rules.create_cellCompositionVolume_payload.output.payload
+    params:
+        app=APPS["cwl-registry"]
+    output:
+        intermediate_density_distribution = f"{WORKING_DIR}/density_distribution.json",
+        summary_statistics = f"{WORKING_DIR}/cellCompositionSummary_payload.json"
+    log:
+        f"{LOG_DIR}/create_cellCompositionSummary_payload.log"
+    run:
+        with open(log[0], "w") as logfile:
+            logfile.write(f"Fetching CellCompositionVolume payload from {input.cellCompositionVolume}")
+            with open(input.cellCompositionVolume) as volume_json:
+                dataset = json.load(volume_json)
+
+                from kgforge.core import KnowledgeGraphForge
+                forge = KnowledgeGraphForge(FORGE_CONFIG, bucket = "/".join([NEXUS_DESTINATION_ORG, NEXUS_DESTINATION_PROJ]), endpoint = NEXUS_DESTINATION_ENV, token = myTokenFetcher.getAccessToken())
+
+                logfile.write(f"Creatting density_distribution in {output.intermediate_density_distribution}")
+                from cwl_registry import staging, statistics
+                density_distribution = staging.materialize_density_distribution(forge=forge, dataset=dataset, output_file=output.intermediate_density_distribution)
+
+                logfile.write(f"Computing CellCompositionSummary payload")
+                import voxcell
+                summary_statistics = statistics.atlas_densities_composition_summary(density_distribution, voxcell.RegionMap.load_json(input.hierarchy), voxcell.VoxelData.load_nrrd(input.annotation_split))
+                logfile.write(f"Writing CellCompositionSummary payload in {output.summary_statistics}")
+                with open(output.summary_statistics, "w") as outfile:
+                    outfile.write(json.dumps(summary_statistics, indent = 4))
+
+##>push_cellcomposition :
+rule push_cellcomposition:
+    input:
+        volume_path = rules.create_cellCompositionVolume_payload.output.payload,
+        summary_path = rules.create_cellCompositionSummary_payload.output.summary_statistics,
+    params:
+        app=APPS["bba-data-push push-cellcomposition"].split(),
+        token = myTokenFetcher.getAccessToken(),
+        resource_tag = RESOURCE_TAG
+    log:
+        f"{LOG_DIR}/push_cellcomposition.log"
+    shell:
+        """
+        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env "https://staging.nise.bbp.epfl.ch/nexus/v1" \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj "atlasdatasetrelease" \
+            --nexus-token {params.token} \
+        {params.app[1]} \
+            --atlasrelease-id {atlas_release_id} \
+            --volume-path {input.volume_path} \
+            --densities-dir {WORKING_DIR} \
+            --summary-path {input.summary_path} \
+            --output-dir {WORKING_DIR} \
+            --resource-tag {params.resource_tag} \
+            2>&1 | tee {log}
+        """
