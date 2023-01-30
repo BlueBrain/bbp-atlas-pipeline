@@ -2930,7 +2930,7 @@ rule create_cellCompositionSummary_payload:
                 with open(output.summary_statistics, "w") as outfile:
                     outfile.write(json.dumps(summary_statistics, indent = 4))
 
-##>push_cellcomposition :
+##>push_cellcomposition : Final rule to generate and push into Nexus the CellComposition along with its dependencies (Volume and Summary)
 rule push_cellcomposition:
     input:
         volume_path = rules.create_cellCompositionVolume_payload.output.payload,
@@ -2943,7 +2943,7 @@ rule push_cellcomposition:
         temp(touch(f"{WORKING_DIR}/push_cellcomposition_success.txt"))
     log:
         f"{LOG_DIR}/push_cellcomposition.log"
-    shell:
+    shell: # use NEXUS_DESTINATION_ENV for --nexus-env when the logic to update an exisiting cellComposition rather than pushing a new one is implemented in the push module
         """
         {params.app[0]} --forge-config-file {FORGE_CONFIG} \
             --nexus-env "https://staging.nise.bbp.epfl.ch/nexus/v1" \

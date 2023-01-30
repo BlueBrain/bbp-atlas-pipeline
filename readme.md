@@ -164,7 +164,8 @@ In a terminal, first cd the workflow folder:
 
 Then, based on whether the whole pipeline or just a subpart of it needs to be launched, it can be handy to have a list of the tasks:
 
-- `generate_annotation_pipeline_datasets`: global rule to generate and check the integrity of every products of the annotation pipeline.
+- `push_cellcomposition`: final rule to generate and push into Nexus the SBO CellComposition along with its dependencies (Volume and Summary);
+- `generate_annotation_pipeline_datasets`: global rule to generate and check the integrity of every products of the annotation pipeline;
 - `push_annotation_pipeline_datasets`: global rule to generate, check and push into Nexus every products of the annotation pipeline.
 
 _Note: the pipeline framework (Snakemake) resolves the data dependencies and automatically schedules the tasks to be launched when data are missing. Hence, there is no need to launch all the tasks manually, only the target one._

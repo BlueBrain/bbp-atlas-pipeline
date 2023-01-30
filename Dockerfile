@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM python:3.9-slim
 
 ARG CI_JOB_TOKEN
 ARG BBP_CA_CERT
@@ -30,18 +30,20 @@ COPY .. blue_brain_atlas_pipeline/
 RUN git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/".insteadOf https://bbpgitlab.epfl.ch/
 
 # module load py-token-fetch
-RUN pip install git+https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_token_fetch.git@v0.2.0
+RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_token_fetch.git@v0.2.0
 
 # module load py-bba-datafetch
-RUN pip install git+https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_fetch.git@v0.1.0
+RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_fetch.git@v0.1.0
 
 # module load py-bba-webexporter
-RUN pip install git+https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_web_exporter.git@v0.1.5
+RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_web_exporter.git@v0.1.5
 
 # module load py-data-integrity-check
-RUN pip install git+https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_integrity_check.git@v0.1.0
+RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_integrity_check.git@v0.1.0
 
-RUN pip install git+https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_push.git@v0.1.0
+RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_push.git@densities
+
+RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ git+https://bbpgitlab.epfl.ch/nse/cwl-registry.git@separate-funcs
 
 RUN git config --global --remove-section url."https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/"
 
