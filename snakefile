@@ -41,6 +41,8 @@ RESOLUTION = str(config["RESOLUTION"])
 MODULES_VERBOSE = config["MODULES_VERBOSE"]
 DISPLAY_HELP = config["DISPLAY_HELP"]
 RESOURCE_TAG = config["RESOURCE_TAG"]
+if RESOURCE_TAG == "None":
+    RESOURCE_TAG = f"Atlas pipeline ({datetime.today().strftime('%Y-%m-%dT%H:%M:%S')})"
 ATLAS_CONFIG_PATH = config["ATLAS_CONFIG_PATH"]
 NEW_ATLAS = config["NEW_ATLAS"]
 PROVENANCE_METADATA_V2_PATH = f"{WORKING_DIR}/provenance_metadata_v2.json"
@@ -1624,10 +1626,11 @@ rule glia_cell_densities_ccfv2_l23split_correctednissl:
         astrocyte_density = f"{CELL_POSITIONS_CCFV2_L23SPLIT_CORRECTEDNISSL_CONFIG_FILE['inputDensityVolumePath']['astrocyte']}",
         oligodendrocyte_density = f"{CELL_POSITIONS_CCFV2_L23SPLIT_CORRECTEDNISSL_CONFIG_FILE['inputDensityVolumePath']['oligodendrocyte']}",
         microglia_density = f"{CELL_POSITIONS_CCFV2_L23SPLIT_CORRECTEDNISSL_CONFIG_FILE['inputDensityVolumePath']['microglia']}",
-        neuron_density = f"{CELL_POSITIONS_CCFV2_L23SPLIT_CORRECTEDNISSL_CONFIG_FILE['inputDensityVolumePath']['neuron']}"
+        neuron_density = f"{CELL_POSITIONS_CCFV2_L23SPLIT_CORRECTEDNISSL_CONFIG_FILE['inputDensityVolumePath']['neuron']}",
+        out=directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['cell_densities_ccfv2_l23split_correctednissl']}")
     params:
         app=APPS["atlas-building-tools cell-densities glia-cell-densities"],
-        out=f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['cell_densities_ccfv2_l23split_correctednissl']}"
+        #out=f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['cell_densities_ccfv2_l23split_correctednissl']}"
     log:
         f"{LOG_DIR}/glia_cell_densities_ccfv2_l23split_correctednissl.log"
     shell:
@@ -1639,7 +1642,7 @@ rule glia_cell_densities_ccfv2_l23split_correctednissl:
             --oligodendrocyte-density-path {input.oligo_density} \
             --microglia-density-path {input.microglia_density} \
             --glia-proportions-path {input.glia_proportion} \
-            --output-dir {params.out} \
+            --output-dir {output.out} \
             2>&1 | tee {log}
         """
 
@@ -2367,7 +2370,7 @@ rule transplant_glia_cell_densities_l23split_correctednissl:
         hierarchy = rules.split_isocortex_layer_23_ccfv2.output.hierarchy_l23split,
         src_parcellation_volume = rules.combine_v2_annotations.output,
         dst_parcellation_volume = rules.fetch_brain_parcellation_ccfv3.output,
-        src_cell_volume = rules.glia_cell_densities_ccfv2_l23split_correctednissl.params.out
+        src_cell_volume = rules.glia_cell_densities_ccfv2_l23split_correctednissl.output.out
     output:
         directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['glia_cell_densities_l23split_transplant_correctednissl']}")
     params:
@@ -2381,7 +2384,7 @@ rule transplant_glia_cell_densities_l23split_correctednissl:
             --src-cell-volume {input.src_cell_volume} \
             --dst-cell-volume {output} \
             2>&1 | tee {log}
-	"""
+        """
 
 ##>transplant_inhibitory_neuron_densities_linprog_l23split_correctednissl : Transplant inhibitory neuron density nrrd files
 rule transplant_inhibitory_neuron_densities_linprog_l23split_correctednissl:
@@ -2783,6 +2786,7 @@ rule push_annotation_pipeline_v2_datasets:
 ## ============================= CELL DENSITY PIPELINE USER RULES ============================
 ## =========================================================================================
 
+pushed_transplant = "pushed_transplant_datasets"
 
 ##>push_celldensity_transplant_pipeline_datasets : Global rule to generate and push into Nexus every products of the cell density pipeline
 rule push_celldensity_transplant_pipeline_datasets:
@@ -2796,8 +2800,10 @@ rule push_celldensity_transplant_pipeline_datasets:
         token = myTokenFetcher.getAccessToken(),
         create_provenance_json = write_json(PROVENANCE_METADATA_V3_PATH, PROVENANCE_METADATA_V3, rule_name = "push_celldensity_pipeline_datasets"),
         resource_tag = RESOURCE_TAG
+    output:
+        f"{WORKING_DIR}/{pushed_transplant}.log"
     log:
-        f"{LOG_DIR}/push_celldensity_pipeline_datasets.log"
+        f"{LOG_DIR}/push_celldensity_transplant_pipeline_datasets.log"
     shell:
         """
         {params.app1[0]} --forge-config-file {FORGE_CONFIG} \
@@ -2814,6 +2820,7 @@ rule push_celldensity_transplant_pipeline_datasets:
             --provenance-metadata-path {PROVENANCE_METADATA_V3_PATH} \
             --resource-tag {params.resource_tag}
             2>&1 | tee {log}
+        touch {output}
         """
 
 ##>push_celldensity_transplant_l23split_pipeline_datasets : Global rule to generate and push into Nexus every products of the cell density pipeline
@@ -2834,8 +2841,10 @@ rule push_celldensity_transplant_l23split_pipeline_datasets:
         token = myTokenFetcher.getAccessToken(),
         create_provenance_json = write_json(PROVENANCE_METADATA_V3_PATH, PROVENANCE_METADATA_V3, rule_name = "push_celldensity_pipeline_datasets"),
         resource_tag = RESOURCE_TAG
+    output:
+        f"{WORKING_DIR}/{pushed_transplant}.log"
     log:
-        f"{LOG_DIR}/push_celldensity_pipeline_datasets.log"
+        f"{LOG_DIR}/push_celldensity_transplant_l23split_pipeline_datasets.log"
     shell:
         """
         {params.app1[0]} --forge-config-file {FORGE_CONFIG} \
@@ -2856,13 +2865,24 @@ rule push_celldensity_transplant_l23split_pipeline_datasets:
             --provenance-metadata-path {PROVENANCE_METADATA_V3_PATH} \
             --resource-tag {params.resource_tag} \
             2>&1 | tee {log}
+        touch {output}
         """
 #            --dataset-path {input.densities_from_probability_map} \
 
-atlas_release_id = NEXUS_IDS["AtlasRelease"]["prod" if "staging" not in NEXUS_DESTINATION_ENV else "staging"]
+if not NEW_ATLAS:
+    atlas_release_id = NEXUS_IDS["AtlasRelease"]["prod" if "staging" not in NEXUS_DESTINATION_ENV else "staging"]
+else:
+    with open(ATLAS_CONFIG_PATH, "r") as atlasrelease_config_file:
+        atlasrelease_config_file.seek(0)
+        atlasrelease_config = json.load(atlasrelease_config_file)
+        atlas_release_id = (list(atlasrelease_config.keys())[0])["id"]
 
 ##>create_cellCompositionVolume_payload :
 rule create_cellCompositionVolume_payload:
+    input:
+        rules.push_celldensity_transplant_l23split_pipeline_datasets.output
+    params:
+        resource_tag = RESOURCE_TAG
     output:
         payload = f"{WORKING_DIR}/cellCompositionVolume_payload.json"
     log:
@@ -2873,8 +2893,8 @@ rule create_cellCompositionVolume_payload:
             from kgforge.core import KnowledgeGraphForge
             forge = KnowledgeGraphForge(FORGE_CONFIG, bucket = "/".join([NEXUS_DESTINATION_ORG, NEXUS_DESTINATION_PROJ]), endpoint = NEXUS_DESTINATION_ENV, token = myTokenFetcher.getAccessToken())
             from cellCompVolume_payload import create_payload
-            logfile.write(f"Creating CellCompositionVolume payload for atlasRelease {atlas_release_id} in {NEXUS_DESTINATION_ENV}")
-            create_payload(forge, atlas_release_id, output.payload)
+            logfile.write(f"Creating CellCompositionVolume payload for atlasRelease {atlas_release_id} with tag {params.resource_tag}")
+            create_payload(forge, atlas_release_id, output.payload, params.resource_tag)
             logfile.write(f"CellCompositionVolume payload created: {output.payload}")
 
 ##>create_cellCompositionSummary_payload :
@@ -2919,6 +2939,8 @@ rule push_cellcomposition:
         app=APPS["bba-data-push push-cellcomposition"].split(),
         token = myTokenFetcher.getAccessToken(),
         resource_tag = RESOURCE_TAG
+    output:
+        temp(touch(f"{WORKING_DIR}/push_cellcomposition_success.txt"))
     log:
         f"{LOG_DIR}/push_cellcomposition.log"
     shell:

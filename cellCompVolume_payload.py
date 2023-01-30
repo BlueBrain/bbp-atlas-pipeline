@@ -1,45 +1,44 @@
 import json
 
-def create_payload(forge, atlas_release_id, output_file):
-    # Density resources annotated with Mtypes without layers are note released
-    query_layer = f"""
-    SELECT DISTINCT ?s
-    WHERE {{
+def create_payload(forge, atlas_release_id, output_file, tag=None):
+    base_query = f"""
             ?s a METypeDensity ;
-                atlasRelease <{atlas_release_id}>; 
-                annotation / hasBody / label ?mtype_label ;
-                brainLocation / brainRegion ?brainRegion ;  
-                brainLocation / layer ?layer;
-                distribution ?distribution .
+            atlasRelease <{atlas_release_id}>;
+            brainLocation / brainRegion ?brainRegion ;
+            distribution ?distribution ;"""
+    if tag:
+        base_query = f"""{base_query}
+            version <{tag}>;"""
+
+    # Density resources annotated with Mtypes without layers are not released
+    query_layer = """
+        SELECT DISTINCT ?s
+        WHERE {""" + base_query + """
+            annotation / hasBody / label ?mtype_label ;
+            brainLocation / layer ?layer .
             ?distribution name ?nrrd_file ;
             contentUrl ?contentUrl .
-    }}
-    """
+        }"""
     all_resources_with_layer = forge.sparql(query_layer, limit=1000, debug=False)
     resources = [forge.retrieve(id = r.s) for r in all_resources_with_layer]
-    print(f"{len(resources)} ME-type dentisities with layer found")
+    print(f"{len(resources)} ME-type dentisities with layer found (tag '{tag}')")
 
     # Get Generic{Excitatory,Inhibitory}Neuron
     for excInh in ["Excitatory", "Inhibitory"]:
         query_gen = f"""
-        SELECT DISTINCT ?s
-        WHERE {{
-                ?s a METypeDensity ;
-                    atlasRelease <{atlas_release_id}>; 
-                    annotation / hasBody <https://bbp.epfl.ch/ontologies/core/bmo/Generic{excInh}NeuronMType> ;
-                    annotation / hasBody <https://bbp.epfl.ch/ontologies/core/bmo/Generic{excInh}NeuronEType> ;
-                    brainLocation / brainRegion ?brainRegion ;
-                    distribution ?distribution .
-                ?distribution name ?nrrd_file ;
-                    contentUrl ?contentUrl .
-        }}
-        """
+            SELECT DISTINCT ?s
+            WHERE {{""" + base_query + f"""
+            annotation / hasBody <https://bbp.epfl.ch/ontologies/core/bmo/Generic{excInh}NeuronMType> ;
+            annotation / hasBody <https://bbp.epfl.ch/ontologies/core/bmo/Generic{excInh}NeuronEType> .
+            ?distribution name ?nrrd_file ;
+            contentUrl ?contentUrl .
+            }}"""
         generic_resources = forge.sparql(query_gen, limit=1000, debug=False)
         assert len(generic_resources) == 1
         generic_resource = forge.retrieve(id = generic_resources[0].s)
         resources.append(generic_resource)
 
-    print(f"{len(resources)} ME-type densities will be released, including generic ones")
+    print(f"{len(resources)} ME-type densities will be released, including generic ones (tag '{tag}')")
 
     metype_annotations = [(a.hasBody for a in r.annotation) for r in resources] 
     etype_annotations = [a.hasBody for r in resources for a in r.annotation if "ETypeAnnotation" in a.type]
