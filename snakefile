@@ -2864,7 +2864,7 @@ rule push_celldensity_transplant_l23split_pipeline_datasets:
             --config-path {input.push_dataset_config} \
             --provenance-metadata-path {PROVENANCE_METADATA_V3_PATH} \
             --resource-tag {params.resource_tag} \
-            2>&1 | tee {log}
+            2>&1 | tee {log} ;
         touch {output}
         """
 #            --dataset-path {input.densities_from_probability_map} \
@@ -2893,9 +2893,9 @@ rule create_cellCompositionVolume_payload:
             from kgforge.core import KnowledgeGraphForge
             forge = KnowledgeGraphForge(FORGE_CONFIG, bucket = "/".join([NEXUS_DESTINATION_ORG, NEXUS_DESTINATION_PROJ]), endpoint = NEXUS_DESTINATION_ENV, token = myTokenFetcher.getAccessToken())
             from cellCompVolume_payload import create_payload
-            logfile.write(f"Creating CellCompositionVolume payload for atlasRelease {atlas_release_id} with tag {params.resource_tag}")
+            logfile.write(f"Creating CellCompositionVolume payload for atlasRelease {atlas_release_id} with tag '{params.resource_tag}'\n")
             create_payload(forge, atlas_release_id, output.payload, params.resource_tag)
-            logfile.write(f"CellCompositionVolume payload created: {output.payload}")
+            logfile.write(f"CellCompositionVolume payload created: {output.payload}\n")
 
 ##>create_cellCompositionSummary_payload :
 rule create_cellCompositionSummary_payload:
@@ -2912,21 +2912,21 @@ rule create_cellCompositionSummary_payload:
         f"{LOG_DIR}/create_cellCompositionSummary_payload.log"
     run:
         with open(log[0], "w") as logfile:
-            logfile.write(f"Fetching CellCompositionVolume payload from {input.cellCompositionVolume}")
+            logfile.write(f"Fetching CellCompositionVolume payload from {input.cellCompositionVolume}\n")
             with open(input.cellCompositionVolume) as volume_json:
                 dataset = json.load(volume_json)
 
                 from kgforge.core import KnowledgeGraphForge
                 forge = KnowledgeGraphForge(FORGE_CONFIG, bucket = "/".join([NEXUS_DESTINATION_ORG, NEXUS_DESTINATION_PROJ]), endpoint = NEXUS_DESTINATION_ENV, token = myTokenFetcher.getAccessToken())
 
-                logfile.write(f"Creatting density_distribution in {output.intermediate_density_distribution}")
+                logfile.write(f"Creatting density_distribution in {output.intermediate_density_distribution}\n")
                 from cwl_registry import staging, statistics
                 density_distribution = staging.materialize_density_distribution(forge=forge, dataset=dataset, output_file=output.intermediate_density_distribution)
 
-                logfile.write(f"Computing CellCompositionSummary payload")
+                logfile.write(f"Computing CellCompositionSummary payload\n")
                 import voxcell
                 summary_statistics = statistics.atlas_densities_composition_summary(density_distribution, voxcell.RegionMap.load_json(input.hierarchy), voxcell.VoxelData.load_nrrd(input.annotation_split))
-                logfile.write(f"Writing CellCompositionSummary payload in {output.summary_statistics}")
+                logfile.write(f"Writing CellCompositionSummary payload in {output.summary_statistics}\n")
                 with open(output.summary_statistics, "w") as outfile:
                     outfile.write(json.dumps(summary_statistics, indent = 4))
 
@@ -2943,10 +2943,10 @@ rule push_cellcomposition:
         temp(touch(f"{WORKING_DIR}/push_cellcomposition_success.txt"))
     log:
         f"{LOG_DIR}/push_cellcomposition.log"
-    shell: # use NEXUS_DESTINATION_ENV for --nexus-env when the logic to update an exisiting cellComposition rather than pushing a new one is implemented in the push module
+    shell:
         """
         {params.app[0]} --forge-config-file {FORGE_CONFIG} \
-            --nexus-env "https://staging.nise.bbp.epfl.ch/nexus/v1" \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
             --nexus-org {NEXUS_DESTINATION_ORG} \
             --nexus-proj "atlasdatasetrelease" \
             --nexus-token {params.token} \

@@ -6,9 +6,6 @@ def create_payload(forge, atlas_release_id, output_file, tag=None):
             atlasRelease <{atlas_release_id}>;
             brainLocation / brainRegion ?brainRegion ;
             distribution ?distribution ;"""
-    if tag:
-        base_query = f"""{base_query}
-            version <{tag}>;"""
 
     # Density resources annotated with Mtypes without layers are not released
     query_layer = """
@@ -20,7 +17,7 @@ def create_payload(forge, atlas_release_id, output_file, tag=None):
             contentUrl ?contentUrl .
         }"""
     all_resources_with_layer = forge.sparql(query_layer, limit=1000, debug=False)
-    resources = [forge.retrieve(id = r.s) for r in all_resources_with_layer]
+    resources = [forge.retrieve(id = r.s, version=tag) for r in all_resources_with_layer]
     print(f"{len(resources)} ME-type dentisities with layer found (tag '{tag}')")
 
     # Get Generic{Excitatory,Inhibitory}Neuron
@@ -35,7 +32,7 @@ def create_payload(forge, atlas_release_id, output_file, tag=None):
             }}"""
         generic_resources = forge.sparql(query_gen, limit=1000, debug=False)
         assert len(generic_resources) == 1
-        generic_resource = forge.retrieve(id = generic_resources[0].s)
+        generic_resource = forge.retrieve(id = generic_resources[0].s, version=tag)
         resources.append(generic_resource)
 
     print(f"{len(resources)} ME-type densities will be released, including generic ones (tag '{tag}')")
