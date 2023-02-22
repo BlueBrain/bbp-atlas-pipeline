@@ -311,18 +311,19 @@ with open(PROVENANCE_METADATA_V3_PATH, "r+") as provenance_file:
     provenance_file.seek(0)
     PROVENANCE_METADATA_V3 = json.loads(provenance_file.read())
 
+help_file = "HELP_RULES.txt"
 if DISPLAY_HELP:
     try:
-        L.info((open("HELP_RULES.txt", "r")).read())
+        L.info((open(help_file, "r")).read())
         os._exit(0)
     except OSError as e:
-        L.error(f"{e}. Could not open 'HELP_RULES.txt'. Its content can also be access by running the 'help' rule.")
+        L.error(f"{e}. Could not open '{help_file}'. Its content can also be accessed by running the 'help' rule.")
 
 
 ##>help : prints help comments for Snakefile
 rule help:
     input: "snakefile"
-    output: "HELP_RULES.txt"
+    output: help_file
     shell:
         """
         sed -n 's/^##//p' {input} \
@@ -1293,7 +1294,7 @@ rule combine_markers_ccfv2_l23split:
         s100b = rules.fetch_gene_s100b.output,
         tmem119 = rules.fetch_gene_tmem119.output,
         hierarchy=rules.split_isocortex_layer_23_ccfv2.output.hierarchy_l23split,
-        parcellation_volume=rules.combine_v2_annotations.output,
+        parcellation_volume=rules.split_isocortex_layer_23_ccfv2.output.annotation_l23split,
         #markers_config_file = f"{rules_config_dir}/combine_markers_ccfv2_l23split_config.yaml"
     output:
         oligodendrocyte_volume = f"{COMBINE_MARKERS_CCFV2_L23SPLIT_CONFIG_FILE['outputCellTypeVolumePath']['oligodendrocyte']}",
