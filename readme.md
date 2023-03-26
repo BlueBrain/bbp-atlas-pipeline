@@ -14,7 +14,7 @@ so that one can run the corresponding container with
 and access the pipeline files at  
 `Singularity> cd /pipeline/blue_brain_atlas_pipeline/`
 
-Go to [Launch the pipeline](#launch-the-pipeline) for the instructions to run the pipeline.
+Go to [Configuration](#configuration) and [Launch the pipeline](#launch-the-pipeline) for the instructions to run the pipeline.
 
 ### Docker image
 A Docker image containing all the pipeline dependecies is automatically built anytime a change is pushed in the relevant files:  
@@ -132,10 +132,13 @@ The Atlas Modules : [https://bbpteam.epfl.ch/project/spaces/display/BBKG/Atlas+M
 
 ## Configuration
 
-The configuration of the pipeline is written in the file 'config.yaml'.
-Before running the pipeline, make sure you modify:
+The configuration of the pipeline is provided in the files 'atlasrelease_config_path.json' and 'config.yaml'.  
+Before running the pipeline, make sure to set the AtlasRelease ID of interest in the 'atlasrelease_config_path.json' (atlas releases for the same Allen ccf may have different IDs between the prod and staging Nexus environments).  
+In 'config.yaml' you can modify:
 
 - `WORKING_DIR` with a directory of your choice (will contain all the files, temporary or not).
+
+- Optionally `NEW_ATLAS` (`True`/`False`, default: `False`) to trigger the creation of a brand new atlas release.
 
 - Optionally `NEXUS_IDS_FILE` if the @ids have changed or if you are using a different Nexus environment.
 
@@ -143,9 +146,9 @@ Before running the pipeline, make sure you modify:
 
 - Optionally `RESOLUTION` if the input volumetric files of the pipeline are in another resolution other than the default one (25 μm).
 
-- Optionally `MODULES_VERBOSE` (True/False, default : False) if you want to enable supplementary verbosity to be displayed during the run.
+- Optionally `MODULES_VERBOSE` (`True`/`False`, default: `False`) if you want to enable supplementary verbosity to be displayed during the run.
 
-- Optionally `DISPLAY_HELP` (True/False, default : False) if you want to display in your console every rules from the snakefile with their descriptions.
+- Optionally `DISPLAY_HELP` (`True`/`False`, default: `False`) if you want to display in your console every rule from the snakefile with its descriptions.
 
 - The generated data destination aka the Nexus environment `NEXUS_DESTINATION_ENV`, organisation `NEXUS_DESTINATION_ORG` and project `NEXUS_DESTINATION_PROJ` where your datasets will be eventually push into. You can find more details on the generated datasets on the page Pipeline Products as well as informations on the module dedicated to push data into Nexus on the page bba-data-push.
 
@@ -164,6 +167,7 @@ In a terminal, first cd the workflow folder:
 
 Then, based on whether the whole pipeline or just a subpart of it needs to be launched, it can be handy to have a list of the tasks:
 
+- `push_volumetric_ccfv{2,3}_l23split`: rule to create/update (see the `NEW_ATLAS` flag in [Configuration](#configuration)) an atlas release and its properties;
 - `push_cellcomposition`: final rule to generate and push into Nexus the SBO CellComposition along with its dependencies (Volume and Summary);
 - `generate_annotation_pipeline_datasets`: global rule to generate and check the integrity of every products of the annotation pipeline;
 - `push_annotation_pipeline_datasets`: global rule to generate, check and push into Nexus every products of the annotation pipeline.

@@ -11,6 +11,8 @@ GeneratedDatasetPath:
     annotation_ccfv3_l23split: {WORKING_DIR}/annotation_ccfv3_l23split.nrrd
     annotation_hybrid: {WORKING_DIR}/annotation_hybrid.nrrd
     annotation_hybrid_l23split: {WORKING_DIR}/annotation_hybrid_l23split.nrrd
+    hemispheres_ccfv2_l23split: {WORKING_DIR}/hemispheres_annotation_ccfv2_l23split.nrrd
+    hemispheres_ccfv3_l23split: {WORKING_DIR}/hemispheres_annotation_ccfv3_l23split.nrrd
     interpolated_direction_vectors_isocortex_ccfv2: fullv2_annotation/interpolated_direction_vectors_isocortex_ccfv2.nrrd
     direction_vectors_isocortex_ccfv2: {WORKING_DIR}/direction_vectors_isocortex_ccfv2.nrrd
     direction_vectors_isocortex_ccfv3: {WORKING_DIR}/direction_vectors_isocortex_ccfv3.nrrd
