@@ -51,9 +51,9 @@ RUN git config --global --remove-section url."https://gitlab-ci-token:${CI_JOB_T
 RUN pip install git+https://github.com/BlueBrain/atlas-commons@main
 
 # module load py-atlas-building-tools
-RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ atlas-building-tools==0.1.9
+RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ atlas-building-tools>=0.1.9
 
-RUN pip install snakemake==7.12.1
+RUN pip install snakemake>=7.20.0
 
 RUN CA_BUNDLE=$(python3 -c "import certifi; print(certifi.where())");echo $CA_BUNDLE; ls $CA_BUNDLE; echo "$BBP_CA_CERT" >> $CA_BUNDLE ; export SSL_CERT_FILE=$CA_BUNDLE
 
