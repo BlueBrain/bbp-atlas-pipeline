@@ -13,7 +13,7 @@ RUN apt-get update && \
         libboost-program-options-dev \
         libopenscenegraph-dev
 
-RUN apt-get -y install pip git
+RUN apt-get -y install pip git vim
 
 WORKDIR /pipeline
 
