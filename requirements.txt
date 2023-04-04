@@ -1,3 +1,4 @@
+pytest
 sphinx
 sphinx-bluebrain-theme
 myst-parser
