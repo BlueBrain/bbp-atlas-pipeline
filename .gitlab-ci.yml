@@ -39,7 +39,6 @@ unit_test:
   extends: .unit-tests
   before_script:
     - pip install -r requirements.txt
-    - pip install .[dev]
   script:
     - !reference [.add_staging_SSL, script]
     - !reference [.unit-tests, script]
