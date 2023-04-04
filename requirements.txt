@@ -1,5 +1,6 @@
 pytest
 pytest-cov
+git+https://github.com/BlueBrain/nexus-forge
 sphinx
 sphinx-bluebrain-theme
 myst-parser
