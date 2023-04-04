@@ -32,6 +32,7 @@ stages:
   script:
     - CA_BUNDLE=$(python3 -c "import certifi; print(certifi.where())")
     - echo '$BBP_CA_CERT' >> $CA_BUNDLE
+    - cat $CA_BUNDLE
     - export SSL_CERT_FILE=$CA_BUNDLE
 
 unit_test:
