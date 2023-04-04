@@ -1,6 +1,6 @@
 pytest
 pytest-cov
-git+https://github.com/BlueBrain/nexus-forge
+nexusforge==0.8.0
 sphinx
 sphinx-bluebrain-theme
 myst-parser
