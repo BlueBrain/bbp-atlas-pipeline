@@ -38,6 +38,7 @@ corrections["Rostrolateral area, layer 4"] = "Rostrolateral visual area, layer 4
 corrections["Rostrolateral area, layer 5"] = "Rostrolateral visual area, layer 5" 
 corrections["Rostrolateral area, layer 6a"] = "Rostrolateral visual area, layer 6a" 
 corrections["Rostrolateral area, layer 6b"] = "Rostrolateral visual area, layer 6b"
+corrections["root"] = "Whole mouse brain"
 
 jsoncontent = json.loads(open(join(DATA_FOLDER, "1.json"), "r").read())
 
