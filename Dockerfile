@@ -50,8 +50,13 @@ RUN git config --global --remove-section url."https://gitlab-ci-token:${CI_JOB_T
 # Need the latest atlas-commons branch until v0.1.5 is shipped along with atlas-building-tools below
 RUN pip install git+https://github.com/BlueBrain/atlas-commons@main
 
+# Need the latest atlas-densities branch until v0.1.4 is shipped along with atlas-building-tools below
+RUN pip install git+https://github.com/BlueBrain/atlas-densities@main
+
 # module load py-atlas-building-tools
 RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ atlas-building-tools>=0.1.9
+
+RUN pip install -i git+https://bbpgitlab.epfl.ch/dke/users/jonathanlurie/atlas_cell_transplant.git@develop
 
 RUN pip install snakemake>=7.20.0
 
