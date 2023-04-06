@@ -1,3 +1,6 @@
+pytest
+pytest-cov
+nexusforge==0.8.0
 sphinx
 sphinx-bluebrain-theme
 myst-parser
