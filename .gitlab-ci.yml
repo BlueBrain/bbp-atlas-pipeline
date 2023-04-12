@@ -42,7 +42,7 @@ unit_test:
   before_script:
     - pip install -r requirements.txt
   script:
-    - !reference [.add_staging_SSL, script]
+    #- !reference [.add_staging_SSL, script]
     - !reference [.unit-tests, script]
   variables:
     SRC_PROJECT: '$CI_PROJECT_PATH'
