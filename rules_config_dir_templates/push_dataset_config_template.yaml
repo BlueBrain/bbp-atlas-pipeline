@@ -2,6 +2,7 @@ HierarchyJson:
   hierarchy: {WORKING_DIR}/hierarchy.json
   hierarchy_l23split: {WORKING_DIR}/hierarchy_l23split.json
   mba_hierarchy_l23split: {WORKING_DIR}/mba_hierarchy_l23split.json
+  mba_hierarchy_l23split_ld: {WORKING_DIR}/mba_hierarchy_l23split_ld.json
 GeneratedDatasetPath:
   VolumetricFile:
     average_template_25: {WORKING_DIR}/average_template_25.nrrd

@@ -29,21 +29,20 @@ from blue_brain_token_fetch.Token_refresher import TokenFetcher
 # loading the config
 configfile: "config.yaml"
 
-# Launch the automatic token refreshing
-myTokenFetcher = TokenFetcher(keycloak_config_file="./keycloak_config.yml")
-
 # placing the config values into local variable
 WORKING_DIR = config["WORKING_DIR"]
-NEXUS_IDS_FILE = config["NEXUS_IDS_FILE"]
-FORGE_CONFIG = config["FORGE_CONFIG"]
-RULES_CONFIG_DIR_TEMPLATES = config["RULES_CONFIG_DIR_TEMPLATES"]
+REPO_PATH = config["REPO_PATH"]
+KEYCLOAK_CONFIG = os.path.join(REPO_PATH, config["KEYCLOAK_CONFIG"])
+NEXUS_IDS_FILE = os.path.join(REPO_PATH, config["NEXUS_IDS_FILE"])
+FORGE_CONFIG = os.path.join(REPO_PATH, config["FORGE_CONFIG"])
+RULES_CONFIG_DIR_TEMPLATES = os.path.join(REPO_PATH, config["RULES_CONFIG_DIR_TEMPLATES"])
 RESOLUTION = str(config["RESOLUTION"])
 MODULES_VERBOSE = config["MODULES_VERBOSE"]
 DISPLAY_HELP = config["DISPLAY_HELP"]
 RESOURCE_TAG = config["RESOURCE_TAG"]
 if RESOURCE_TAG == "None":
     RESOURCE_TAG = f"Atlas pipeline ({datetime.today().strftime('%Y-%m-%dT%H:%M:%S')})"
-ATLAS_CONFIG_PATH = config["ATLAS_CONFIG_PATH"]
+ATLAS_CONFIG_PATH = os.path.join(REPO_PATH, config["ATLAS_CONFIG_PATH"])
 NEW_ATLAS = config["NEW_ATLAS"]
 EXPORT_MESHES = config["EXPORT_MESHES"]
 PROVENANCE_METADATA_V2_PATH = f"{WORKING_DIR}/provenance_metadata_v2.json"
@@ -140,9 +139,9 @@ try:
 except OSError:
     pass
 
-# fetch version of each app and write it down in a file
-applications = {"applications": {}}
 # UNCOMMENT TO CHECK SYSTEMATICALY EVERY MODULES PRESENCE BEFORE RUNNING THE PIPELINE:
+# fetch version of each app and write it down in a file
+# #applications = {"applications": {}}
 #for app in APPS:
 
 #    app_name_fixed = app.split()[0]
@@ -158,8 +157,8 @@ applications = {"applications": {}}
 #    app_version = subprocess.check_output(f"{app_name_fixed} --version", shell=True).decode('ascii').rstrip("\n\r")
 #    applications["applications"].update({app: app_version})
 
-with open(VERSION_FILE, "w") as outfile: 
-    outfile.write(json.dumps(applications, indent = 4))
+#with open(VERSION_FILE, "w") as outfile:
+#    outfile.write(json.dumps(applications, indent = 4))
 
 # Reading some Nexus file @id mapping
 NEXUS_IDS = json.loads(open(NEXUS_IDS_FILE, 'r').read().strip())
@@ -175,8 +174,7 @@ if not os.path.exists(rules_config_dir):
         L.error(f"creation of the directory {rules_config_dir} failed")
 
 # Generate all the configuration yaml files from the template ones located in blue_brain_atlas_pipeline/rules_config_dir_templates
-repository = "rules_config_dir_templates"
-files = os.listdir(repository)
+files = os.listdir(RULES_CONFIG_DIR_TEMPLATES)
 pattern = "*_template.yaml"
 files_list = fnmatch.filter(files, pattern)
 for file in files_list:
@@ -330,6 +328,11 @@ rule help:
         sed -n 's/^##//p' {input} \
         | tee {output}
         """
+
+
+# Launch the automatic token refreshing
+myTokenFetcher = TokenFetcher("lcristel", "080903aA..1", keycloak_config_file=KEYCLOAK_CONFIG)
+
 
 ##>fetch_ccf_brain_region_hierarchy : fetch the hierarchy file, originally called 1.json
 rule fetch_ccf_brain_region_hierarchy:
@@ -2521,7 +2524,8 @@ rule export_brain_region_ccfv2_l23split:
         mesh_dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['MeshFile']['brain_region_meshes_ccfv2_l23split']}"),
         mask_dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['brain_region_mask_ccfv2_l23split']}"),
         json_metadata_parcellations = f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['MetadataFile']['metadata_parcellations_ccfv2_l23split']}",
-        hierarchy_jsonld = f"{PUSH_DATASET_CONFIG_FILE['HierarchyJson']['mba_hierarchy_l23split']}"
+        hierarchy_volume = f"{PUSH_DATASET_CONFIG_FILE['HierarchyJson']['mba_hierarchy_l23split']}",
+        hierarchy_jsonld = f"{PUSH_DATASET_CONFIG_FILE['HierarchyJson']['mba_hierarchy_l23split_ld']}"
     params:
         app=APPS["parcellationexport"],
     log:
@@ -2535,6 +2539,7 @@ rule export_brain_region_ccfv2_l23split:
             " + mesh_dir_option + " \
             --out-mask-dir {output.mask_dir} \
             --out-metadata {output.json_metadata_parcellations} \
+            --out-hierarchy-volume {output.hierarchy_volume} \
             --out-hierarchy-jsonld {output.hierarchy_jsonld} \
             2>&1 | tee {log}"
         )
@@ -2549,7 +2554,8 @@ rule export_brain_region_ccfv3_l23split:
         mesh_dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['MeshFile']['brain_region_meshes_ccfv3_l23split']}"),
         mask_dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['brain_region_mask_ccfv3_l23split']}"),
         json_metadata_parcellations = f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['MetadataFile']['metadata_parcellations_ccfv3_l23split']}",
-        hierarchy_jsonld = f"{PUSH_DATASET_CONFIG_FILE['HierarchyJson']['mba_hierarchy_l23split']}"
+        hierarchy_volume = f"{PUSH_DATASET_CONFIG_FILE['HierarchyJson']['mba_hierarchy_l23split']}",
+        hierarchy_jsonld = f"{PUSH_DATASET_CONFIG_FILE['HierarchyJson']['mba_hierarchy_l23split_ld']}"
     params:
         app=APPS["parcellationexport"],
     log:
@@ -2563,6 +2569,7 @@ rule export_brain_region_ccfv3_l23split:
             " + mesh_dir_option + " \
             --out-mask-dir {output.mask_dir} \
             --out-metadata {output.json_metadata_parcellations} \
+            --out-hierarchy-volume {output.hierarchy_volume} \
             --out-hierarchy-jsonld {output.hierarchy_jsonld} \
             2>&1 | tee {log}"
         )
