@@ -2885,6 +2885,42 @@ rule push_regionsummary_ccfv2_l23split:
             2>&1 | tee {log}
         """
 
+##>push_mesh_ccfv2_l23split :
+rule push_mesh_ccfv2_l23split:
+    input:
+        hierarchy=rules.split_isocortex_layer_23_ccfv2.output.hierarchy_l23split,
+        hierarchy_jsonld=rules.export_brain_region_ccfv2_l23split.output.hierarchy_jsonld,
+        mesh=rules.export_brain_region_ccfv2_l23split.output.mesh_dir,
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
+    output:
+        touch = temp(touch(f"{WORKING_DIR}/push_mesh_ccfv2_l23split.txt"))
+    params:
+        app=APPS["bba-data-push push-meshes"].split(),
+        token = myTokenFetcher.getAccessToken(),
+        create_provenance_json = write_json(PROVENANCE_METADATA_V2_PATH, PROVENANCE_METADATA_V2, rule_name = "push_annotation_pipeline_datasets"),
+        resource_tag = RESOURCE_TAG
+    log:
+        f"{LOG_DIR}/push_mesh_ccfv2_l23split.log"
+    shell:
+        """
+        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app[1]} \
+            --dataset-path {input.mesh} \
+            --hierarchy-path {input.hierarchy} \
+            --hierarchy-jsonld-path {input.hierarchy_jsonld} \
+            --config-path {input.push_dataset_config} \
+            --link-regions-path {output.link_regions} \
+            --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
+            --provenance-metadata-path {PROVENANCE_METADATA_V2_PATH} \
+            --resource-tag {params.resource_tag}
+            2>&1 | tee {log}
+        """
+
+
 ##>push_annotation_pipeline_v2_datasets : Global rule to generate, check and push into Nexus every products of the annotation pipeline.
 rule push_annotation_pipeline_v2_datasets:
     input:
@@ -2895,7 +2931,6 @@ rule push_annotation_pipeline_v2_datasets:
         hierarchy_jsonld=rules.export_brain_region_ccfv2_l23split.output.hierarchy_jsonld,
         brain_template=rules.fetch_brain_template.output,
         annotation=rules.split_isocortex_layer_23_ccfv2.output.annotation_l23split,
-        mask=rules.export_brain_region_ccfv2_l23split.output.mask_dir,
         mesh=rules.export_brain_region_ccfv2_l23split.output.mesh_dir,
         placement_hints_split =rules.placement_hints_isocortex_ccfv2_l23split.output,
         direction_vectors =rules.interpolate_direction_vectors_isocortex_ccfv2.output,
