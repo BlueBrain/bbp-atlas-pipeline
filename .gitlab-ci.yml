@@ -20,13 +20,26 @@ stages:
 
 .deploy_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop"
+    - if: $CI_COMMIT_BRANCH == "master" && '$CI_COMMIT_TAG'
       changes:
         - snakefile
         - Dockerfile
         - .gitlab-ci.yml
         - .keycloak_config.yml
       when: on_success
+      variables:
+        CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE
+        REGISTRY_IMAGE_TAG: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH == "develop"
+      changes:
+        - snakefile
+        - Dockerfile
+        - .gitlab-ci.yml
+        - .keycloak_config.yml
+      when: on_success
+      variables:
+        CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE
+        REGISTRY_IMAGE_TAG: dev
 
 .add_staging_SSL:
   script:
@@ -62,7 +75,6 @@ update-pipeline-image:
     KUBERNETES_MEMORY_REQUEST: 4Gi
   before_script:
     - export IFS=''
-
 
 convert_and_deploy_job:
   stage:

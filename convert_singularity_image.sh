@@ -27,12 +27,13 @@ export SINGULARITY_CACHEDIR=${TMPDIR}/singularity-cachedir
 export SINGULARITY_DOCKER_USERNAME=${CI_REGISTRY_USER}
 export SINGULARITY_DOCKER_PASSWORD=${CI_JOB_TOKEN}
 echo "Pulling the image from the GitLab registry:"
-image="blue_brain_atlas_pipeline"
+image="$CI_REGISTRY_IMAGE"
 imagesif="$image.sif"
-singularity pull --no-https ${TMPDIR}/$imagesif docker://bbpgitlab.epfl.ch:5050/dke/apps/$image:latest
+tmpimage="${TMPDIR}/$imagesif"
+singularity pull --no-https $tmpimage docker://bbpgitlab.epfl.ch:5050/dke/apps/$image:$REGISTRY_IMAGE_TAG
 
-echo "At this stage, we have the singularity image at ${TMPDIR}/blue_brain_atlas_pipeline.sif"
-ls -la ${TMPDIR}/$imagesif
+echo "At this stage, we have the singularity image at $tmpimage"
+ls -la $tmpimage
 
 #echo "Run tests: as a demo, just check if we can get the help of 2048"
 #singularity exec --containall ${TMPDIR}/blue_brain_atlas_pipeline.sif 2048 -h
@@ -41,9 +42,11 @@ echo "Deploying the image to proj83"
 export GPFSDIR=/gpfs/bbp.cscs.ch/data/project/proj83/singularity-images
 export NAME_WITH_TIMESTAMP=$image-$(date +%Y-%m-%dT%H:%M:%S).sif
 mkdir -p ${GPFSDIR}
-mv ${TMPDIR}/$imagesif ${GPFSDIR}/${NAME_WITH_TIMESTAMP}
-rm -f ${GPFSDIR}/$imagesif
-ln -s ${GPFSDIR}/${NAME_WITH_TIMESTAMP} ${GPFSDIR}/$imagesif
+mv $tmpimage ${GPFSDIR}/${NAME_WITH_TIMESTAMP}
+imagepath="${GPFSDIR}/$imagesif"
+# rm the previous link
+rm -f $imagepath
+ln -s ${GPFSDIR}/${NAME_WITH_TIMESTAMP} imagepath
 
-echo "Updated ${GPFSDIR}/blue_brain_atlas_pipeline.sif which is actually a symbolic link to ${GPFSDIR}/${NAME_WITH_TIMESTAMP}"
+echo "Updated $imagepath which is actually a symbolic link to ${GPFSDIR}/${NAME_WITH_TIMESTAMP}"
 
