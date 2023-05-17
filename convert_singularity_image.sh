@@ -30,7 +30,7 @@ echo "Pulling the image from the GitLab registry:"
 image="$CI_REGISTRY_IMAGE"
 imagesif="$image.sif"
 tmpimage="${TMPDIR}/$imagesif"
-singularity pull --no-https $tmpimage docker://bbpgitlab.epfl.ch:5050/dke/apps/$image:$REGISTRY_IMAGE_TAG
+singularity pull --no-https $tmpimage docker://$image:$REGISTRY_IMAGE_TAG
 
 echo "At this stage, we have the singularity image at $tmpimage"
 ls -la $tmpimage

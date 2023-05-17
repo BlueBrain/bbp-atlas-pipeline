@@ -59,5 +59,3 @@ RUN pip install git+https://github.com/BlueBrain/atlas-densities@main
 RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ atlas-building-tools>=0.1.9
 
 RUN pip install snakemake>=7.20.0
-
-RUN CA_BUNDLE=$(python3 -c "import certifi; print(certifi.where())"); ls $CA_BUNDLE; echo "BBP_CA_CERT: $BBP_CA_CERT"; echo "$BBP_CA_CERT" >> $CA_BUNDLE ; export SSL_CERT_FILE=$CA_BUNDLE
