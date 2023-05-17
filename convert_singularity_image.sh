@@ -27,10 +27,10 @@ export SINGULARITY_CACHEDIR=${TMPDIR}/singularity-cachedir
 export SINGULARITY_DOCKER_USERNAME=${CI_REGISTRY_USER}
 export SINGULARITY_DOCKER_PASSWORD=${CI_JOB_TOKEN}
 echo "Pulling the image from the GitLab registry:"
-image="$CI_REGISTRY_IMAGE"
+image="$CI_PROJECT_NAME"
 imagesif="$image.sif"
 tmpimage="${TMPDIR}/$imagesif"
-singularity pull --no-https $tmpimage docker://$image:$REGISTRY_IMAGE_TAG
+singularity pull --no-https $tmpimage docker://$CI_REGISTRY_IMAGE:$REGISTRY_IMAGE_TAG
 
 echo "At this stage, we have the singularity image at $tmpimage"
 ls -la $tmpimage
