@@ -1,6 +1,7 @@
 FROM nginx:1.21.3
 
 ARG DOC_PATH
+RUN ls $DOC_PATH
 
 # Copy generated files to nginx default html directory
 COPY $DOC_PATH /usr/share/nginx/html
