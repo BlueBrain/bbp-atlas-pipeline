@@ -1,7 +1,8 @@
 FROM nginx:1.21.3
 
 ARG DOC_PATH
-#RUN ls $DOC_PATH
+RUN ls -l /builds/dke/apps/blue_brain_atlas_pipeline/doc/$DOC_PATH
+RUN ls .
 
 # Copy generated files to nginx default html directory
 COPY $DOC_PATH /usr/share/nginx/html
