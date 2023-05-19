@@ -99,7 +99,7 @@ deploy-documentation-in-staging-openshift:
           CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/sphinx-documentation-dev
   variables:
     BUILD_PATH: $CI_PROJECT_DIR/$DOC_DIR
-    KANIKO_EXTRA_ARGS: "--build-arg DOC_PATH=$DOC"
+    KANIKO_EXTRA_ARGS: "--build-arg CI_PROJECT_DIR=$CI_PROJECT_DIR  --build-arg DOC_DIR=$DOC_DIR  --build-arg DOC_PATH=$DOC"
 
 # Convert Docker to Singularity image and deploy in BB5
 convert_and_deploy_job:
