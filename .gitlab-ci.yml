@@ -72,7 +72,7 @@ generate-documentation:
     - pip install -r requirements.txt
   artifacts:
     paths:
-      - generated/html
+      - doc/generated/html
   variables:
     KUBERNETES_MEMORY_LIMIT: 4Gi
     KUBERNETES_MEMORY_REQUEST: 4Gi
