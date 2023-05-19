@@ -1,11 +1,9 @@
 FROM nginx:1.21.3
 
-ARG DOC
-RUN ls .
-RUN ls /builds/dke/apps/blue_brain_atlas_pipeline/doc
+ARG DOC_PATH
 
 # Copy generated files to nginx default html directory
-COPY $DOC /usr/share/nginx/html
+COPY $DOC_PATH /usr/share/nginx/html
 # Copy nginx custom configuration to default directory
 COPY ../nginx.conf /etc/nginx/nginx.conf
 # Expose port
