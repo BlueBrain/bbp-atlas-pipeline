@@ -9,7 +9,7 @@ RUN ls .
 WORKDIR $CI_PROJECT_DIR/$DOC_DIR
 
 # Copy generated files to nginx default html directory
-COPY $DOC_PATH/* /usr/share/nginx/html/
+COPY generated/html/index.html /usr/share/nginx/html/
 # Copy nginx custom configuration to default directory
 COPY ../nginx.conf /etc/nginx/nginx.conf
 # Expose port
