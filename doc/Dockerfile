@@ -1,9 +1,12 @@
 FROM nginx:1.21.3
 
 ARG DOC
+RUN ls /
+RUN ls /builds/dke/apps/blue_brain_atlas_pipeline/
+RUN ls /builds/dke/apps/blue_brain_atlas_pipeline/doc
+RUN ls $DOC
 
 # Copy generated files to nginx default html directory
-# Replace generated/html directory with the one that generated files are placed in
 COPY ${DOC} /usr/share/nginx/html
 # Copy nginx custom configuration to default directory
 COPY ../nginx.conf /etc/nginx/nginx.conf
