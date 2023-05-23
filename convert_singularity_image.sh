@@ -46,7 +46,7 @@ mv $tmpimage ${GPFSDIR}/${NAME_WITH_TIMESTAMP}
 imagepath="${GPFSDIR}/$imagesif"
 # rm the previous link
 rm -f $imagepath
-ln -s ${GPFSDIR}/${NAME_WITH_TIMESTAMP} imagepath
+ln -s ${GPFSDIR}/${NAME_WITH_TIMESTAMP} $imagepath
 
 echo "Updated $imagepath which is actually a symbolic link to ${GPFSDIR}/${NAME_WITH_TIMESTAMP}"
 
