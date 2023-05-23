@@ -22,7 +22,8 @@
         "brain_ccfv2" : "https://bbp.epfl.ch/neurosciencegraph/data/7b4b36ad-911c-4758-8686-2bf7943e10fb",
         "brain_ccfv3" : "https://bbp.epfl.ch/neurosciencegraph/data/025eef5f-2a9a-4119-b53f-338452c72f2a",
         "brain_realigned" : "https://bbp.epfl.ch/neurosciencegraph/data/d318062c-b24e-4eab-830c-37d2b0ec4c00",
-        "fiber_ccfv2" : "https://bbp.epfl.ch/neurosciencegraph/data/a4552116-607b-469e-ad2a-50bba00c23d8"
+        "fiber_ccfv2" : "https://bbp.epfl.ch/neurosciencegraph/data/a4552116-607b-469e-ad2a-50bba00c23d8",
+	"barrel_positions_25" : "https://bbp.epfl.ch/data/bbp/mmb-barrel-cortex/a48c0db0-5fde-4912-a702-595c15a380b6"
       },
       "NISSLImageDataLayer": {
         "ara_nissl" : "https://bbp.epfl.ch/neurosciencegraph/data/9768fb11-6461-4705-995f-7ad40b3aab77",

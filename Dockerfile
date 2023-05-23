@@ -41,6 +41,7 @@ RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_web_expo
 # module load py-data-integrity-check
 RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_integrity_check.git@v0.1.0
 
+# module load py-bba-data-push
 RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_push.git@densities
 
 RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ git+https://bbpgitlab.epfl.ch/nse/cwl-registry.git@separate-funcs
@@ -49,11 +50,12 @@ RUN pip install git+https://bbpgitlab.epfl.ch/dke/users/jonathanlurie/atlas_cell
 
 RUN git config --global --remove-section url."https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/"
 
-# Need the latest atlas-commons branch until v0.1.5 is shipped along with atlas-building-tools below
+# Need the latest atlas-commons branch until v0.1.5 is cut
 RUN pip install git+https://github.com/BlueBrain/atlas-commons@main
 
-# Need the latest atlas-densities branch until v0.1.4 is shipped along with atlas-building-tools below
-RUN pip install git+https://github.com/BlueBrain/atlas-densities@main
+RUN pip install git+https://github.com/BlueBrain/atlas-splitter@v0.1.2
+
+RUN pip install git+https://github.com/BlueBrain/atlas-densities@v0.1.4
 
 # module load py-atlas-building-tools
 RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ atlas-building-tools>=0.1.9
