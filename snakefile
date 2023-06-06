@@ -269,12 +269,12 @@ provenance_dict_v2 = {
         }
     },
     "derivations": {
-        "brain_region_mask_ccfv2_l23split": "annotation_ccfv2_l23split",
+        #"brain_region_mask_ccfv2_l23split": "annotation_ccfv2_l23split", # no longer produced by default
         "hierarchy_l23split": "hierarchy",
         "annotation_ccfv2_l23split": "brain_parcellation_ccfv2",
         "interpolated_direction_vectors_isocortex_ccfv2": "brain_parcellation_ccfv2",
         "cell_orientations_ccfv2": "direction_vectors_isocortex_ccfv2",
-        "placement_hints_ccfv2_l23split": "annotation_ccfv2_l23split"
+        #"placement_hints_ccfv2_l23split": "annotation_ccfv2_l23split" # not always part of the payload
     }
 }
 
@@ -297,12 +297,12 @@ provenance_dict_v3 = {
         }
     },
     "derivations": {
-        "brain_region_mask_ccfv3_l23split": "annotation_ccfv3_l23split",
+        #"brain_region_mask_ccfv3_l23split": "annotation_ccfv3_l23split", # no longer produced by default
         "hierarchy_l23split": "hierarchy",
         "annotation_ccfv3_l23split": "brain_parcellation_ccfv3",
         "direction_vectors_isocortex_ccfv3": "brain_parcellation_ccfv3",
         "cell_orientations_ccfv3": "direction_vectors_isocortex_ccfv3",
-        "placement_hints_ccfv3_l23split": "annotation_ccfv3_l23split"
+        #"placement_hints_ccfv3_l23split": "annotation_ccfv3_l23split" # not always part of the payload
     }
 }
 
@@ -1313,7 +1313,8 @@ rule split_barrel_ccfv2_l23split:
         hierarchy_barrelsplit=f"{PUSH_DATASET_CONFIG_FILE['HierarchyJson']['hierarchy_l23split_barrelsplit']}",
         annotation_barrelsplit=f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['annotation_ccfv2_l23split_barrelsplit']}"
     params:
-        app=APPS["atlas-splitter split-barrel-columns"]
+        app=APPS["atlas-splitter split-barrel-columns"],
+        derivation = PROVENANCE_METADATA_V2["derivations"].update({"hierarchy_l23split_barrelsplit": "hierarchy_l23split"})
     log:
         f"{LOG_DIR}/split_barrel_ccfv2_l23split.log"
     shell:
@@ -1336,7 +1337,8 @@ rule split_barrel_ccfv3_l23split:
         hierarchy_barrelsplit=f"{PUSH_DATASET_CONFIG_FILE['HierarchyJson']['hierarchy_l23split_barrelsplit']}",
         annotation_barrelsplit=f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['annotation_ccfv3_l23split_barrelsplit']}"
     params:
-        app=APPS["atlas-splitter split-barrel-columns"]
+        app=APPS["atlas-splitter split-barrel-columns"],
+        derivation = PROVENANCE_METADATA_V3["derivations"].update({"hierarchy_l23split_barrelsplit": "hierarchy_l23split"})
     log:
         f"{LOG_DIR}/split_barrel_ccfv3_l23split.log"
     shell:
@@ -3353,8 +3355,8 @@ rule push_annotation_pipeline_v2_datasets:
 
 pushed_transplant = "pushed_transplant_datasets"
 
-##>push_celldensity_transplant_pipeline_datasets : Global rule to generate and push into Nexus every products of the cell density pipeline
-rule push_celldensity_transplant_pipeline_datasets:
+##>push_celldensity_transplant : Global rule to generate and push into Nexus every products of the cell density pipeline
+rule push_celldensity_transplant:
     input:
         #densities_from_profile_transplanted = rules.transplant_mtypes_densities_from_profile_correctednissl.output,
         densities_from_probability_map_transplanted = rules.transplant_mtypes_densities_from_probability_map_correctednissl.output,
@@ -3363,12 +3365,12 @@ rule push_celldensity_transplant_pipeline_datasets:
     params:
         app1=APPS["bba-data-push push-volumetric"].split(),
         token = myTokenFetcher.getAccessToken(),
-        create_provenance_json = write_json(PROVENANCE_METADATA_V3_PATH, PROVENANCE_METADATA_V3, rule_name = "push_celldensity_pipeline_datasets"),
+        create_provenance_json = write_json(PROVENANCE_METADATA_V3_PATH, PROVENANCE_METADATA_V3, rule_name = "push_celldensity"),
         resource_tag = RESOURCE_TAG
     output:
         f"{WORKING_DIR}/{pushed_transplant}.log"
     log:
-        f"{LOG_DIR}/push_celldensity_transplant_pipeline_datasets.log"
+        f"{LOG_DIR}/push_celldensity_transplant.log"
     shell:
         """
         {params.app1[0]} --forge-config-file {FORGE_CONFIG} \
@@ -3428,11 +3430,58 @@ rule push_celldensity_transplant_l23split_pipeline_datasets:
             --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
             --config-path {input.push_dataset_config} \
             --provenance-metadata-path {PROVENANCE_METADATA_V3_PATH} \
-            --resource-tag {params.resource_tag} \
+            --resource-tag '{params.resource_tag}' \
             2>&1 | tee {log} ;
         touch {output}
         """
+
 #            --dataset-path {input.densities_from_probability_map} \
+
+##>push_celldensity_transplant_pipeline_datasets : Global rule to generate and push into Nexus every products of the cell density pipeline
+rule push_celldensity_transplant_pipeline_datasets:
+    input:
+        densities_from_probability_map = rules.transplant_mtypes_densities_from_probability_map.output,
+        #inhibitory_neuron_densities = rules.transplant_inhibitory_neuron_densities_linprog_l23split_correctednissl.output,
+        #glia_cell_densities = rules.transplant_glia_cell_densities_l23split_correctednissl.output,
+        annotation = annotation_v3,
+        #direction_vectors = rules.direction_vectors_isocortex_ccfv3.output,
+        hierarchy = hierarchy,
+        hierarchy_jsonld = hierarchy_jsonld,
+        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
+    params:
+        app1=APPS["bba-data-push push-volumetric"].split(),
+        token = myTokenFetcher.getAccessToken(),
+        create_provenance_json = write_json(PROVENANCE_METADATA_V3_PATH, PROVENANCE_METADATA_V3, rule_name = "push_celldensity_pipeline_datasets"),
+        resource_tag = RESOURCE_TAG
+    output:
+        f"{WORKING_DIR}/{pushed_transplant}.log"
+    log:
+        f"{LOG_DIR}/push_celldensity_transplant_pipeline_datasets.log"
+    shell:
+        """
+        {params.app1[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app1[1]} \
+            --dataset-path {input.annotation} \
+            --dataset-path {input.densities_from_probability_map} \
+            --hierarchy-path {input.hierarchy} \
+            --hierarchy-jsonld-path {input.hierarchy_jsonld} \
+            --new-atlas {NEW_ATLAS} \
+            --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
+            --config-path {input.push_dataset_config} \
+            --provenance-metadata-path {PROVENANCE_METADATA_V3_PATH} \
+            --resource-tag '{params.resource_tag}' \
+            2>&1 | tee {log} ;
+        touch {output}
+        """
+#            --dataset-path {input.inhibitory_neuron_densities} \
+#                        --dataset-path {input.glia_cell_densities} \
+#                                    --dataset-path {input.annotation_v3} \
+#                                                --dataset-path {input.direction_vectors} \
+#
 
 if not NEW_ATLAS:
     atlas_release_id = NEXUS_IDS["AtlasRelease"]["prod" if ("staging" not in NEXUS_DESTINATION_ENV) else "staging"]
@@ -3445,7 +3494,7 @@ else:
 ##>create_cellCompositionVolume_payload :
 rule create_cellCompositionVolume_payload:
     input:
-        rules.push_celldensity_transplant_l23split_pipeline_datasets.output
+        rules.push_celldensity_transplant_pipeline_datasets.output
     params:
         resource_tag = RESOURCE_TAG
     output:

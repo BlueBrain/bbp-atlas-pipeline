@@ -2,8 +2,10 @@ HierarchyJson:
   hierarchy: {WORKING_DIR}/hierarchy.json
   hierarchy_l23split: {WORKING_DIR}/hierarchy_l23split.json
   hierarchy_l23split_barrelsplit: {WORKING_DIR}/hierarchy_l23split_barrelsplit.json
+  mba_hierarchy: {WORKING_DIR}/mba_hierarchy.json
   mba_hierarchy_l23split: {WORKING_DIR}/mba_hierarchy_l23split.json
   mba_hierarchy_l23split_barrelsplit: {WORKING_DIR}/mba_hierarchy_l23split_barrelsplit.json
+  mba_hierarchy_ld: {WORKING_DIR}/mba_hierarchy_ld.json
   mba_hierarchy_l23split_ld: {WORKING_DIR}/mba_hierarchy_l23split_ld.json
   mba_hierarchy_l23split_barrelsplit_ld: {WORKING_DIR}/mba_hierarchy_l23split_barrelsplit_ld.json
 GeneratedDatasetPath:
@@ -63,11 +65,13 @@ GeneratedDatasetPath:
     mtypes_densities_probability_map_hybrid_l23split_correctednissl: {WORKING_DIR}/mtypes_densities_probability_map_hybrid_l23split_correctednissl
     mtypes_densities_probability_map_transplant_correctednissl: {WORKING_DIR}/mtypes_densities_probability_map_transplant_correctednissl
     mtypes_densities_probability_map_l23split_transplant_correctednissl: {WORKING_DIR}/mtypes_densities_probability_map_l23split_transplant_correctednissl
+    brain_region_mask: {WORKING_DIR}/brain_region_mask
     brain_region_mask_ccfv2_l23split: {WORKING_DIR}/brain_region_mask_ccfv2_l23split
     brain_region_mask_ccfv3_l23split: {WORKING_DIR}/brain_region_mask_ccfv3_l23split
     brain_region_masks_hybrid: {WORKING_DIR}/brain_region_masks_hybrid
     brain_region_masks_hybrid_l23split: {WORKING_DIR}/brain_region_masks_hybrid_l23split
   MeshFile:
+    brain_region_meshes: {WORKING_DIR}/brain_region_mesh
     brain_region_meshes_ccfv2_l23split: {WORKING_DIR}/brain_region_mesh_ccfv2_l23split
     brain_region_meshes_ccfv3_l23split: {WORKING_DIR}/brain_region_mesh_ccfv3_l23split
     brain_region_meshes_hybrid: {WORKING_DIR}/brain_region_meshes_v2v3_hybrid
@@ -75,5 +79,6 @@ GeneratedDatasetPath:
   CellRecordsFile:
     cell_records_sonata: {WORKING_DIR}/cell_records_sonata.h5
   MetadataFile:
+    metadata_parcellations: {WORKING_DIR}/metadata_parcellations.json
     metadata_parcellations_ccfv2_l23split: {WORKING_DIR}/metadata_parcellations_ccfv2_l23split.json
     metadata_parcellations_ccfv3_l23split: {WORKING_DIR}/metadata_parcellations_ccfv3_l23split.json
