@@ -2923,6 +2923,37 @@ rule export_brain_region_ccfv3_l23split:
             2>&1 | tee {log}"
         )
 
+##>export_brain_region : export a mesh, a volumetric mask and a region summary json file for every brain region available in the brain parcellation volume. Create a hierarchy JSONLD file from the input hierarchy JSON file as well. Note: not only the leaf regions are exported but also the above regions that are combinaisons of leaves
+rule export_brain_region:
+    input:
+        hierarchy = hierarchy,
+        parcellation_volume = annotation_v3
+    output:
+        mesh_dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['MeshFile']['brain_region_meshes']}"),
+        mask_dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['brain_region_mask']}"),
+        json_metadata_parcellations = f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['MetadataFile']['metadata_parcellations']}",
+        hierarchy_volume = f"{PUSH_DATASET_CONFIG_FILE['HierarchyJson']['mba_hierarchy']}",
+        hierarchy_jsonld = f"{PUSH_DATASET_CONFIG_FILE['HierarchyJson']['mba_hierarchy_ld']}"
+    params:
+        app=APPS["parcellationexport"],
+    log:
+        f"{LOG_DIR}/export_brain_region.log"
+    run:
+        mesh_dir_option = ""
+        if EXPORT_MESHES:
+            mesh_dir_option = " --out-mesh-dir output.mesh_dir"
+        shell("{params.app} --hierarchy {input.hierarchy} \
+            --parcellation-volume {input.parcellation_volume} \
+            " + mesh_dir_option + " \
+            --out-mask-dir {output.mask_dir} \
+            --out-metadata {output.json_metadata_parcellations} \
+            --out-hierarchy-volume {output.hierarchy_volume} \
+            --out-hierarchy-jsonld {output.hierarchy_jsonld} \
+            2>&1 | tee {log}"
+        )
+
+hierarchy_jsonld = rules.export_brain_region.output.hierarchy_jsonld
+
 
 ##>cell_records_hybrid : Generate 3D cell records for the whole mouse brain and save them with the orientations and the region_ID in an hdf5 file. OUTDATED
 rule cell_records_hybrid:
@@ -3146,7 +3177,8 @@ rule push_volumetric_ccfv2_l23split:
             --config-path {input.push_dataset_config} \
             --link-regions-path {output.link_regions} \
             --provenance-metadata-path {PROVENANCE_METADATA_V2_PATH} \
-            --resource-tag {params.resource_tag}
+            --resource-tag '{params.resource_tag}' \
+            2>&1 | tee {log}
         """
 
 ##>push_volumetric_ccfv3_l23split : push into Nexus the ccfv3 volumetric artifacts
@@ -3194,7 +3226,8 @@ rule push_volumetric_ccfv3_l23split:
             --config-path {input.push_dataset_config} \
             --link-regions-path {output.link_regions} \
             --provenance-metadata-path {PROVENANCE_METADATA_V2_PATH} \
-            --resource-tag {params.resource_tag}
+            --resource-tag '{params.resource_tag}' \
+            2>&1 | tee {log}
         """
 
 
@@ -3230,7 +3263,7 @@ rule push_regionsummary_ccfv2_l23split:
             --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
             --link-regions-path {output.link_regions} \
             --provenance-metadata-path {PROVENANCE_METADATA_V2_PATH} \
-            --resource-tag {params.resource_tag} \
+            --resource-tag '{params.resource_tag}' \
             2>&1 | tee {log}
         """
 
@@ -3265,7 +3298,7 @@ rule push_mesh_ccfv2_l23split:
             --link-regions-path {output.link_regions} \
             --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
             --provenance-metadata-path {PROVENANCE_METADATA_V2_PATH} \
-            --resource-tag {params.resource_tag}
+            --resource-tag '{params.resource_tag}' \
             2>&1 | tee {log}
         """
 
@@ -3309,7 +3342,7 @@ rule push_annotation_pipeline_v2_datasets:
             --link-regions-path {output.link_regions} \
             --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
             --provenance-metadata-path {PROVENANCE_METADATA_V2_PATH} \
-            --resource-tag {params.resource_tag}
+            --resource-tag '{params.resource_tag}' \
             2>&1 | tee {log}
         """
 
@@ -3350,7 +3383,7 @@ rule push_celldensity_transplant_pipeline_datasets:
             --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
             --config-path {input.push_dataset_config} \
             --provenance-metadata-path {PROVENANCE_METADATA_V3_PATH} \
-            --resource-tag {params.resource_tag}
+            --resource-tag '{params.resource_tag}' \
             2>&1 | tee {log}
         touch {output}
         """
@@ -3488,6 +3521,6 @@ rule push_cellcomposition:
             --densities-dir {WORKING_DIR} \
             --summary-path {input.summary_path} \
             --output-dir {WORKING_DIR} \
-            --resource-tag {params.resource_tag} \
+            --resource-tag '{params.resource_tag}' \
             2>&1 | tee {log}
         """
