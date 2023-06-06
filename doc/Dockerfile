@@ -7,7 +7,8 @@ ARG DOC_PATH
 WORKDIR $CI_PROJECT_DIR/$DOC_DIR
 
 # Copy generated files to nginx default html directory
-COPY $DOC_PATH /usr/share/nginx/html
+COPY $DOC_PATH /usr/share/nginx/html/atlas-pipeline
+
 # Copy nginx custom configuration to default directory
 COPY nginx.conf /etc/nginx/nginx.conf
 # Expose port

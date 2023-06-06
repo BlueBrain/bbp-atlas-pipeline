@@ -83,7 +83,7 @@ generate-documentation:
     KUBERNETES_MEMORY_REQUEST: 4Gi
 
 # Executes deployment of project documentation to bbp-dke-staging Openshift
-deploy-documentation-in-staging-openshift:
+deploy-documentation-in-registry:
   stage: deploy
   extends: .build-image-using-kaniko
   dependencies:
