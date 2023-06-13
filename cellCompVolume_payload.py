@@ -18,6 +18,7 @@ def create_payload(forge, atlas_release_id, output_file, tag=None):
         }"""
     all_resources_with_layer = forge.sparql(query_layer, limit=1000, debug=False)
     resources = [forge.retrieve(id = r.s, version=tag) for r in all_resources_with_layer]
+    resources = [res for res in resources if res is not None]
     print(f"{len(resources)} ME-type dentisities with layer found (tag '{tag}')")
 
     # Get Generic{Excitatory,Inhibitory}Neuron
