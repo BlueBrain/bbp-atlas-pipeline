@@ -8,9 +8,10 @@ include:
 
 stages:
   - unit-test
-  - generate
-  - deploy
+  - deploy_image
   - convert_and_deployToBB5
+  - generate_doc
+  - deploy_doc
 
 variables:
   DOC_DIR: "doc"
@@ -19,7 +20,7 @@ variables:
 
 .deploy_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH == "master" && '$CI_COMMIT_TAG'
+    - if: $CI_COMMIT_BRANCH == "master"  &&  $CI_COMMIT_TAG != null
       when: on_success
       variables:
         CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE
@@ -53,7 +54,7 @@ unit_test:
 
 # Build image for pipeline
 update-pipeline-image:
-  stage: deploy
+  stage: deploy_image
   extends: .build-image-using-kaniko
   rules:
     - !reference [.deploy_rules, rules]
@@ -67,10 +68,10 @@ update-pipeline-image:
 
 # Generate documentation and stores the artifact under doc/generated/html
 generate-documentation:
-  stage: generate
+  stage: generate_doc
   image: python
   rules:
-      - if: $CI_COMMIT_TAG || $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop" || $CI_MERGE_REQUEST_IID || $CI_COMMIT_MESSAGE =~ /DRAFT$/
+      - if: $CI_COMMIT_TAG != null  || $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop" || $CI_MERGE_REQUEST_IID || $CI_COMMIT_MESSAGE =~ /DRAFT$/
         when: on_success
   script: sphinx-build -T --keep-going -b html -c ./$DOC_DIR/source -D language=en ./$DOC_DIR/source $DOC_DIR/$DOC
   before_script:
@@ -84,16 +85,16 @@ generate-documentation:
 
 # Executes deployment of project documentation to bbp-dke-staging Openshift
 deploy-documentation-in-registry:
-  stage: deploy
+  stage: deploy_doc
   extends: .build-image-using-kaniko
   dependencies:
     - generate-documentation
   rules:
-      - if: $CI_COMMIT_BRANCH == "master" && '$CI_COMMIT_TAG'
+      - if: $CI_COMMIT_BRANCH == "master"  &&  $CI_COMMIT_TAG != null
         when: on_success
         variables:
           CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/sphinx-documentation-prod
-      - if: $CI_COMMIT_BRANCH == "develop" || $CI_MERGE_REQUEST_IID || $CI_COMMIT_MESSAGE =~ /DRAFT$/
+      - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "develop"'
         when: on_success
         variables:
           CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/sphinx-documentation-dev
