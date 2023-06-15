@@ -33,7 +33,7 @@ RUN git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgi
 RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_token_fetch.git@v0.2.0
 
 # module load py-bba-datafetch
-RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_fetch.git@v0.1.0
+RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_fetch.git@v0.2.0
 
 # module load py-bba-webexporter
 RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_web_exporter.git@v0.1.5
