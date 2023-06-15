@@ -357,7 +357,8 @@ rule fetch_ccf_brain_region_hierarchy:
         f"{LOG_DIR}/fetch_ccf_brain_region_hierarchy.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ONTOLOGY_ORG} \
             --nexus-proj {NEXUS_ONTOLOGY_PROJ} \
@@ -380,7 +381,8 @@ rule fetch_brain_parcellation_ccfv2:
         f"{LOG_DIR}/fetch_brain_parcellation_ccfv2.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -402,7 +404,8 @@ rule fetch_fiber_parcellation_ccfv2:
         f"{LOG_DIR}/fetch_fiber_parcellation_ccfv2.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -425,7 +428,8 @@ rule fetch_brain_parcellation_ccfv3:
         f"{LOG_DIR}/fetch_brain_parcellation_ccfv3.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -448,7 +452,8 @@ rule fetch_brain_template:
         f"{LOG_DIR}/fetch_brain_template.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -471,7 +476,8 @@ rule fetch_barrel_positions:
         f"{LOG_DIR}/fetch_brain_template.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj "mmb-barrel-cortex" \
@@ -494,7 +500,8 @@ rule fetch_nissl_stained_volume:
         f"{LOG_DIR}/fetch_nissl_stained_volume.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -516,7 +523,8 @@ rule fetch_corrected_nissl_stained_volume:
         f"{LOG_DIR}/fetch_corrected_nissl_stained_volume.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -538,7 +546,8 @@ rule fetch_annotation_stack_ccfv2_coronal:
         f"{LOG_DIR}/fetch_annotation_stack_ccfv2_coronal.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -563,7 +572,8 @@ rule fetch_nissl_stack_ccfv2_coronal:
         f"{LOG_DIR}/fetch_nissl_stack_ccfv2_coronal.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -589,7 +599,8 @@ rule fetch_probability_map:
         f"{LOG_DIR}/fetch_probability_map.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -689,7 +700,8 @@ rule fetch_gene_gad:
         f"{LOG_DIR}/fetch_gene_gad.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -711,7 +723,8 @@ rule fetch_gene_nrn1:
         f"{LOG_DIR}/fetch_gene_nrn1.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -733,7 +746,8 @@ rule fetch_gene_aldh1l1:
         f"{LOG_DIR}/fetch_gene_aldh1l1.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -755,7 +769,8 @@ rule fetch_gene_cnp:
         f"{LOG_DIR}/fetch_gene_cnp.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -777,7 +792,8 @@ rule fetch_gene_mbp:
         f"{LOG_DIR}/fetch_gene_mbp.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -799,7 +815,8 @@ rule fetch_gene_gfap:
         f"{LOG_DIR}/fetch_gene_gfap.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -821,7 +838,8 @@ rule fetch_gene_s100b:
         f"{LOG_DIR}/fetch_gene_s100b.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -843,7 +861,8 @@ rule fetch_gene_tmem119:
         f"{LOG_DIR}/fetch_gene_tmem119.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -865,7 +884,8 @@ rule fetch_gene_pv:
         f"{LOG_DIR}/fetch_gene_pv.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -887,7 +907,8 @@ rule fetch_gene_pv_correctednissl:
         f"{LOG_DIR}/fetch_gene_pv_correctednissl.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -909,7 +930,8 @@ rule fetch_gene_sst:
         f"{LOG_DIR}/fetch_gene_sst.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -931,7 +953,8 @@ rule fetch_gene_sst_correctednissl:
         f"{LOG_DIR}/fetch_gene_sst_correctednissl.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -953,7 +976,8 @@ rule fetch_gene_vip:
         f"{LOG_DIR}/fetch_gene_vip.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -975,7 +999,8 @@ rule fetch_gene_vip_correctednissl:
         f"{LOG_DIR}/fetch_gene_vip_correctednissl.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -997,7 +1022,8 @@ rule fetch_gene_gad67:
         f"{LOG_DIR}/fetch_gene_gad67.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -1019,7 +1045,8 @@ rule fetch_gene_gad67_correctednissl:
         f"{LOG_DIR}/fetch_gene_gad67_correctednissl.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -1054,7 +1081,8 @@ rule fetch_isocortex_metadata:
         f"{LOG_DIR}/fetch_isocortex_metadata.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
@@ -1076,7 +1104,8 @@ rule fetch_isocortex_23_metadata:
         f"{LOG_DIR}/fetch_isocortex_23_metadata.log"
     shell:
         """
-        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
+        {params.app} --forge-config {FORGE_CONFIG} \
+            --nexus-env {NEXUS_ATLAS_ENV} \
             --nexus-token {params.token} \
             --nexus-org {NEXUS_ATLAS_ORG} \
             --nexus-proj {NEXUS_ATLAS_PROJ} \
