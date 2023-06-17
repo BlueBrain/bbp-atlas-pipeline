@@ -343,6 +343,11 @@ rule help:
 # Launch the automatic token refreshing
 myTokenFetcher = TokenFetcher(keycloak_config_file=KEYCLOAK_CONFIG)
 
+default_fetch = """{params.app} --forge-config {FORGE_CONFIG} \
+                                --nexus-env {NEXUS_ATLAS_ENV} --nexus-token {params.token} \
+                                --nexus-org {NEXUS_ATLAS_ORG} --nexus-proj {NEXUS_ATLAS_PROJ} \
+                                --out {output} --nexus-id {params.nexus_id} \
+                                --verbose 2>&1 | tee {log}"""
 
 ##>fetch_ccf_brain_region_hierarchy : fetch the hierarchy file, originally called 1.json
 rule fetch_ccf_brain_region_hierarchy:
@@ -356,18 +361,7 @@ rule fetch_ccf_brain_region_hierarchy:
     log:
         f"{LOG_DIR}/fetch_ccf_brain_region_hierarchy.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ONTOLOGY_ORG} \
-            --nexus-proj {NEXUS_ONTOLOGY_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --favor name:1.json \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch.replace("--nexus-id {params.nexus_id}", "--nexus-id {params.nexus_id}  --favor name:1.json")
 
 ##>fetch_brain_parcellation_ccfv2 : fetch the CCF v2 brain parcellation volume in the given resolution
 rule fetch_brain_parcellation_ccfv2:
@@ -380,17 +374,7 @@ rule fetch_brain_parcellation_ccfv2:
     log:
         f"{LOG_DIR}/fetch_brain_parcellation_ccfv2.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """              
+        default_fetch
 
 ##>fetch_fiber_parcellation_ccfv2 : fetch the CCF v2 fiber parcellation volume in the given resolution
 rule fetch_fiber_parcellation_ccfv2:
@@ -403,17 +387,7 @@ rule fetch_fiber_parcellation_ccfv2:
     log:
         f"{LOG_DIR}/fetch_fiber_parcellation_ccfv2.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch
 
 ##>fetch_brain_parcellation_ccfv3 : fetch the CCF v3 brain parcellation volume in the given resolution
 rule fetch_brain_parcellation_ccfv3:
@@ -427,17 +401,7 @@ rule fetch_brain_parcellation_ccfv3:
     log:
         f"{LOG_DIR}/fetch_brain_parcellation_ccfv3.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch
 
 
 ##>fetch_brain_template : fetch the CCF v3 brain average template volume in the given resolution
@@ -451,17 +415,7 @@ rule fetch_brain_template:
     log:
         f"{LOG_DIR}/fetch_brain_template.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch
 
 
 ##>fetch_barrel_positions : fetch barrel columns positions
@@ -475,17 +429,7 @@ rule fetch_barrel_positions:
     log:
         f"{LOG_DIR}/fetch_brain_template.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj "mmb-barrel-cortex" \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch.replace("{NEXUS_ATLAS_PROJ}", "mmb-barrel-cortex")
 
 
 ##>fetch_nissl_stained_volume : fetch the CCF nissl stained volume in the given resolution
@@ -499,17 +443,7 @@ rule fetch_nissl_stained_volume:
     log:
         f"{LOG_DIR}/fetch_nissl_stained_volume.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch
 
 ##>fetch_corrected_nissl_stained_volume : fetch the corrected nissl stained volume in the given resolution
 rule fetch_corrected_nissl_stained_volume:
@@ -522,17 +456,7 @@ rule fetch_corrected_nissl_stained_volume:
     log:
         f"{LOG_DIR}/fetch_corrected_nissl_stained_volume.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch
 
 ##>fetch_annotation_stack_ccfv2_coronal : fetch the CCFv2 annotation coronal image stack stack
 rule fetch_annotation_stack_ccfv2_coronal:
@@ -545,20 +469,10 @@ rule fetch_annotation_stack_ccfv2_coronal:
     log:
         f"{LOG_DIR}/fetch_annotation_stack_ccfv2_coronal.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output}.tar.gz \
-            --nexus-id {params.nexus_id} \
-            --verbose ;
-            mkdir {output} ;
-            tar xf {WORKING_DIR}/annotation_stack_ccfv2_coronal.tar.gz --directory={output} --strip-components=1 ;
-            rm {WORKING_DIR}/annotation_stack_ccfv2_coronal.tar.gz ;
-            2>&1 | tee {log}
-        """
+        default_fetch.replace("{output}", "{output}.tar.gz").replace("--verbose", "--verbose ; \
+            mkdir {output} ; \
+            tar xf {WORKING_DIR}/annotation_stack_ccfv2_coronal.tar.gz --directory={output} --strip-components=1 ; \
+            rm {WORKING_DIR}/annotation_stack_ccfv2_coronal.tar.gz")
 
 ##>fetch_nissl_stack_ccfv2_coronal : fetch the CCFv2 nissl coronal image stack stack
 rule fetch_nissl_stack_ccfv2_coronal:
@@ -571,20 +485,10 @@ rule fetch_nissl_stack_ccfv2_coronal:
     log:
         f"{LOG_DIR}/fetch_nissl_stack_ccfv2_coronal.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output}.tar.gz \
-            --nexus-id {params.nexus_id} \
-            --verbose ;
-            mkdir {output} ;
-            tar xf {WORKING_DIR}/nissl_stack_ccfv2_coronal.tar.gz --directory={output} --strip-components=1 ;
-            rm {WORKING_DIR}/nissl_stack_ccfv2_coronal.tar.gz \
-            2>&1 | tee {log}
-        """
+        default_fetch.replace("{output}", "{output}.tar.gz").replace("--verbose", "--verbose ; \
+            mkdir {output} ; \
+            tar xf {WORKING_DIR}/nissl_stack_ccfv2_coronal.tar.gz --directory={output} --strip-components=1 ; \
+            rm {WORKING_DIR}/nissl_stack_ccfv2_coronal.tar.gz")
 
 
 ##>fetch_probability_map : fetch the probability mapping from https://github.com/BlueBrain/atlas-densities/tree/main/atlas_densities/app/data/mtypes/probability_map
@@ -598,17 +502,7 @@ rule fetch_probability_map:
     log:
         f"{LOG_DIR}/fetch_probability_map.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch
 
 
 ##>combine_v2_annotations : Generate and save the combined annotation file
@@ -699,17 +593,7 @@ rule fetch_gene_gad:
     log:
         f"{LOG_DIR}/fetch_gene_gad.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch
 
 ##>fetch_gene_nrn1 : fetch the gene expression volume corresponding to the genetic marker nrn1
 rule fetch_gene_nrn1:
@@ -722,17 +606,7 @@ rule fetch_gene_nrn1:
     log:
         f"{LOG_DIR}/fetch_gene_nrn1.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch
 
 ##>fetch_gene_aldh1l1 : fetch the gene expression volume corresponding to the genetic marker aldh1l1
 rule fetch_gene_aldh1l1:
@@ -745,17 +619,7 @@ rule fetch_gene_aldh1l1:
     log:
         f"{LOG_DIR}/fetch_gene_aldh1l1.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch
 
 ##>fetch_gene_cnp : fetch the gene expression volume corresponding to the genetic marker cnp
 rule fetch_gene_cnp:
@@ -768,17 +632,7 @@ rule fetch_gene_cnp:
     log:
         f"{LOG_DIR}/fetch_gene_cnp.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch
 
 ##>fetch_gene_mbp : fetch the gene expression volume corresponding to the genetic marker mbp
 rule fetch_gene_mbp:
@@ -791,17 +645,7 @@ rule fetch_gene_mbp:
     log:
         f"{LOG_DIR}/fetch_gene_mbp.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch
 
 ##>fetch_gene_gfap : fetch the gene expression volume corresponding to the genetic marker gfap
 rule fetch_gene_gfap:
@@ -814,17 +658,7 @@ rule fetch_gene_gfap:
     log:
         f"{LOG_DIR}/fetch_gene_gfap.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch
 
 ##>fetch_gene_s100b : fetch the gene expression volume corresponding to the genetic marker s100b
 rule fetch_gene_s100b:
@@ -837,17 +671,7 @@ rule fetch_gene_s100b:
     log:
         f"{LOG_DIR}/fetch_gene_s100b.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch
 
 ##>fetch_gene_tmem119 : fetch the gene expression volume corresponding to the genetic marker tmem119
 rule fetch_gene_tmem119:
@@ -860,17 +684,7 @@ rule fetch_gene_tmem119:
     log:
         f"{LOG_DIR}/fetch_gene_tmem119.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch
         
 ##>fetch_gene_pv : fetch the gene expression volume corresponding to the genetic marker pv
 rule fetch_gene_pv:
@@ -883,17 +697,7 @@ rule fetch_gene_pv:
     log:
         f"{LOG_DIR}/fetch_gene_pv.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch
 
 ##>fetch_gene_pv_correctednissl : fetch the gene expression volume corresponding to the genetic marker pv
 rule fetch_gene_pv_correctednissl:
@@ -906,17 +710,7 @@ rule fetch_gene_pv_correctednissl:
     log:
         f"{LOG_DIR}/fetch_gene_pv_correctednissl.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch
         
 ##>fetch_gene_sst : fetch the gene expression volume corresponding to the genetic marker sst
 rule fetch_gene_sst:
@@ -929,17 +723,7 @@ rule fetch_gene_sst:
     log:
         f"{LOG_DIR}/fetch_gene_sst.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch
         
 ##>fetch_gene_sst_correctednissl : fetch the gene expression volume corresponding to the genetic marker sst
 rule fetch_gene_sst_correctednissl:
@@ -952,17 +736,7 @@ rule fetch_gene_sst_correctednissl:
     log:
         f"{LOG_DIR}/fetch_gene_sst_correctednissl.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch
         
 ##>fetch_gene_vip : fetch the gene expression volume corresponding to the genetic marker vip
 rule fetch_gene_vip:
@@ -975,17 +749,7 @@ rule fetch_gene_vip:
     log:
         f"{LOG_DIR}/fetch_gene_vip.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch
 
 ##>fetch_gene_vip_correctednissl : fetch the gene expression volume corresponding to the genetic marker vip
 rule fetch_gene_vip_correctednissl:
@@ -998,17 +762,7 @@ rule fetch_gene_vip_correctednissl:
     log:
         f"{LOG_DIR}/fetch_gene_vip_correctednissl.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch
 
 ##>fetch_gene_gad67 : fetch the gene expression volume corresponding to the genetic marker gad67
 rule fetch_gene_gad67:
@@ -1021,17 +775,7 @@ rule fetch_gene_gad67:
     log:
         f"{LOG_DIR}/fetch_gene_gad67.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch
 
 ##>fetch_gene_gad67_correctednissl : fetch the gene expression volume corresponding to the genetic marker gad67
 rule fetch_gene_gad67_correctednissl:
@@ -1044,17 +788,7 @@ rule fetch_gene_gad67_correctednissl:
     log:
         f"{LOG_DIR}/fetch_gene_gad67_correctednissl.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch
 
 ##>fetch_genes_correctednissl : fetch all the gene expression volumes
 rule fetch_genes_correctednissl:
@@ -1080,17 +814,7 @@ rule fetch_isocortex_metadata:
     log:
         f"{LOG_DIR}/fetch_isocortex_metadata.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch
 
 ##>fetch_isocortex_23_metadata : fetch isocortex 23 metadata
 rule fetch_isocortex_23_metadata:
@@ -1103,17 +827,7 @@ rule fetch_isocortex_23_metadata:
     log:
         f"{LOG_DIR}/fetch_isocortex_23_metadata.log"
     shell:
-        """
-        {params.app} --forge-config {FORGE_CONFIG} \
-            --nexus-env {NEXUS_ATLAS_ENV} \
-            --nexus-token {params.token} \
-            --nexus-org {NEXUS_ATLAS_ORG} \
-            --nexus-proj {NEXUS_ATLAS_PROJ} \
-            --out {output} \
-            --nexus-id {params.nexus_id} \
-            --verbose \
-            2>&1 | tee {log}
-        """
+        default_fetch
 
 # ##>gene_expression_volume : Compute the overall mouse brain cell density
 #rule gene_expression_volume:
