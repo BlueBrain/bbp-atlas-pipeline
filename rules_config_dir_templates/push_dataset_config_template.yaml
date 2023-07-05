@@ -24,6 +24,8 @@ GeneratedDatasetPath:
     inhibitory_neuron_densities_linprog_transplant_correctednissl: {WORKING_DIR}/inhibitory_neuron_densities_linprog_transplant_correctednissl
     mtypes_densities_probability_map: {WORKING_DIR}/mtypes_densities_probability_map
     mtypes_densities_probability_map_transplant: {WORKING_DIR}/mtypes_densities_probability_map_transplant
+    excitatory_split: {WORKING_DIR}/excitatory_split
+    excitatory_split_transplant: {WORKING_DIR}/excitatory_split_transplant
     brain_region_mask: {WORKING_DIR}/brain_region_mask
   MeshFile:
     brain_region_meshes: {WORKING_DIR}/brain_region_mesh

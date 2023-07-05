@@ -106,6 +106,7 @@ APPS = {
     "atlas-building-tools cell-densities cell-density": "atlas-densities cell-densities cell-density",
     "atlas-building-tools cell-densities glia-cell-densities": "atlas-densities cell-densities glia-cell-densities",
     "atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities": "atlas-densities cell-densities inhibitory-and-excitatory-neuron-densities",
+    "atlas-densities cell-densities excitatory-split": "atlas-densities cell-densities excitatory-split",
     "atlas-building-tools cell-densities compile-measurements": "atlas-densities cell-densities compile-measurements",
     "atlas-building-tools cell-densities measurements-to-average-densities": "atlas-densities cell-densities measurements-to-average-densities",
     "atlas-building-tools cell-densities fit-average-densities": "atlas-densities cell-densities fit-average-densities",
@@ -1105,6 +1106,29 @@ rule inhibitory_neuron_densities_linprog_correctednissl:
             2>&1 | tee {log}
         """
 
+##>excitatory_split : Subdivide excitatory files into pyramidal subtypes
+rule excitatory_split:
+    input:
+        hierarchy = hierarchy_v2,
+        parcellation_volume = annotation_v2,
+        neuron_density = rules.glia_cell_densities_correctednissl.output.neuron_density,
+        inhibitory_density = rules.inhibitory_neuron_densities_linprog_correctednissl.output,
+    output:
+        directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['excitatory_split']}")
+    params:
+        app=APPS["atlas-densities cell-densities excitatory-split"]
+    log:
+        f"{LOG_DIR}/excitatory_split.log"
+    shell:
+        """
+        {params.app} --annotation-path {input.parcellation_volume} \
+            --hierarchy-path {input.hierarchy} \
+            --neuron-density-path {input.neuron_density} \
+            --inhibitory-density {input.inhibitory_density}/gad67+_density.nrrd \
+            --output-dir {output} \
+            2>&1 | tee {log}
+        """
+
 ##>create_mtypes_densities_from_probability_map : Create neuron density nrrd files for the mtypes listed in the probability mapping csv file.
 rule create_mtypes_densities_from_probability_map:
     input:
@@ -1169,6 +1193,28 @@ rule transplant_inhibitory_neuron_densities_linprog_correctednissl:
         app=APPS["celltransplant"]
     log:
         f"{LOG_DIR}/transplant_inhibitory_neuron_densities_linprog_correctednissl.log"
+    shell:
+        """{params.app} --hierarchy {input.hierarchy} \
+            --src-annot-volume {input.src_parcellation_volume} \
+            --dst-annot-volume {input.dst_parcellation_volume} \
+            --src-cell-volume {input.src_cell_volume} \
+            --dst-cell-volume {output} \
+            2>&1 | tee {log}
+        """
+
+##>transplant_excitatory_split : Transplant excitatory-split neuron density nrrd files
+rule transplant_excitatory_split:
+    input:
+        hierarchy = hierarchy_v2,
+        src_parcellation_volume = annotation_v2,
+        dst_parcellation_volume = annotation_v3,
+        src_cell_volume = rules.excitatory_split.output
+    output:
+        directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['excitatory_split_transplant']}")
+    params:
+        app=APPS["celltransplant"]
+    log:
+        f"{LOG_DIR}/transplant_excitatory_split.log"
     shell:
         """{params.app} --hierarchy {input.hierarchy} \
             --src-annot-volume {input.src_parcellation_volume} \
@@ -1377,6 +1423,7 @@ rule push_celldensity_transplant_pipeline_datasets:
     input:
         glia_densities_transplanted = rules.transplant_glia_cell_densities_correctednissl.output,
         inhibitory_densities_transplanted = rules.transplant_inhibitory_neuron_densities_linprog_correctednissl.output,
+        excitatory_split_transplanted = rules.transplant_excitatory_split.output,
         densities_from_probability_map_transplanted = rules.transplant_mtypes_densities_from_probability_map.output,
         annotation = annotation_v3,
         hierarchy = hierarchy_mba,
@@ -1401,6 +1448,7 @@ rule push_celldensity_transplant_pipeline_datasets:
         {params.app1[1]} \
             --dataset-path {input.glia_densities_transplanted} \
             --dataset-path {input.inhibitory_densities_transplanted} \
+            --dataset-path {input.excitatory_split_transplanted} \
             --dataset-path {input.densities_from_probability_map_transplanted} \
             --dataset-path {input.annotation} \
             --hierarchy-path {input.hierarchy} \
