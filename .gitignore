@@ -136,7 +136,11 @@ dmypy.json
 .DS_Store
 
 # snakelike stuff
-.snakemake/metadata/
+.snakemake/
+working_dir*
 
 # batch log
 slurm-*.out
+
+# PyCharm
+.idea
