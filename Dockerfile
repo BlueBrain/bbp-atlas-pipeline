@@ -35,6 +35,11 @@ RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_token_fe
 # module load py-bba-datafetch
 RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_fetch.git@v0.2.0
 
+# temporary test, will be ported into atlas-splitter
+#RUN pip install git+https://bbpgitlab.epfl.ch/conn/structural/validation/cell-density-validations/cell-densities.git@2325c56d
+RUN git clone --branch new_regions_hier https://bbpgitlab.epfl.ch/conn/structural/validation/cell-density-validations.git cell-density-validation
+RUN 'cd cell-density-validation ; git checkout 11b4332c ; pip install cell-densities/'
+
 # module load py-bba-webexporter
 RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_web_exporter.git@master
 

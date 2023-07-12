@@ -2,6 +2,8 @@ HierarchyJson:
   hierarchy: {WORKING_DIR}/hierarchy.json
   hierarchy_ccfv2_l23split: {WORKING_DIR}/hierarchy_ccfv2_l23split.json
   hierarchy_ccfv3_l23split: {WORKING_DIR}/hierarchy_ccfv3_l23split.json
+  hierarchy_ccfv2_leaves_only: {WORKING_DIR}/hierarchy_ccfv2_leaves_only.json
+  hierarchy_ccfv3_leaves_only: {WORKING_DIR}/hierarchy_ccfv3_leaves_only.json
   hierarchy_ccfv2_l23split_barrelsplit: {WORKING_DIR}/hierarchy_ccfv2_l23split_barrelsplit.json
   hierarchy_ccfv3_l23split_barrelsplit: {WORKING_DIR}/hierarchy_ccfv3_l23split_barrelsplit.json
   mba_hierarchy: {WORKING_DIR}/mba_hierarchy.json
@@ -11,8 +13,10 @@ GeneratedDatasetPath:
     average_template_25: {WORKING_DIR}/average_template_25.nrrd
     annotation_v2_withfiber: {WORKING_DIR}/annotation_v2_withfiber.nrrd
     annotation_ccfv2_l23split: {WORKING_DIR}/annotation_ccfv2_l23split.nrrd
+    annotation_ccfv2_leaves_only: {WORKING_DIR}/annotation_ccfv2_leaves_only.nrrd
     annotation_ccfv2_l23split_barrelsplit: {WORKING_DIR}/annotation_ccfv2_l23split_barrelsplit.nrrd
     annotation_ccfv3_l23split: {WORKING_DIR}/annotation_ccfv3_l23split.nrrd
+    annotation_ccfv3_leaves_only: {WORKING_DIR}/annotation_ccfv3_leaves_only.nrrd
     annotation_ccfv3_l23split_barrelsplit: {WORKING_DIR}/annotation_ccfv3_l23split_barrelsplit.nrrd
     barrel_positions_25: {WORKING_DIR}/barrel_positions_25.feather
     hemispheres: {WORKING_DIR}/hemispheres_annotation.nrrd
