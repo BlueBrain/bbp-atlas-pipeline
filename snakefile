@@ -110,7 +110,6 @@ APPS = {
     "atlas-building-tools cell-densities compile-measurements": "atlas-densities cell-densities compile-measurements",
     "atlas-building-tools cell-densities measurements-to-average-densities": "atlas-densities cell-densities measurements-to-average-densities",
     "atlas-building-tools cell-densities fit-average-densities": "atlas-densities cell-densities fit-average-densities",
-    "atlas-building-tools cell-densities fit-average-densities": "atlas-densities cell-densities fit-average-densities",
     "atlas-building-tools cell-densities inhibitory-neuron-densities": "atlas-densities cell-densities inhibitory-neuron-densities",
     "atlas-building-tools mtype-densities create-from-profile": "atlas-densities mtype-densities create-from-profile",
     "atlas-building-tools mtype-densities create-from-probability-map": "atlas-densities mtype-densities create-from-probability-map",
@@ -697,6 +696,33 @@ rule fetch_isocortex_23_metadata:
     shell:
         default_fetch
 
+##>fetch_realigned_slices : fetch realigned_slices
+rule fetch_realigned_slices:
+    output:
+        f"{rules_config_dir}/realigned_slices.json"
+    params:
+        nexus_id=NEXUS_IDS["metadata"]["realigned_slices"],
+        app=APPS["bba-data-fetch"],
+        token = myTokenFetcher.getAccessToken()
+    log:
+        f"{LOG_DIR}/fetch_realigned_slices.log"
+    shell:
+        default_fetch
+
+##>fetch_std_cells : fetch std_cells
+rule fetch_std_cells:
+    output:
+        f"{rules_config_dir}/std_cells.json"
+    params:
+        nexus_id=NEXUS_IDS["metadata"]["std_cells"],
+        app=APPS["bba-data-fetch"],
+        token = myTokenFetcher.getAccessToken()
+    log:
+        f"{LOG_DIR}/fetch_std_cells.log"
+    shell:
+        default_fetch
+
+
 ## =========================================================================================
 ## =============================== ANNOTATION PIPELINE PART 1.1 ============================
 ## =========================================================================================
@@ -1141,6 +1167,8 @@ rule average_densities_correctednissl:
 rule fit_average_densities_correctednissl:
     input:
         rules.fetch_genes_correctednissl.output,
+        rules.fetch_realigned_slices.output,
+        rules.fetch_std_cells.output,
         hierarchy = rules.split_barrel_ccfv2_l23split.output.hierarchy,
         annotation = rules.split_barrel_ccfv2_l23split.output.annotation,
         neuron_density = rules.glia_cell_densities_correctednissl.output.neuron_density,
