@@ -107,7 +107,6 @@ APPS = {
     "atlas-building-tools cell-densities glia-cell-densities": "atlas-densities cell-densities glia-cell-densities",
     "atlas-building-tools cell-densities inhibitory-and-excitatory-neuron-densities": "atlas-densities cell-densities inhibitory-and-excitatory-neuron-densities",
     "atlas-densities cell-densities excitatory-split": "atlas-densities cell-densities excitatory-split",
-    "atlas-building-tools cell-densities compile-measurements": "atlas-densities cell-densities compile-measurements",
     "atlas-building-tools cell-densities measurements-to-average-densities": "atlas-densities cell-densities measurements-to-average-densities",
     "atlas-building-tools cell-densities fit-average-densities": "atlas-densities cell-densities fit-average-densities",
     "atlas-building-tools cell-densities inhibitory-neuron-densities": "atlas-densities cell-densities inhibitory-neuron-densities",
@@ -683,16 +682,16 @@ rule fetch_isocortex_metadata:
     shell:
         default_fetch
 
-##>fetch_isocortex_23_metadata : fetch isocortex 23 metadata
-rule fetch_isocortex_23_metadata:
+##>fetch_measurements : fetch measurements
+rule fetch_measurements:
     output:
-        f"{WORKING_DIR}/isocortex_23_metadata.json"
+        f"{rules_config_dir}/measurements.csv"
     params:
-        nexus_id=NEXUS_IDS["metadata"]["isocortex_23"],
+        nexus_id=NEXUS_IDS["metadata"]["measurements"],
         app=APPS["bba-data-fetch"],
         token = myTokenFetcher.getAccessToken()
     log:
-        f"{LOG_DIR}/fetch_isocortex_23_metadata.log"
+        f"{LOG_DIR}/fetch_measurements.log"
     shell:
         default_fetch
 
@@ -719,6 +718,32 @@ rule fetch_std_cells:
         token = myTokenFetcher.getAccessToken()
     log:
         f"{LOG_DIR}/fetch_std_cells.log"
+    shell:
+        default_fetch
+
+##>fetch_homogenous_regions : fetch homogenous_regions
+rule fetch_homogenous_regions:
+    output:
+        f"{rules_config_dir}/homogenous_regions.csv"
+    params:
+        nexus_id=NEXUS_IDS["metadata"]["homogenous_regions"],
+        app=APPS["bba-data-fetch"],
+        token = myTokenFetcher.getAccessToken()
+    log:
+        f"{LOG_DIR}/fetch_homogenous_regions.log"
+    shell:
+        default_fetch
+
+##>fetch_isocortex_23_metadata : fetch isocortex 23 metadata
+rule fetch_isocortex_23_metadata:
+    output:
+        f"{WORKING_DIR}/isocortex_23_metadata.json"
+    params:
+        nexus_id=NEXUS_IDS["metadata"]["isocortex_23"],
+        app=APPS["bba-data-fetch"],
+        token = myTokenFetcher.getAccessToken()
+    log:
+        f"{LOG_DIR}/fetch_isocortex_23_metadata.log"
     shell:
         default_fetch
 
@@ -1122,23 +1147,6 @@ rule placement_hints:
 
 ##======== Optimized inhibitory neuron densities and mtypes ========
 
-##>compile_densities_measurements : Compile the cell density related measurements of mmc3.xlsx and `gaba_papers.xsls` into a CSV file.
-rule compile_densities_measurements:
-    output:
-        measurements_csv = f"{WORKING_DIR}/measurements.csv",
-        homogenous_regions_csv = f"{WORKING_DIR}/homogenous_regions.csv"
-    params:
-        app=APPS["atlas-building-tools cell-densities compile-measurements"]
-    log:
-        f"{LOG_DIR}/compile_densities_measurements.log"
-    shell:
-        """
-        {params.app} \
-            --measurements-output-path {output.measurements_csv} \
-            --homogenous-regions-output-path {output.homogenous_regions_csv} \
-            2>&1 | tee {log}
-        """
-
 ##>average_densities_correctednissl : Compute cell densities based on measurements and AIBS region volumes.
 rule average_densities_correctednissl:
     input:
@@ -1146,7 +1154,7 @@ rule average_densities_correctednissl:
         annotation = rules.split_barrel_ccfv2_l23split.output.annotation,
         overall_cell_density = rules.cell_density_correctednissl.output,
         neuron_density = rules.glia_cell_densities_correctednissl.output.neuron_density,
-        measurements_csv = rules.compile_densities_measurements.output.measurements_csv,
+        measurements_csv = rules.fetch_measurements.output,
     output:
         f"{WORKING_DIR}/average_cell_densities_correctednissl.csv"
     params:
@@ -1174,7 +1182,7 @@ rule fit_average_densities_correctednissl:
         neuron_density = rules.glia_cell_densities_correctednissl.output.neuron_density,
         average_densities = rules.average_densities_correctednissl.output,
         gene_config = f"{AVERAGE_DENSITIES_CORRECTEDNISSL_CONFIG_FILE}",
-        homogenous_regions_csv = f"{WORKING_DIR}/homogenous_regions.csv"
+        homogenous_regions_csv = rules.fetch_homogenous_regions.output
     output:
         fitted_densities = f"{WORKING_DIR}/fitted_densities_correctednissl.csv",
         fitting_maps = f"{WORKING_DIR}/fitting_maps_correctednissl.json"
