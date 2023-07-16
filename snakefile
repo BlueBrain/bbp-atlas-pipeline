@@ -1234,7 +1234,7 @@ rule excitatory_split:
         """
         {params.app} --annotation-path {input.annotation} \
             --hierarchy-path {input.hierarchy} \
-            --neuron-density-path {input.neuron_density} \
+            --neuron-density {input.neuron_density} \
             --inhibitory-density {input.inhibitory_density}/gad67+_density.nrrd \
             --output-dir {output} \
             2>&1 | tee {log}
@@ -1269,6 +1269,15 @@ rule create_mtypes_densities_from_probability_map:
 ## ======================== TRANSPLANT DENSITIES ===========================================
 ## =========================================================================================
 
+default_transplant = """{params.app} \
+                        --hierarchy {input.hierarchy} \
+                        --src-annot-volume {input.src_annotation} \
+                        --dst-annot-volume {input.dst_annotation} \
+                        --src-cell-volume {input.src_cell_volume} \
+                        --dst-cell-volume {output} \
+                        2>&1 | tee {log}
+                     """
+
 ##>transplant_glia_cell_densities_correctednissl : Transplant neuron density nrrd files
 rule transplant_glia_cell_densities_correctednissl:
     input:
@@ -1283,13 +1292,7 @@ rule transplant_glia_cell_densities_correctednissl:
     log:
         f"{LOG_DIR}/transplant_glia_cell_densities_correctednissl.log"
     shell:
-        """{params.app} --hierarchy {input.hierarchy} \
-            --src-annot-volume {input.src_annotation} \
-            --dst-annot-volume {input.dst_annotation} \
-            --src-cell-volume {input.src_cell_volume} \
-            --dst-cell-volume {output} \
-            2>&1 | tee {log}
-        """
+        default_transplant
 
 ##>transplant_inhibitory_neuron_densities_linprog_correctednissl : Transplant inhibitory neuron density nrrd files
 rule transplant_inhibitory_neuron_densities_linprog_correctednissl:
@@ -1305,13 +1308,7 @@ rule transplant_inhibitory_neuron_densities_linprog_correctednissl:
     log:
         f"{LOG_DIR}/transplant_inhibitory_neuron_densities_linprog_correctednissl.log"
     shell:
-        """{params.app} --hierarchy {input.hierarchy} \
-            --src-annot-volume {input.src_annotation} \
-            --dst-annot-volume {input.dst_annotation} \
-            --src-cell-volume {input.src_cell_volume} \
-            --dst-cell-volume {output} \
-            2>&1 | tee {log}
-        """
+        default_transplant
 
 ##>transplant_excitatory_split : Transplant excitatory-split neuron density nrrd files
 rule transplant_excitatory_split:
@@ -1327,13 +1324,7 @@ rule transplant_excitatory_split:
     log:
         f"{LOG_DIR}/transplant_excitatory_split.log"
     shell:
-        """{params.app} --hierarchy {input.hierarchy} \
-            --src-annot-volume {input.src_annotation} \
-            --dst-annot-volume {input.dst_annotation} \
-            --src-cell-volume {input.src_cell_volume} \
-            --dst-cell-volume {output} \
-            2>&1 | tee {log}
-        """
+        default_transplant
 
 ##>transplant_mtypes_densities_from_probability_map : Transplant neuron density nrrd files for the mtypes listed in the probability mapping csv file.
 rule transplant_mtypes_densities_from_probability_map:
@@ -1349,13 +1340,7 @@ rule transplant_mtypes_densities_from_probability_map:
     log:
         f"{LOG_DIR}/transplant_mtypes_densities_from_probability_map.log"
     shell:
-        """{params.app} --hierarchy {input.hierarchy} \
-            --src-annot-volume {input.src_annotation} \
-            --dst-annot-volume {input.dst_annotation} \
-            --src-cell-volume {input.src_cell_volume} \
-            --dst-cell-volume {output} \
-            2>&1 | tee {log}
-        """
+        default_transplant
 
 ## =========================================================================================
 ## ======================== EXPORT MASKS,MESHES,SUMMARIES ==================================
@@ -1379,7 +1364,7 @@ rule export_brain_region:
     run:
         mesh_dir_option = ""
         if EXPORT_MESHES:
-            mesh_dir_option = " --out-mesh-dir output.mesh_dir"
+            mesh_dir_option = " --out-mesh-dir {output.mesh_dir}"
         shell("{params.app} --hierarchy {input.hierarchy} \
             --parcellation-volume {input.annotation} \
             " + mesh_dir_option + " \
