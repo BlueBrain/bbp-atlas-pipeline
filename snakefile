@@ -1373,6 +1373,8 @@ rule export_brain_region:
         mesh_dir_option = ""
         if EXPORT_MESHES:
             mesh_dir_option = " --out-mesh-dir {output.mesh_dir}"
+        else:
+            os.makedirs({output.mesh_dir}, exist_ok = True)
         shell("{params.app} --hierarchy {input.hierarchy} \
             --parcellation-volume {input.annotation} \
             " + mesh_dir_option + " \
