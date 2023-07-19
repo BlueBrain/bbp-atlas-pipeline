@@ -440,6 +440,18 @@ rule fetch_nissl_stack_ccfv2_coronal:
             tar xf {WORKING_DIR}/nissl_stack_ccfv2_coronal.tar.gz --directory={output} --strip-components=1 ; \
             rm {WORKING_DIR}/nissl_stack_ccfv2_coronal.tar.gz")
 
+##>fetch_mapping_cortex_all_to_exc_mtypes : fetch the cortex_all_to_exc_mtypes mapping
+rule fetch_mapping_cortex_all_to_exc_mtypes:
+    output:
+        f"{WORKING_DIR}/mapping_cortex_all_to_exc_mtypes.csv"
+    params:
+        nexus_id=NEXUS_IDS["metadata"]["mapping_cortex_all_to_exc_mtypes"],
+        app=APPS["bba-data-fetch"],
+        token = myTokenFetcher.getAccessToken(),
+    log:
+        f"{LOG_DIR}/fetch_mapping_cortex_all_to_exc_mtypes.log"
+    shell:
+        default_fetch
 
 ##>fetch_probability_map : fetch the probability mapping from https://github.com/BlueBrain/atlas-densities/tree/main/atlas_densities/app/data/mtypes/probability_map
 rule fetch_probability_map:
@@ -1232,6 +1244,7 @@ rule excitatory_split:
         annotation = rules.split_barrel_ccfv2_l23split.output.annotation,
         neuron_density = rules.glia_cell_densities_correctednissl.output.neuron_density,
         inhibitory_density = rules.inhibitory_neuron_densities_linprog_correctednissl.output,
+        mapping_cortex_all_to_exc_mtypes = rules.fetch_mapping_cortex_all_to_exc_mtypes.output
     output:
         directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['excitatory_split']}")
     params:
@@ -1244,6 +1257,7 @@ rule excitatory_split:
             --hierarchy-path {input.hierarchy} \
             --neuron-density {input.neuron_density} \
             --inhibitory-density {input.inhibitory_density}/gad67+_density.nrrd \
+            --cortex-all-to-exc-mtypes {input.mapping_cortex_all_to_exc_mtypes} \
             --output-dir {output} \
             2>&1 | tee {log}
         """
