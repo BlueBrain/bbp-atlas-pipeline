@@ -41,7 +41,7 @@ RUN git clone --branch new_regions_hier https://bbpgitlab.epfl.ch/conn/structura
 RUN cd cell-density-validation  &&  git checkout 11b4332c  &&  pip install cell-densities/
 
 # module load py-bba-webexporter
-RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_web_exporter.git@v2.0.1
+RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_web_exporter.git@v2.0.2
 
 # module load py-data-integrity-check
 RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_integrity_check.git@v0.1.0
