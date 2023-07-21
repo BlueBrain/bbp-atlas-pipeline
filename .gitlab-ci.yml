@@ -99,6 +99,8 @@ deploy-documentation-in-registry:
         variables:
           CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/sphinx-documentation-dev
   variables:
+    CI_COMMIT_SHORT_SHA: $CI_COMMIT_SHORT_SHA
+    REGISTRY_IMAGE_TAG: $CI_COMMIT_SHORT_SHA-$(date +%s)
     BUILD_PATH: $CI_PROJECT_DIR/$DOC_DIR
     KANIKO_EXTRA_ARGS: "--build-arg CI_PROJECT_DIR=$CI_PROJECT_DIR  --build-arg DOC_DIR=$DOC_DIR  --build-arg DOC_PATH=$DOC"
 
