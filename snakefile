@@ -1530,8 +1530,6 @@ rule push_atlas_release:
             --brain-template-id {params.brain_template} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
-            --name {ATLAS_RELEASE_NAME} \
-            --description {ATLAS_RELEASE_DESC} \
             2>&1 | tee {log} ;
         touch {output}
         """
@@ -1783,7 +1781,7 @@ rule push_volumetric_datasets:
         rules.push_neuron_densities.output,
         rules.push_metype_pipeline_datasets.output,
     output:
-        touch = temp(touch(f"{WORKING_DIR}/pushed_volumetric_datasets.txt"))
+        touch = temp(touch(f"{WORKING_DIR}/pushed_volumetric_datasets.log"))
     log:
         f"{LOG_DIR}/push_volumetric_datasets.log"
     shell:
