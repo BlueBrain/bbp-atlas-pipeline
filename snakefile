@@ -34,7 +34,7 @@ WORKING_DIR = config["WORKING_DIR"]
 REPO_PATH = config["REPO_PATH"]
 KEYCLOAK_CONFIG = os.path.join(REPO_PATH, config["KEYCLOAK_CONFIG"])
 NEXUS_IDS_FILE = os.path.join(REPO_PATH, config["NEXUS_IDS_FILE"])
-FORGE_CONFIG = os.path.join(REPO_PATH, config["FORGE_CONFIG"])
+FORGE_CONFIG = os.path.join(os.getcwd(), REPO_PATH, config["FORGE_CONFIG"])
 RULES_CONFIG_DIR_TEMPLATES = os.path.join(REPO_PATH, config["RULES_CONFIG_DIR_TEMPLATES"])
 RESOLUTION = str(config["RESOLUTION"])
 MODULES_VERBOSE = config["MODULES_VERBOSE"]
@@ -47,6 +47,10 @@ NEW_ATLAS = config["NEW_ATLAS"]
 EXPORT_MESHES = config["EXPORT_MESHES"]
 PROVENANCE_METADATA_V2_PATH = f"{WORKING_DIR}/provenance_metadata_v2.json"
 PROVENANCE_METADATA_V3_PATH = f"{WORKING_DIR}/provenance_metadata_v3.json"
+
+IS_PROD_ENV = config["IS_PROD_ENV"]
+ATLAS_RELEASE_NAME = config["ATLAS_RELEASE_NAME"]
+ATLAS_RELEASE_DESC = config["ATLAS_RELEASE_DESCRIPTION"]
 
 NEXUS_ATLAS_ENV = config["NEXUS_ATLAS_ENV"]
 NEXUS_ATLAS_ORG = config["NEXUS_ATLAS_ORG"]
@@ -124,6 +128,7 @@ APPS = {
     "bba-data-integrity-check nrrd-integrity": "bba-data-integrity-check nrrd-integrity",
     "bba-data-integrity-check meshes-obj-integrity": "bba-data-integrity-check meshes-obj-integrity",
     "bba-data-integrity-check atlas-sonata-integrity": "bba-data-integrity-check atlas-sonata-integrity",
+    "bba-data-push push-atlasrelease": "bba-data-push push-atlasrelease",
     "bba-data-push push-volumetric": "bba-data-push push-volumetric",
     "bba-data-push push-meshes": "bba-data-push push-meshes",
     "bba-data-push push-cellrecords": "bba-data-push push-cellrecords",
@@ -1477,35 +1482,34 @@ rule check_annotation_pipeline_v3:
 ## ============================= ANNOTATION PIPELINE USER RULES ============================
 ## =========================================================================================
 
-##>generate_annotation_pipeline_v3_datasets : Global rule to generate and check the integrity of every products of the annotation pipeline
-rule generate_annotation_pipeline_v3_datasets:
-    input:
-        all_datasets = rules.check_annotation_pipeline_v3.output,
+if IS_PROD_ENV:
+    env = "prod"
+else:
+    env = "staging"
+atlas_release_id = NEXUS_IDS["AtlasRelease"][env]
+cell_composition_id = NEXUS_IDS["CellComposition"][env]
 
-##>push_volumetric_ccfv3_l23split : push into Nexus the ccfv3 volumetric artifactspush_volumetric_ccfv3_l23split
-rule push_volumetric_ccfv3_l23split:
+brain_region_id = "http://api.brain-map.org/api/v2/data/Structure/997"
+
+##>push_atlas_release : rule to push into Nexus an atlas release
+rule push_atlas_release:
     input:
         hierarchy = hierarchy_mba,
         hierarchy_jsonld = hierarchy_jsonld,
-        brain_template=rules.fetch_brain_template.output,
         annotation = rules.split_barrel_ccfv3_l23split.output.annotation,
-        hemispheres=rules.create_hemispheres_ccfv3.output,
-        mask=rules.export_brain_region.output.mask_dir,
-        mesh=rules.export_brain_region.output.mesh_dir,
-        placement_hints =rules.placement_hints.output,
-        direction_vectors =rules.interpolate_direction_vectors_isocortex_ccfv3.output,
-        orientation_field=rules.orientation_field.output,
-        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
-    output:
-        link_regions = f"{WORKING_DIR}/link_regions_path.json",
-        touch = temp(touch(f"{WORKING_DIR}/push_volumetric_ccfv3_l23split.txt"))
+        hemisphere = rules.create_hemispheres_ccfv3.output,
+        placement_hints = rules.placement_hints.output,
     params:
-        app=APPS["bba-data-push push-volumetric"].split(),
+        app=APPS["bba-data-push push-atlasrelease"].split(),
         token = myTokenFetcher.getAccessToken(),
-        create_provenance_json = write_json(PROVENANCE_METADATA_V3_PATH, PROVENANCE_METADATA_V3, rule_name = "push_volumetric_datasets"),
-        resource_tag = RESOURCE_TAG
+        resource_tag = RESOURCE_TAG,
+        species=NEXUS_IDS["species"],
+        reference_system=NEXUS_IDS["reference_system"],
+        brain_template=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainTemplateDataLayer"]["average_template_25"],
+    output:
+        f"{WORKING_DIR}/pushed_atlas_release.log"
     log:
-        f"{LOG_DIR}/push_volumetric_ccfv3_l23split.log"
+        f"{LOG_DIR}/push_atlas_release.log"
     shell:
         """
         {params.app[0]} --forge-config-file {FORGE_CONFIG} \
@@ -1514,50 +1518,75 @@ rule push_volumetric_ccfv3_l23split:
             --nexus-proj {NEXUS_DESTINATION_PROJ} \
             --nexus-token {params.token} \
         {params.app[1]} \
-            --dataset-path {input.annotation} \
-            --dataset-path {input.hemispheres} \
-            --dataset-path {input.brain_template} \
-            --dataset-path {input.mask} \
-            --dataset-path {input.orientation_field} \
-            --dataset-path {input.direction_vectors} \
-            --dataset-path {input.placement_hints} \
             --hierarchy-path {input.hierarchy} \
-            --hierarchy-jsonld-path {input.hierarchy_jsonld} \
-            --new-atlas {NEW_ATLAS} \
-            --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
-            --config-path {input.push_dataset_config} \
-            --link-regions-path {output.link_regions} \
-            --provenance-metadata-path {PROVENANCE_METADATA_V2_PATH} \
+            --hierarchy-ld-path {input.hierarchy_jsonld} \
+            --annotation-path {input.annotation} \
+            --hemisphere-path {input.hemisphere} \
+            --placement-hints-path {input.placement_hints} \
+            --atlas-release-id {atlas_release_id} \
+            --species {params.species} \
+            --brain-region {brain_region_id} \
+            --reference-system-id {params.reference_system} \
+            --brain-template-id {params.brain_template} \
             --resource-tag '{params.resource_tag}' \
-            2>&1 | tee {log}
+            --is-prod-env {IS_PROD_ENV} \
+            --name {ATLAS_RELEASE_NAME} \
+            --description {ATLAS_RELEASE_DESC} \
+            2>&1 | tee {log} ;
+        touch {output}
         """
 
-## =========================================================================================
-## ============================= CELL DENSITY PIPELINE USER RULES ============================
-## =========================================================================================
-
-pushed_transplant = "pushed_transplant_datasets"
-
-##>push_celldensity_transplant_pipeline_datasets : Global rule to generate and push into Nexus every products of the cell density pipeline
-rule push_celldensity_transplant_pipeline_datasets:
+##>push_meshes : rule to push into Nexus brain regions meshes
+rule push_meshes:
     input:
-        glia_densities_transplanted = rules.transplant_glia_cell_densities_correctednissl.output,
-        inhibitory_densities_transplanted = rules.transplant_inhibitory_neuron_densities_linprog_correctednissl.output,
-        excitatory_split_transplanted = rules.transplant_excitatory_split.output,
-        densities_from_probability_map_transplanted = rules.transplant_mtypes_densities_from_probability_map.output,
-        annotation = rules.split_barrel_ccfv3_l23split.output.annotation,
         hierarchy = hierarchy_mba,
-        hierarchy_jsonld = hierarchy_jsonld,
-        push_dataset_config = f"{rules_config_dir}/push_dataset_config.yaml",
+        meshes = rules.export_brain_region.output.mesh_dir,
+    params:
+        app=APPS["bba-data-push push-meshes"].split(),
+        token = myTokenFetcher.getAccessToken(),
+        resource_tag = RESOURCE_TAG,
+        species=NEXUS_IDS["species"],
+        reference_system=NEXUS_IDS["reference_system"],
+    output:
+        f"{WORKING_DIR}/pushed_meshes.log"
+    log:
+        f"{LOG_DIR}/push_meshes.log"
+    shell:
+        """
+        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app[1]} \
+            --dataset-path {input.meshes} \
+            --dataset-type BrainParcellationMesh \
+            --hierarchy-path {input.hierarchy} \
+            --atlas-release-id {atlas_release_id} \
+            --species {params.species} \
+            --brain-region None \
+            --reference-system-id {params.reference_system} \
+            --resource-tag '{params.resource_tag}' \
+            --is-prod-env {IS_PROD_ENV} \
+            2>&1 | tee {log} ;
+        touch {output}
+        """
+
+##>push_masks : rule to push into Nexus brain regions masks
+rule push_masks:
+    input:
+        masks = rules.export_brain_region.output.mask_dir,
+        hierarchy = hierarchy_mba,
     params:
         app1=APPS["bba-data-push push-volumetric"].split(),
         token = myTokenFetcher.getAccessToken(),
-        create_provenance_json = write_json(PROVENANCE_METADATA_V3_PATH, PROVENANCE_METADATA_V3, rule_name = "push_celldensity_pipeline_datasets"),
+        species=NEXUS_IDS["species"],
+        reference_system=NEXUS_IDS["reference_system"],
         resource_tag = RESOURCE_TAG
     output:
-        f"{WORKING_DIR}/{pushed_transplant}.log"
+        f"{WORKING_DIR}/pushed_masks.log"
     log:
-        f"{LOG_DIR}/push_celldensity_transplant_pipeline_datasets.log"
+        f"{LOG_DIR}/push_masks.log"
     shell:
         """
         {params.app1[0]} --forge-config-file {FORGE_CONFIG} \
@@ -1566,35 +1595,209 @@ rule push_celldensity_transplant_pipeline_datasets:
             --nexus-proj {NEXUS_DESTINATION_PROJ} \
             --nexus-token {params.token} \
         {params.app1[1]} \
-            --dataset-path {input.glia_densities_transplanted} \
-            --dataset-path {input.inhibitory_densities_transplanted} \
-            --dataset-path {input.excitatory_split_transplanted} \
-            --dataset-path {input.densities_from_probability_map_transplanted} \
-            --dataset-path {input.annotation} \
+            --dataset-path {input.masks} \
+            --dataset-type BrainParcellationMask \
+            --atlas-release-id {atlas_release_id} \
+            --species {params.species} \
             --hierarchy-path {input.hierarchy} \
-            --hierarchy-jsonld-path {input.hierarchy_jsonld} \
-            --new-atlas {NEW_ATLAS} \
-            --atlasrelease-config-path {ATLAS_CONFIG_PATH} \
-            --config-path {input.push_dataset_config} \
-            --provenance-metadata-path {PROVENANCE_METADATA_V3_PATH} \
+            --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
+            --is-prod-env {IS_PROD_ENV} \
             2>&1 | tee {log} ;
         touch {output}
         """
 
-if not NEW_ATLAS:
-    atlas_release_id = NEXUS_IDS["AtlasRelease"]["prod" if ("staging" not in NEXUS_DESTINATION_ENV) else "staging"]
-else:
-    with open(ATLAS_CONFIG_PATH, "r") as atlasrelease_config_file:
-        atlasrelease_config_file.seek(0)
-        atlasrelease_config = json.load(atlasrelease_config_file)
-        atlas_release_id = (list(atlasrelease_config.keys())[0])["id"]
+##>push_orientation_field : rule to push into Nexus orientation fields
+rule push_orientation_field:
+    input:
+        direction_vectors = direction_vectors_isocortex,
+        orientation_field = rules.orientation_field.output,
+        hierarchy = hierarchy_mba,
+    params:
+        app1=APPS["bba-data-push push-volumetric"].split(),
+        token = myTokenFetcher.getAccessToken(),
+        species=NEXUS_IDS["species"],
+        reference_system=NEXUS_IDS["reference_system"],
+        resource_tag = RESOURCE_TAG
+    output:
+        f"{WORKING_DIR}/pushed_orientation_field.log"
+    log:
+        f"{LOG_DIR}/push_orientation_field.log"
+    shell:
+        """
+        {params.app1[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app1[1]} \
+            --dataset-path {input.direction_vectors} \
+            --dataset-path {input.orientation_field} \
+            --dataset-type CellOrientationField \
+            --atlas-release-id {atlas_release_id} \
+            --species {params.species} \
+            --brain-region {brain_region_id} \
+            --hierarchy-path {input.hierarchy} \
+            --reference-system-id {params.reference_system} \
+            --resource-tag '{params.resource_tag}' \
+            --is-prod-env {IS_PROD_ENV} \
+            2>&1 | tee {log} ;
+        touch {output}
+        """
+
+##>generate_annotation_pipeline_v3_datasets : Global rule to generate and check the integrity of every products of the annotation pipeline
+rule generate_annotation_pipeline_v3_datasets:
+    input:
+        all_datasets = rules.check_annotation_pipeline_v3.output,
+
+
+## =========================================================================================
+## ============================= CELL DENSITY PIPELINE USER RULES ============================
+## =========================================================================================
+
+##>push_glia_densities : rule to push into Nexus Glia densities
+rule push_glia_densities:
+    input:
+        astro = f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['glia_cell_densities_transplant_correctednissl']}/astrocyte_density_v3.nrrd",
+        glia = f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['glia_cell_densities_transplant_correctednissl']}/glia_density_v3.nrrd",
+        micro = f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['glia_cell_densities_transplant_correctednissl']}/microglia_density_v3.nrrd",
+        oligo = f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['glia_cell_densities_transplant_correctednissl']}/oligodendrocyte_density_v3.nrrd",
+        hierarchy = hierarchy_mba,
+    params:
+        app1=APPS["bba-data-push push-volumetric"].split(),
+        token = myTokenFetcher.getAccessToken(),
+        species=NEXUS_IDS["species"],
+        reference_system=NEXUS_IDS["reference_system"],
+        resource_tag = RESOURCE_TAG
+    output:
+        f"{WORKING_DIR}/pushed_glia_densities.log"
+    log:
+        f"{LOG_DIR}/push_glia_densities.log"
+    shell:
+        """
+        {params.app1[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app1[1]} \
+            --dataset-path {input.astro} \
+            --dataset-path {input.glia} \
+            --dataset-path {input.micro} \
+            --dataset-path {input.oligo} \
+            --dataset-type GliaCellDensity \
+            --atlas-release-id {atlas_release_id} \
+            --species {params.species} \
+            --brain-region {brain_region_id} \
+            --hierarchy-path {input.hierarchy} \
+            --reference-system-id {params.reference_system} \
+            --resource-tag '{params.resource_tag}' \
+            --is-prod-env {IS_PROD_ENV} \
+            2>&1 | tee {log} ;
+        touch {output}
+        """
+
+##>push_neuron_densities : rule to push into Nexus Neuron densities
+rule push_neuron_densities:
+    input:
+        inhibitory_densities = rules.transplant_inhibitory_neuron_densities_linprog_correctednissl.output,
+        neuron_density = f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['glia_cell_densities_transplant_correctednissl']}/neuron_density_v3.nrrd",
+        hierarchy = hierarchy_mba,
+    params:
+        app1=APPS["bba-data-push push-volumetric"].split(),
+        token = myTokenFetcher.getAccessToken(),
+        species=NEXUS_IDS["species"],
+        reference_system=NEXUS_IDS["reference_system"],
+        resource_tag = RESOURCE_TAG
+    output:
+        f"{WORKING_DIR}/pushed_neuron_densities.log"
+    log:
+        f"{LOG_DIR}/push_neuron_densities.log"
+    shell:
+        """
+        {params.app1[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app1[1]} \
+            --dataset-path {input.inhibitory_densities} \
+            --dataset-path {input.neuron_density} \
+            --dataset-type NeuronDensity \
+            --atlas-release-id {atlas_release_id} \
+            --species {params.species} \
+            --brain-region {brain_region_id} \
+            --hierarchy-path {input.hierarchy} \
+            --reference-system-id {params.reference_system} \
+            --resource-tag '{params.resource_tag}' \
+            --is-prod-env {IS_PROD_ENV} \
+            2>&1 | tee {log} ;
+        touch {output}
+        """
+
+##>push_metype_pipeline_datasets : rule to push into Nexus ME-type densities
+rule push_metype_pipeline_datasets:
+    input:
+        excitatory_split_transplanted = rules.transplant_excitatory_split.output,
+        densities_from_probability_map_transplanted = rules.transplant_mtypes_densities_from_probability_map.output,
+        hierarchy = hierarchy_mba,
+    params:
+        app1=APPS["bba-data-push push-volumetric"].split(),
+        token = myTokenFetcher.getAccessToken(),
+        create_provenance_json = write_json(PROVENANCE_METADATA_V3_PATH, PROVENANCE_METADATA_V3, rule_name = "push_metype_pipeline_datasets"),
+        species=NEXUS_IDS["species"],
+        reference_system=NEXUS_IDS["reference_system"],
+        resource_tag = RESOURCE_TAG
+    output:
+        f"{WORKING_DIR}/pushed_metype_datasets.log"
+    log:
+        f"{LOG_DIR}/push_metype_pipeline_datasets.log"
+    shell:
+        """
+        {params.app1[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app1[1]} \
+            --dataset-path {input.densities_from_probability_map_transplanted} \
+            --dataset-path {input.excitatory_split_transplanted} \
+            --dataset-type METypeDensity \
+            --atlas-release-id {atlas_release_id} \
+            --species {params.species} \
+            --brain-region {brain_region_id} \
+            --hierarchy-path {input.hierarchy} \
+            --reference-system-id {params.reference_system} \
+            --resource-tag '{params.resource_tag}' \
+            --is-prod-env {IS_PROD_ENV} \
+            2>&1 | tee {log} ;
+        touch {output}
+        """
+
+##>push_volumetric_datasets : push into Nexus the volumetric datasets that are not inputs of push_atlas_release
+rule push_volumetric_datasets:
+    input:
+        rules.push_masks.output,
+        rules.push_orientation_field.output,
+        rules.push_glia_densities.output,
+        rules.push_neuron_densities.output,
+        rules.push_metype_pipeline_datasets.output,
+    output:
+        touch = temp(touch(f"{WORKING_DIR}/pushed_volumetric_datasets.txt"))
+    log:
+        f"{LOG_DIR}/push_volumetric_datasets.log"
+    shell:
+        """
+        touch {output}
+        """
+
 
 ##>create_cellCompositionVolume_payload :
 rule create_cellCompositionVolume_payload:
     input:
-        rules.push_celldensity_transplant_pipeline_datasets.output
+        rules.push_metype_pipeline_datasets.output
     params:
+        input_paths = rules.push_metype_pipeline_datasets.input,
         resource_tag = RESOURCE_TAG
     output:
         payload = f"{WORKING_DIR}/cellCompositionVolume_payload.json"
@@ -1602,12 +1805,19 @@ rule create_cellCompositionVolume_payload:
         f"{LOG_DIR}/create_cellCompositionVolume_payload.log"
     run:
         with open(log[0], "w") as logfile:
-            #sys.path.append("/gpfs/bbp.cscs.ch/home/lcristel/BBP/atlas_pipelines/kgforge/lib/python3.9/site-packages")
+            n_layer_densities = 0
+            for folder in params.input_paths:
+                densities = Path(folder).rglob("*.nrrd")
+                for dens in densities:
+                    if re.match("^L(\d){1,}_", dens.name):
+                        n_layer_densities += 1
+            logfile.write(f"Expecting {n_layer_densities} densities with layer in the CellCompositionVolume payload\n")
+
             from kgforge.core import KnowledgeGraphForge
             forge = KnowledgeGraphForge(FORGE_CONFIG, bucket = "/".join([NEXUS_DESTINATION_ORG, NEXUS_DESTINATION_PROJ]), endpoint = NEXUS_DESTINATION_ENV, token = myTokenFetcher.getAccessToken())
             from cellCompVolume_payload import create_payload
             logfile.write(f"Creating CellCompositionVolume payload for atlasRelease {atlas_release_id} with tag '{params.resource_tag}'\n")
-            create_payload(forge, atlas_release_id, output.payload, params.resource_tag)
+            create_payload(forge, atlas_release_id, output.payload, n_layer_densities, params.resource_tag)
             logfile.write(f"CellCompositionVolume payload created: {output.payload}\n")
 
 ##>create_cellCompositionSummary_payload :
@@ -1617,7 +1827,8 @@ rule create_cellCompositionSummary_payload:
         annotation = rules.split_barrel_ccfv3_l23split.output.annotation,
         cellCompositionVolume = rules.create_cellCompositionVolume_payload.output.payload
     params:
-        app=APPS["cwl-registry"]
+        app=APPS["cwl-registry"],
+        token = myTokenFetcher.getAccessToken(),
     output:
         intermediate_density_distribution = f"{WORKING_DIR}/density_distribution.json",
         summary_statistics = f"{WORKING_DIR}/cellCompositionSummary_payload.json"
@@ -1630,9 +1841,9 @@ rule create_cellCompositionSummary_payload:
                 dataset = json.load(volume_json)
 
                 from kgforge.core import KnowledgeGraphForge
-                forge = KnowledgeGraphForge(FORGE_CONFIG, bucket = "/".join([NEXUS_DESTINATION_ORG, NEXUS_DESTINATION_PROJ]), endpoint = NEXUS_DESTINATION_ENV, token = myTokenFetcher.getAccessToken())
+                forge = KnowledgeGraphForge(FORGE_CONFIG, bucket = "/".join([NEXUS_DESTINATION_ORG, NEXUS_DESTINATION_PROJ]), endpoint = NEXUS_DESTINATION_ENV, token=params.token)
 
-                logfile.write(f"Creatting density_distribution in {output.intermediate_density_distribution}\n")
+                logfile.write(f"Creating density_distribution in {output.intermediate_density_distribution}\n")
                 from cwl_registry import staging, statistics
                 density_distribution = staging.materialize_density_distribution(forge=forge, dataset=dataset, output_file=output.intermediate_density_distribution)
 
@@ -1646,12 +1857,15 @@ rule create_cellCompositionSummary_payload:
 ##>push_cellcomposition : Final rule to generate and push into Nexus the CellComposition along with its dependencies (Volume and Summary)
 rule push_cellcomposition:
     input:
+        hierarchy = hierarchy_mba,
         volume_path = rules.create_cellCompositionVolume_payload.output.payload,
         summary_path = rules.create_cellCompositionSummary_payload.output.summary_statistics,
     params:
         app=APPS["bba-data-push push-cellcomposition"].split(),
         token = myTokenFetcher.getAccessToken(),
-        resource_tag = RESOURCE_TAG
+        resource_tag = RESOURCE_TAG,
+        species=NEXUS_IDS["species"],
+        reference_system=NEXUS_IDS["reference_system"],
     output:
         temp(touch(f"{WORKING_DIR}/push_cellcomposition_success.txt"))
     log:
@@ -1664,11 +1878,16 @@ rule push_cellcomposition:
             --nexus-proj "atlasdatasetrelease" \
             --nexus-token {params.token} \
         {params.app[1]} \
-            --atlasrelease-id {atlas_release_id} \
+            --atlas-release-id {atlas_release_id} \
+            --cell-composition-id {cell_composition_id} \
+            --species {params.species} \
+            --brain-region {brain_region_id} \
+            --hierarchy-path {input.hierarchy} \
+            --reference-system-id {params.reference_system} \
             --volume-path {input.volume_path} \
-            --densities-dir {WORKING_DIR} \
             --summary-path {input.summary_path} \
-            --output-dir {WORKING_DIR} \
+            --log-dir {LOG_DIR} \
             --resource-tag '{params.resource_tag}' \
+            --is-prod-env {IS_PROD_ENV} \
             2>&1 | tee {log}
         """

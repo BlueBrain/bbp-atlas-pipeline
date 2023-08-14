@@ -1,11 +1,13 @@
 import json
 
-def create_payload(forge, atlas_release_id, output_file, tag=None):
+def create_payload(forge, atlas_release_id, output_file, n_layer_densities, tag=None):
     base_query = f"""
             ?s a METypeDensity ;
             atlasRelease <{atlas_release_id}>;
             brainLocation / brainRegion ?brainRegion ;
-            distribution ?distribution ;"""
+            distribution ?distribution ;
+            _deprecated ?_deprecated;
+            """
 
     # Density resources annotated with Mtypes without layers are not released
     query_layer = """
@@ -15,11 +17,19 @@ def create_payload(forge, atlas_release_id, output_file, tag=None):
             brainLocation / layer ?layer .
             ?distribution name ?nrrd_file ;
             contentUrl ?contentUrl .
+            Filter (?_deprecated = 'false'^^xsd:boolean)
         }"""
-    all_resources_with_layer = forge.sparql(query_layer, limit=1000, debug=False)
-    resources = [forge.retrieve(id = r.s, version=tag) for r in all_resources_with_layer]
+    all_resources_with_layer = forge.sparql(query_layer, limit=3500, debug=False)
+    resources = []
+    for r in all_resources_with_layer:
+        try:
+            resources.append(forge.retrieve(id = r.s, version=tag))
+        except Exception as e:
+            pass
     resources = [res for res in resources if res is not None]
-    print(f"{len(resources)} ME-type dentisities with layer found (tag '{tag}')")
+    n_res_with_layer = len(resources)
+    print(f"{n_res_with_layer} ME-type densities with layer found (tag '{tag}')")
+    assert n_res_with_layer == n_layer_densities
 
     # Get Generic{Excitatory,Inhibitory}Neuron
     for excInh in ["Excitatory", "Inhibitory"]:
@@ -30,16 +40,22 @@ def create_payload(forge, atlas_release_id, output_file, tag=None):
             annotation / hasBody <https://bbp.epfl.ch/ontologies/core/bmo/Generic{excInh}NeuronEType> .
             ?distribution name ?nrrd_file ;
             contentUrl ?contentUrl .
+            Filter (?_deprecated = 'false'^^xsd:boolean)
             }}"""
-        generic_resources = forge.sparql(query_gen, limit=1000, debug=False)
+        all_generic_resources = forge.sparql(query_gen, limit=1000, debug=False)
+        generic_resources = []
+        for r in all_generic_resources:
+            try:
+                generic_resources.append(forge.retrieve(id = r.s, version=tag))
+            except Exception as e:
+                pass
+        generic_resources = [res for res in generic_resources if res is not None]
         assert len(generic_resources) == 1
-        generic_resource = forge.retrieve(id = generic_resources[0].s, version=tag)
-        resources.append(generic_resource)
+        resources.extend(generic_resources)
 
     print(f"{len(resources)} ME-type densities will be released, including generic ones (tag '{tag}')")
 
     metype_annotations = [(a.hasBody for a in r.annotation) for r in resources] 
-    etype_annotations = [a.hasBody for r in resources for a in r.annotation if "ETypeAnnotation" in a.type]
 
     mtype_to_etype = {}
     for i, metype_annotation_gen in enumerate(metype_annotations):
