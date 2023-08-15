@@ -136,7 +136,6 @@ APPS = {
     "bba-data-push push-cellcomposition": "bba-data-push push-cellcomposition",
     "cwl-registry": "cwl-registry"
 }
-#"gene-expression-volume create-volumes": "gene-expression-volume create-volumes",
 
 # delete the log of app versions
 try:
