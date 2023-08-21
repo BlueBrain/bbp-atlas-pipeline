@@ -38,10 +38,10 @@ RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_fet
 # temporary test, will be ported into atlas-splitter
 #RUN pip install git+https://bbpgitlab.epfl.ch/conn/structural/validation/cell-density-validations/cell-densities.git@2325c56d
 RUN git clone --branch new_regions_hier https://bbpgitlab.epfl.ch/conn/structural/validation/cell-density-validations.git cell-density-validation
-RUN cd cell-density-validation  &&  git checkout 11b4332c  &&  pip install cell-densities/
+RUN cd cell-density-validation  &&  git checkout 94c2f3aa  &&  pip install cell-densities/
 
 # module load py-bba-webexporter
-RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_web_exporter.git@v2.0.2
+RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_web_exporter.git@v2.0.3
 
 # module load py-data-integrity-check
 RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_integrity_check.git@v0.1.0
