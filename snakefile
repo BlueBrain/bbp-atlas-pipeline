@@ -1498,6 +1498,8 @@ rule push_atlas_release:
         annotation = rules.split_barrel_ccfv3_l23split.output.annotation,
         hemisphere = rules.create_hemispheres_ccfv3.output,
         placement_hints = rules.placement_hints.output,
+        direction_vectors = direction_vectors_isocortex,
+        cell_orientations = rules.orientation_field.output,
     params:
         app=APPS["bba-data-push push-atlasrelease"].split(),
         token = myTokenFetcher.getAccessToken(),
@@ -1522,6 +1524,8 @@ rule push_atlas_release:
             --annotation-path {input.annotation} \
             --hemisphere-path {input.hemisphere} \
             --placement-hints-path {input.placement_hints} \
+            --direction-vectors-path {input.direction_vectors} \
+            --cell-orientations-path {input.cell_orientations} \
             --atlas-release-id {atlas_release_id} \
             --species {params.species} \
             --brain-region {brain_region_id} \
@@ -1604,10 +1608,45 @@ rule push_masks:
         touch {output}
         """
 
+##>push_direction_vectors : rule to push into Nexus direction vectors
+rule push_direction_vectors:
+    input:
+        direction_vectors = direction_vectors_isocortex,
+        hierarchy = hierarchy_mba,
+    params:
+        app1=APPS["bba-data-push push-volumetric"].split(),
+        token = myTokenFetcher.getAccessToken(),
+        species=NEXUS_IDS["species"],
+        reference_system=NEXUS_IDS["reference_system"],
+        resource_tag = RESOURCE_TAG
+    output:
+        f"{WORKING_DIR}/pushed_direction_vectors.log"
+    log:
+        f"{LOG_DIR}/push_direction_vectors.log"
+    shell:
+        """
+        {params.app1[0]} --forge-config-file {FORGE_CONFIG} \
+            --nexus-env {NEXUS_DESTINATION_ENV} \
+            --nexus-org {NEXUS_DESTINATION_ORG} \
+            --nexus-proj {NEXUS_DESTINATION_PROJ} \
+            --nexus-token {params.token} \
+        {params.app1[1]} \
+            --dataset-path {input.direction_vectors} \
+            --dataset-type DirectionVectorsField \
+            --atlas-release-id {atlas_release_id} \
+            --species {params.species} \
+            --brain-region {brain_region_id} \
+            --hierarchy-path {input.hierarchy} \
+            --reference-system-id {params.reference_system} \
+            --resource-tag '{params.resource_tag}' \
+            --is-prod-env {IS_PROD_ENV} \
+            2>&1 | tee {log} ;
+        touch {output}
+        """
+
 ##>push_orientation_field : rule to push into Nexus orientation fields
 rule push_orientation_field:
     input:
-        direction_vectors = direction_vectors_isocortex,
         orientation_field = rules.orientation_field.output,
         hierarchy = hierarchy_mba,
     params:
@@ -1628,7 +1667,6 @@ rule push_orientation_field:
             --nexus-proj {NEXUS_DESTINATION_PROJ} \
             --nexus-token {params.token} \
         {params.app1[1]} \
-            --dataset-path {input.direction_vectors} \
             --dataset-path {input.orientation_field} \
             --dataset-type CellOrientationField \
             --atlas-release-id {atlas_release_id} \
@@ -1775,7 +1813,6 @@ rule push_metype_pipeline_datasets:
 rule push_volumetric_datasets:
     input:
         rules.push_masks.output,
-        rules.push_orientation_field.output,
         rules.push_glia_densities.output,
         rules.push_neuron_densities.output,
         rules.push_metype_pipeline_datasets.output,
