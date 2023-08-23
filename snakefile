@@ -1208,6 +1208,7 @@ rule fit_average_densities_correctednissl:
         f"{LOG_DIR}/fit_average_densities_correctednissl.log"
     shell:
         """{params.app} --hierarchy-path {input.hierarchy} \
+            --region-name "Whole mouse brain" \
             --annotation-path {input.annotation} \
             --average-densities-path {input.average_densities} \
             --neuron-density-path {input.neuron_density} \
@@ -1233,6 +1234,7 @@ rule inhibitory_neuron_densities_linprog_correctednissl:
         f"{LOG_DIR}/inhibitory_neuron_densities_linprog_correctednissl.log"
     shell:
         """{params.app} --hierarchy-path {input.hierarchy} \
+            --region-name "Whole mouse brain" \
             --annotation-path {input.annotation} \
             --neuron-density-path {input.neuron_density} \
             --average-densities-path {input.average_densities} \
@@ -1307,7 +1309,7 @@ default_transplant = """{params.app} \
 ##>transplant_glia_cell_densities_correctednissl : Transplant neuron density nrrd files
 rule transplant_glia_cell_densities_correctednissl:
     input:
-        hierarchy = rules.split_barrel_ccfv2_l23split.output.hierarchy,
+        hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
         src_annotation = rules.split_barrel_ccfv2_l23split.output.annotation,
         dst_annotation = rules.split_barrel_ccfv3_l23split.output.annotation,
         src_cell_volume = rules.glia_cell_densities_correctednissl.output.cell_densities
@@ -1323,7 +1325,7 @@ rule transplant_glia_cell_densities_correctednissl:
 ##>transplant_inhibitory_neuron_densities_linprog_correctednissl : Transplant inhibitory neuron density nrrd files
 rule transplant_inhibitory_neuron_densities_linprog_correctednissl:
     input:
-        hierarchy = rules.split_barrel_ccfv2_l23split.output.hierarchy,
+        hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
         src_annotation = rules.split_barrel_ccfv2_l23split.output.annotation,
         dst_annotation = rules.split_barrel_ccfv3_l23split.output.annotation,
         src_cell_volume = rules.inhibitory_neuron_densities_linprog_correctednissl.output
@@ -1339,7 +1341,7 @@ rule transplant_inhibitory_neuron_densities_linprog_correctednissl:
 ##>transplant_excitatory_split : Transplant excitatory-split neuron density nrrd files
 rule transplant_excitatory_split:
     input:
-        hierarchy = rules.split_barrel_ccfv2_l23split.output.hierarchy,
+        hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
         src_annotation = rules.split_barrel_ccfv2_l23split.output.annotation,
         dst_annotation = rules.split_barrel_ccfv3_l23split.output.annotation,
         src_cell_volume = rules.excitatory_split.output
@@ -1355,7 +1357,7 @@ rule transplant_excitatory_split:
 ##>transplant_mtypes_densities_from_probability_map : Transplant neuron density nrrd files for the mtypes listed in the probability mapping csv file.
 rule transplant_mtypes_densities_from_probability_map:
     input:
-        hierarchy = rules.split_barrel_ccfv2_l23split.output.hierarchy,
+        hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
         src_annotation = rules.split_barrel_ccfv2_l23split.output.annotation,
         dst_annotation = rules.split_barrel_ccfv3_l23split.output.annotation,
         src_cell_volume = rules.create_mtypes_densities_from_probability_map.output
