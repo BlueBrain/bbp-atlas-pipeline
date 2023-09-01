@@ -1,4 +1,4 @@
-image: python:3.7
+image: python:3.8
 
 include:
   - project: dke/apps/templates/job-templates
@@ -51,6 +51,8 @@ unit_test:
     SRC_PROJECT: '$CI_PROJECT_PATH'
     TEST_FOLDER: 'tests'
     NEXUS_STAGING_TOKEN: '$NEXUS_STAGING_TOKEN'
+    KUBERNETES_MEMORY_LIMIT: 8Gi
+    KUBERNETES_MEMORY_REQUEST: 8Gi
 
 # Build image for pipeline
 update-pipeline-image:

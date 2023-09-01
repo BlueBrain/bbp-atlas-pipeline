@@ -1,6 +1,10 @@
 pytest
 pytest-cov
-nexusforge==0.8.0
+pyyaml
+nexusforge==0.8.1
 sphinx
 sphinx-bluebrain-theme
 myst-parser
+numpy
+voxcell
+git+https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/pipeline-validator.git@0.1.1
