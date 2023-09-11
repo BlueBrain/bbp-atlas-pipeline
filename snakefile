@@ -684,6 +684,29 @@ rule fetch_genes_correctednissl:
     output:
         temp(touch(f"{WORKING_DIR}/fetch_genes_correctednissl.txt"))
 
+# https://github.com/BlueBrain/atlas-densities/commit/db30d0b4c7d6b6356dcf48a766ffd98a18ac9248#commitcomment-124751923
+##>compute_gene_lamp5_correctednissl : compute gene lamp5 from the other genes
+rule compute_gene_lamp5_correctednissl:
+    input:
+        gad67=rules.fetch_gene_gad67_correctednissl.output,
+        vip=rules.fetch_gene_vip_correctednissl.output,
+        sst=rules.fetch_gene_sst_correctednissl.output,
+        pv=rules.fetch_gene_pv_correctednissl.output,
+    log:
+        f"{LOG_DIR}/compute_gene_lamp5_correctednissl.log"
+    output:
+        f"{WORKING_DIR}/gene_lamp5_correctednissl.nrrd"
+    run:
+        from voxcell import VoxelData
+
+        gad67 = VoxelData.load_nrrd(input.gad67)
+        vip = VoxelData.load_nrrd(input.vip)
+        sst = VoxelData.load_nrrd(input.sst)
+        pv = VoxelData.load_nrrd(input.pv)
+        lamp5 = VoxelData(gad67.raw - vip.raw - sst.raw - pv.raw,
+            gad67.voxel_dimensions, gad67.offset)
+
+        lamp5.save_nrrd(output)
 
 ##>fetch_isocortex_metadata : fetch isocortex metadata
 rule fetch_isocortex_metadata:
@@ -1271,12 +1294,14 @@ rule excitatory_split:
 ##>create_mtypes_densities_from_probability_map : Create neuron density nrrd files for the mtypes listed in the probability mapping csv file.
 rule create_mtypes_densities_from_probability_map:
     input:
-        rules.fetch_probability_map.output,
-        rules.inhibitory_neuron_densities_linprog_correctednissl.output,
         hierarchy = rules.split_barrel_ccfv2_l23split.output.hierarchy,
         annotation = rules.split_barrel_ccfv2_l23split.output.annotation,
-        metadata_file = rules.fetch_isocortex_23_metadata.output,
-        mtypes_config = f"{MTYPES_PROBABILITY_MAP_CORRECTEDNISSL_LINPROG_CONFIG_}",
+        prob_map = rules.fetch_probability_map.output,
+        gad67 = rules.fetch_gene_gad67_correctednissl.output,
+        pv = rules.fetch_gene_pv_correctednissl.output,
+        sst = rules.fetch_gene_sst_correctednissl.output,
+        vip = rules.fetch_gene_vip_correctednissl.output,
+        lamp5 = rules.compute_gene_lamp5_correctednissl.output,
     output:
         directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['mtypes_densities_probability_map']}")
     params:
@@ -1286,8 +1311,14 @@ rule create_mtypes_densities_from_probability_map:
     shell:
         """{params.app} --hierarchy-path {input.hierarchy} \
             --annotation-path {input.annotation} \
-            --metadata-path {input.metadata_file} \
-            --mtypes-config-path {input.mtypes_config} \
+            --probability-map {input.prob_map} \
+            --marker gad67 {input.gad67}  \
+            --marker pv {input.pv} \
+            --marker sst {input.sst} \
+            --marker vip {input.vip} \
+            --marker approx_lamp5 {input.lamp5} \
+            --synapse-class INH \
+            --n-jobs {workflow.cores} \
             --output-dir {output} \
             2>&1 | tee {log}
         """
