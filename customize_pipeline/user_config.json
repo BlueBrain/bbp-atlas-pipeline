@@ -1,4 +1,5 @@
 {
+  "target_rule": "push_atlas_release",
   "rules":[
     {
       "rule": "placement_hints",
@@ -8,13 +9,13 @@
             "brainRegion": "http://api.brain-map.org/api/v2/data/Structure/315",
             "container": "docker://bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:dev",
             "output_dir": "placement_hints/isocortex/",
-            "command": "atlas-placement-hints isocortex --hierarchy-path {hierarchy} --annotation-path {annotation} --direction-vectors-path {direction_vectors}"
+            "command": "atlas-placement-hints isocortex  --hierarchy-path {input.hierarchy}  --annotation-path {input.annotation}  --direction-vectors-path {input.direction_vectors} --algorithm voxel-based  --output-dir placement_hints/isocortex"
           },
           {
             "brainRegion": "http://api.brain-map.org/api/v2/data/Structure/549",
             "container": "docker://bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:dev",
             "output_dir": "placement_hints/thalamus/",
-            "command": "atlas-placement-hints thalamus --hierarchy-path {hierarchy} --annotation-path {annotation} --direction-vectors-path {direction_vectors}"
+            "command": "atlas-placement-hints isocortex  --hierarchy-path {input.hierarchy}  --annotation-path {input.annotation}  --direction-vectors-path {input.direction_vectors} --algorithm voxel-based  --output-dir placement_hints/thalamus"
           }
         ]
     }
