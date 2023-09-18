@@ -684,29 +684,6 @@ rule fetch_genes_correctednissl:
     output:
         temp(touch(f"{WORKING_DIR}/fetch_genes_correctednissl.txt"))
 
-# https://github.com/BlueBrain/atlas-densities/commit/db30d0b4c7d6b6356dcf48a766ffd98a18ac9248#commitcomment-124751923
-##>compute_gene_lamp5_correctednissl : compute gene lamp5 from the other genes
-rule compute_gene_lamp5_correctednissl:
-    input:
-        gad67=rules.fetch_gene_gad67_correctednissl.output,
-        vip=rules.fetch_gene_vip_correctednissl.output,
-        sst=rules.fetch_gene_sst_correctednissl.output,
-        pv=rules.fetch_gene_pv_correctednissl.output,
-    log:
-        f"{LOG_DIR}/compute_gene_lamp5_correctednissl.log"
-    output:
-        f"{WORKING_DIR}/gene_lamp5_correctednissl.nrrd"
-    run:
-        from voxcell import VoxelData
-
-        gad67 = VoxelData.load_nrrd(input.gad67)
-        vip = VoxelData.load_nrrd(input.vip)
-        sst = VoxelData.load_nrrd(input.sst)
-        pv = VoxelData.load_nrrd(input.pv)
-        lamp5 = VoxelData(gad67.raw - vip.raw - sst.raw - pv.raw,
-            gad67.voxel_dimensions, gad67.offset)
-
-        lamp5.save_nrrd(output)
 
 ##>fetch_isocortex_metadata : fetch isocortex metadata
 rule fetch_isocortex_metadata:
@@ -1265,14 +1242,43 @@ rule inhibitory_neuron_densities_linprog_correctednissl:
             --output-dir {output} \
             2>&1 | tee {log}
         """
+inhibitory_densities_dir = rules.inhibitory_neuron_densities_linprog_correctednissl.output[0]
+marker_density_map = {
+    "gad67": os.path.join(inhibitory_densities_dir, "gad67+_density.nrrd"),
+    "vip": os.path.join(inhibitory_densities_dir, "vip+_density.nrrd"),
+    "sst": os.path.join(inhibitory_densities_dir, "sst+_density.nrrd"),
+    "pv": os.path.join(inhibitory_densities_dir, "pv+_density.nrrd"),
+    "lamp5": os.path.join(WORKING_DIR, "lamp5_density.nrrd")
+}
+
+# https://github.com/BlueBrain/atlas-densities/commit/db30d0b4c7d6b6356dcf48a766ffd98a18ac9248#commitcomment-124751923
+##>compute_lamp5_density : compute lamp5 density from the other marker densities
+rule compute_lamp5_density:
+    input:
+        rules.inhibitory_neuron_densities_linprog_correctednissl.output
+    log:
+        f"{LOG_DIR}/compute_lamp5_density.log"
+    output:
+        marker_density_map["lamp5"]
+    run:
+        from voxcell import VoxelData
+
+        gad67 = VoxelData.load_nrrd(marker_density_map["gad67"])
+        vip = VoxelData.load_nrrd(marker_density_map["vip"])
+        sst = VoxelData.load_nrrd(marker_density_map["sst"])
+        pv = VoxelData.load_nrrd(marker_density_map["pv"])
+        lamp5 = VoxelData(gad67.raw - vip.raw - sst.raw - pv.raw,
+            gad67.voxel_dimensions, gad67.offset)
+
+        lamp5.save_nrrd(output)
 
 ##>excitatory_split : Subdivide excitatory files into pyramidal subtypes
 rule excitatory_split:
     input:
+        rules.inhibitory_neuron_densities_linprog_correctednissl.output,
         hierarchy = rules.split_barrel_ccfv2_l23split.output.hierarchy,
         annotation = rules.split_barrel_ccfv2_l23split.output.annotation,
         neuron_density = rules.glia_cell_densities_correctednissl.output.neuron_density,
-        inhibitory_density = rules.inhibitory_neuron_densities_linprog_correctednissl.output,
         mapping_cortex_all_to_exc_mtypes = rules.fetch_mapping_cortex_all_to_exc_mtypes.output
     output:
         directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['excitatory_split']}")
@@ -1285,7 +1291,7 @@ rule excitatory_split:
         {params.app} --annotation-path {input.annotation} \
             --hierarchy-path {input.hierarchy} \
             --neuron-density {input.neuron_density} \
-            --inhibitory-density {input.inhibitory_density}/gad67+_density.nrrd \
+            --inhibitory-density """ + marker_density_map["gad67"] + """ \
             --cortex-all-to-exc-mtypes {input.mapping_cortex_all_to_exc_mtypes} \
             --output-dir {output} \
             2>&1 | tee {log}
@@ -1294,14 +1300,11 @@ rule excitatory_split:
 ##>create_mtypes_densities_from_probability_map : Create neuron density nrrd files for the mtypes listed in the probability mapping csv file.
 rule create_mtypes_densities_from_probability_map:
     input:
+        rules.inhibitory_neuron_densities_linprog_correctednissl.output,
         hierarchy = rules.split_barrel_ccfv2_l23split.output.hierarchy,
         annotation = rules.split_barrel_ccfv2_l23split.output.annotation,
         prob_map = rules.fetch_probability_map.output,
-        gad67 = rules.fetch_gene_gad67_correctednissl.output,
-        pv = rules.fetch_gene_pv_correctednissl.output,
-        sst = rules.fetch_gene_sst_correctednissl.output,
-        vip = rules.fetch_gene_vip_correctednissl.output,
-        lamp5 = rules.compute_gene_lamp5_correctednissl.output,
+        lamp5 = rules.compute_lamp5_density.output
     output:
         directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['mtypes_densities_probability_map']}")
     params:
@@ -1312,10 +1315,10 @@ rule create_mtypes_densities_from_probability_map:
         """{params.app} --hierarchy-path {input.hierarchy} \
             --annotation-path {input.annotation} \
             --probability-map {input.prob_map} \
-            --marker gad67 {input.gad67}  \
-            --marker pv {input.pv} \
-            --marker sst {input.sst} \
-            --marker vip {input.vip} \
+            --marker gad67 """ + marker_density_map["gad67"] + """ \
+            --marker pv """ + marker_density_map["pv"] + """ \
+            --marker sst """ + marker_density_map["sst"] + """ \
+            --marker vip """ + marker_density_map["vip"] + """ \
             --marker approx_lamp5 {input.lamp5} \
             --synapse-class INH \
             --n-jobs {workflow.cores} \
