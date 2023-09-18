@@ -76,7 +76,7 @@ def merge_nrrd_files(region_map: RegionMap, annotation: np.ndarray, region_volum
             # Get region mask
             region_mask = np.isin(annotation, list(ids_reg))
             # Supersede region {region_id} in result with values from volume
-            if len(result_volume.shape) == len(region_mask.shape):
+            if result_volume.shape[0:len(region_mask.shape)] == region_mask.shape:
                 result_volume[region_mask] = volume[region_mask]
             else:
                 result_volume[:region_mask] = volume[:region_mask]
