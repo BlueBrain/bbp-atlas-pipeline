@@ -1134,6 +1134,16 @@ rule orientation_field:
             2>&1 | tee {log}
         """
 
+def create_placement_hints_metadata(ph_dir, region_name, output_path):
+    extension = ".nrrd"
+    ph_files = [str(path) for path in Path(ph_dir).rglob("*" + extension)]
+    ph_region_map = {}
+    for ph_file in ph_files:
+        ph_region_map[ph_file] = [region_name]
+
+    with open(output_path, "w") as outfile:
+        outfile.write(json.dumps(ph_region_map, indent=4))
+
 ##>placement_hints : Generate and save the placement hints of different regions of the AIBS mouse brain
 rule placement_hints:
     input:
@@ -1141,21 +1151,22 @@ rule placement_hints:
         hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
         direction_vectors = direction_vectors_isocortex
     output:
-        directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['placement_hints']}")
+        dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['placement_hints']}"),
+        metadata = os.path.join(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['placement_hints']}", "metadata.json")
     params:
         app=APPS["atlas-building-tools placement-hints isocortex"],
         derivation = PROVENANCE_METADATA_V3["derivations"].update({"placement_hints_ccfv3_l23split": "annotation_ccfv3_l23split"})
     log:
         f"{LOG_DIR}/placement_hints.log"
-    shell:
-        """
-        {params.app} --annotation-path {input.annotation} \
+    run:
+        shell("{params.app} --annotation-path {input.annotation} \
             --hierarchy-path {input.hierarchy} \
             --direction-vectors-path {input.direction_vectors} \
             --output-dir {output} \
             --algorithm voxel-based \
-            2>&1 | tee {log}
-        """
+            2>&1 | tee {log}"
+        )
+        create_placement_hints_metadata(output.dir, "isocortex", output.metadata)
 
 ## =========================================================================================
 ## ============================== CELL DENSITY PIPELINE PART 2 =============================
@@ -1452,7 +1463,7 @@ rule check_annotation_pipeline_v3_volume_datasets:
         annotation_ccfv3_split=rules.split_isocortex_layer_23_ccfv3.output.annotation,
         direction_vectors_ccfv3=rules.interpolate_direction_vectors_isocortex_ccfv3.output,
         orientation_ccfv3=rules.orientation_field.output,
-        placement_hints = rules.placement_hints.output,
+        placement_hints = rules.placement_hints.output.dir,
         mask_ccfv3_split=rules.export_brain_region.output.mask_dir
     output:
         f"{WORKING_DIR}/data_check_report/report_v3_volumetric_nrrd.json"
@@ -1533,7 +1544,8 @@ rule push_atlas_release:
         hierarchy_jsonld = hierarchy_jsonld,
         annotation = rules.split_barrel_ccfv3_l23split.output.annotation,
         hemisphere = rules.create_hemispheres_ccfv3.output,
-        placement_hints = rules.placement_hints.output,
+        placement_hints = rules.placement_hints.output.dir,
+        placement_hints_metadata = rules.placement_hints.output.metadata,
         direction_vectors = direction_vectors_isocortex,
         cell_orientations = rules.orientation_field.output,
     params:

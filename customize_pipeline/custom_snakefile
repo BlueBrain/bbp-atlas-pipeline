@@ -45,7 +45,8 @@ for user_rule in user_rules:
     check_rule_existence(default_rule, rule_name)
 
     default_output = getattr(default_rule, "output")
-    merged_output = f"{default_output}_merged"
+    default_output_dir = getattr(default_output, "dir", default_output)
+    merged_output = f"{default_output_dir}_merged"
 
     custom_regions_rules = []
     for region_customization in user_rule["execute"]:
@@ -70,20 +71,22 @@ for user_rule in user_rules:
 
     ##>merge_rule : Merge the outputs from region-specific rules into the default rule output
     merge_rule_name = get_merge_rule_name(rule_name)
-    merge_rule_flag = f"{WORKING_DIR}/{merge_rule_name}.txt"
     rule:
         name: merge_rule_name
         input:
             [custom_rule.output for custom_rule in custom_regions_rules],
             **var_path_map,
-            default_output_dir = default_output,
+            default_output_dir = default_output_dir,
         output:
-            directory(merged_output),
-            touch(merge_rule_flag)
+            directory(merged_output)
         log:
             f"{LOG_DIR}/{merge_rule_name}.log"
         run:
             import shutil
             import customize_pipeline
-            customize_pipeline.main(input.hierarchy, input.annotation, user_rule, input.default_output_dir[0], output[0])
-            shutil.copytree(output[0], input.default_output_dir[0])
+            metadata_path = None
+            if rule_name == "placement_hints":
+                metadata_path = default_output.metadata
+            customize_pipeline.main(input.hierarchy, input.annotation, user_rule,
+                input.default_output_dir[0], output[0], metadata_path)
+            shutil.copytree(output, input.default_output_dir[0])

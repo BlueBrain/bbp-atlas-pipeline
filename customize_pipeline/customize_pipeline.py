@@ -1,4 +1,5 @@
 import os
+import json
 from pathlib import Path
 from copy import deepcopy
 import numpy as np
@@ -6,7 +7,8 @@ import numpy as np
 from voxcell import RegionMap, VoxelData
 
 
-def main(hierarchy, annotation_volume, user_rule, default_rule_output, merged_output_dir):
+def main(hierarchy, annotation_volume, user_rule, default_rule_output, merged_output_dir,
+         metadata_path=None):
     region_map = RegionMap.load_json(hierarchy)
     annotation = VoxelData.load_nrrd(annotation_volume)
 
@@ -19,12 +21,13 @@ def main(hierarchy, annotation_volume, user_rule, default_rule_output, merged_ou
         region_volume_map[region_id] = custom_region["output_dir"]
 
     print(f"Merging outputs of rule {rule_name} from {len(customized_regions)} regions")
-    merged_volumes = merge_nrrd_files(region_map, annotation.raw, region_volume_map, default_rule_output, merged_output_dir)
+    merged_volumes = merge_nrrd_files(region_map, annotation.raw, region_volume_map,
+        default_rule_output, merged_output_dir, metadata_path)
     print(f"{len(merged_volumes)} files have been merged in {merged_output_dir}: {merged_volumes}")
 
 
-def merge_nrrd_files(region_map: RegionMap, annotation: np.ndarray, region_volume_map: dict, default_rule_output:
-                     str, merged_output_dir: str) -> list:
+def merge_nrrd_files(region_map: RegionMap, annotation: np.ndarray, region_volume_map: dict,
+    default_rule_output: str, merged_output_dir: str, metadata_path=None) -> list:
     """
     Merge nrrd volumes for various brain regions.
 
@@ -35,6 +38,7 @@ def merge_nrrd_files(region_map: RegionMap, annotation: np.ndarray, region_volum
         default_rule_output: output path of the nrrd file of original default rule.
             The areas of the brain regions in region_volume_map will be superseded.
         merged_output_dir: directory where to save merged volumes
+        metadata_path: optional path to the metadata file
 
     Returns:
         The list of volume files with updated values from the volumes in region_volume_map.
@@ -49,6 +53,10 @@ def merge_nrrd_files(region_map: RegionMap, annotation: np.ndarray, region_volum
     elif default_rule_output.endswith(extension):
         if os.path.isfile(default_rule_output):
             default_output_files.append(default_rule_output)
+
+    if metadata_path:
+        metadata_file = open(metadata_path, "r+")
+        metadata_json = json.load(metadata_file)
 
     result = []
     os.makedirs(merged_output_dir, exist_ok=True)
@@ -73,9 +81,18 @@ def merge_nrrd_files(region_map: RegionMap, annotation: np.ndarray, region_volum
             else:
                 result_volume[:region_mask] = volume[:region_mask]
 
+            if metadata_path:
+                metadata_json[default_output].append(region_map.get(region_id, "name"))
+
         merged_file = os.path.join(merged_output_dir, filename)
         default_volume.with_data(result_volume).save_nrrd(merged_file)
         result.append(merged_file)
+
+    if metadata_path:
+        metadata_file.seek(0)
+        json.dump(metadata_json, metadata_file)
+        metadata_file.truncate()
+        metadata_file.close()
 
     return result
 
