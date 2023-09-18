@@ -1572,6 +1572,7 @@ rule push_atlas_release:
             --annotation-path {input.annotation} \
             --hemisphere-path {input.hemisphere} \
             --placement-hints-path {input.placement_hints} \
+            --placement-hints-metadata {input.placement_hints_metadata} \
             --direction-vectors-path {input.direction_vectors} \
             --cell-orientations-path {input.cell_orientations} \
             --atlas-release-id {atlas_release_id} \
