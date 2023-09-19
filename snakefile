@@ -1166,7 +1166,7 @@ rule placement_hints:
             --algorithm voxel-based \
             2>&1 | tee {log}"
         )
-        create_placement_hints_metadata(output.dir, "isocortex", output.metadata)
+        create_placement_hints_metadata(output.dir, "Isocortex", output.metadata)
 
 ## =========================================================================================
 ## ============================== CELL DENSITY PIPELINE PART 2 =============================

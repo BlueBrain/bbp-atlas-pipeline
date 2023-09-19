@@ -4,10 +4,6 @@ import json
 import yaml
 import re
 
-from blue_brain_token_fetch.Token_refresher import TokenFetcher
-from pipeline_validator.pipeline_validator import pipeline_validator
-from customize_pipeline.customize_pipeline import get_merge_rule_name, get_var_path_map
-
 @click.command()
 @click.option("--target-rule",
               type=click.STRING,
@@ -26,7 +22,9 @@ def execute_pipeline(target_rule, user_config_file, snakemake_options):
     if not user_config_file:
         pipeline_command += " --snakefile snakefile"
     else:
-        pipeline_command += " --snakefile customize_pipeline/custom_snakefile"
+        from blue_brain_token_fetch.Token_refresher import TokenFetcher
+        from pipeline_validator.pipeline_validator import pipeline_validator
+        from customize_pipeline.customize_pipeline import get_merge_rule_name, get_var_path_map
 
         with open("config.yaml") as pipeline_config_file:
             pipeline_config = yaml.safe_load(pipeline_config_file.read().strip())
@@ -54,6 +52,7 @@ def execute_pipeline(target_rule, user_config_file, snakemake_options):
             else:
                 priority_rules.append(merge_rule_name)
 
+        pipeline_command += " --snakefile customize_pipeline/custom_snakefile"
         if priority_rules:
             pipeline_command += f" --prioritize {' '.join(priority_rules)}"
 

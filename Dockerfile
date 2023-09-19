@@ -17,7 +17,7 @@ RUN apt-get -y install pip git vim
 
 WORKDIR /pipeline
 
-COPY .. blue_brain_atlas_pipeline/
+COPY .. .
 
 # Regiodesics
 #RUN git clone https://bbpgitlab.epfl.ch/nse/archive/regiodesics  && \
@@ -25,6 +25,9 @@ COPY .. blue_brain_atlas_pipeline/
 #	mkdir build  &&  cd build  && \
 #	cmake ..  &&  make -j  &&  cd ..  && \
 #	export PATH=$PATH:$PWD/build/bin
+
+# Install the pipeline repository (along with the bbp-atlas CLI)
+RUN pip install blue_brain_atlas_pipeline/
 
 # For install dependencies
 RUN git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/".insteadOf https://bbpgitlab.epfl.ch/
@@ -54,6 +57,8 @@ RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_push.git
 
 RUN pip install git+https://bbpgitlab.epfl.ch/dke/users/jonathanlurie/atlas_cell_transplant.git@develop
 
+RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/pipeline-validator.git@0.1.1
+
 RUN git config --global --remove-section url."https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/"
 
 # Need the latest atlas-commons branch until v0.1.5 is cut
@@ -64,6 +69,6 @@ RUN pip install git+https://github.com/BlueBrain/atlas-splitter@v0.1.2
 RUN pip install git+https://github.com/BlueBrain/atlas-densities@v0.2.0
 
 # module load py-atlas-building-tools
-RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ atlas-building-tools>=0.1.9
+RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "atlas-building-tools>=0.1.9"
 
-RUN pip install snakemake>=7.20.0
+RUN pip install "snakemake>=7.20.0"

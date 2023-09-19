@@ -20,6 +20,7 @@ def create_payload(forge, atlas_release_id, output_file, n_layer_densities, tag=
             Filter (?_deprecated = 'false'^^xsd:boolean)
         }"""
     all_resources_with_layer = forge.sparql(query_layer, limit=3500, debug=False)
+    print(f"{len(all_resources_with_layer)} ME-type densities with layer found in total, filtering those with tag '{tag}'")
     resources = []
     for r in all_resources_with_layer:
         try:
@@ -28,7 +29,7 @@ def create_payload(forge, atlas_release_id, output_file, n_layer_densities, tag=
             pass
     resources = [res for res in resources if res is not None]
     n_res_with_layer = len(resources)
-    print(f"{n_res_with_layer} ME-type densities with layer found (tag '{tag}')")
+    print(f"{n_res_with_layer} ME-type densities with layer found with tag '{tag}'")
     assert n_res_with_layer == n_layer_densities
 
     # Get Generic{Excitatory,Inhibitory}Neuron
