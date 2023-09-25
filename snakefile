@@ -62,6 +62,10 @@ NEXUS_DESTINATION_ENV = config["NEXUS_DESTINATION_ENV"]
 NEXUS_DESTINATION_ORG = config["NEXUS_DESTINATION_ORG"]
 NEXUS_DESTINATION_PROJ = config["NEXUS_DESTINATION_PROJ"]
 
+CELL_COMPOSITION_NAME = config["CELL_COMPOSITION_NAME"]
+CELL_COMPOSITION_SUMMARY_NAME = config["CELL_COMPOSITION_SUMMARY_NAME"]
+CELL_COMPOSITION_VOLUME_NAME = config["CELL_COMPOSITION_VOLUME_NAME"]
+
 VERSION_FILE = os.path.join(WORKING_DIR, "versions.txt")
 
 if not os.path.exists(WORKING_DIR):
@@ -1975,6 +1979,7 @@ rule push_cellcomposition:
             --nexus-token {params.token} \
         {params.app[1]} \
             --atlas-release-id {atlas_release_id} \
+            --atlas-release-rev {atlas_release_rev} \
             --cell-composition-id {cell_composition_id} \
             --species {params.species} \
             --brain-region {brain_region_id} \
@@ -1982,6 +1987,7 @@ rule push_cellcomposition:
             --reference-system-id {params.reference_system} \
             --volume-path {input.volume_path} \
             --summary-path {input.summary_path} \
+            --name '{CELL_COMPOSITION_NAME}' '{CELL_COMPOSITION_SUMMARY_NAME}' '{CELL_COMPOSITION_VOLUME_NAME}' \
             --log-dir {LOG_DIR} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \

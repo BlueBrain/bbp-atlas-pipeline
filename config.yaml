@@ -33,7 +33,6 @@ NEXUS_DESTINATION_ENV: *staging_url
 NEXUS_DESTINATION_ORG: "bbp"
 NEXUS_DESTINATION_PROJ: "atlas"
 
-# The pipeline will push the generated datasets into:
-#NEXUS_DESTINATION_ENV: *prod_url
-#NEXUS_DESTINATION_ORG: "bbp"
-#NEXUS_DESTINATION_PROJ: "atlas"
+CELL_COMPOSITION_NAME: "Cell Composition from Blue Brain Atlas"
+CELL_COMPOSITION_SUMMARY_NAME: "Cell Composition Summary from Blue Brain Atlas"
+CELL_COMPOSITION_VOLUME_NAME: "Cell Composition Volume from Blue Brain Atlas"
