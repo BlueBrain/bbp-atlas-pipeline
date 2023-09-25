@@ -1537,6 +1537,12 @@ cell_composition_id = NEXUS_IDS["CellComposition"][env]
 
 brain_region_id = "http://api.brain-map.org/api/v2/data/Structure/997"
 
+from kgforge.core import KnowledgeGraphForge
+forge = KnowledgeGraphForge(FORGE_CONFIG, bucket = "/".join([NEXUS_ATLAS_ORG, NEXUS_ATLAS_PROJ]),
+    endpoint = NEXUS_ATLAS_ENV, token = myTokenFetcher.getAccessToken())
+atlas_release_res = forge.retrieve(atlas_release_id)
+atlas_release_rev = atlas_release_res._store_metadata._rev
+
 ##>push_atlas_release : rule to push into Nexus an atlas release
 rule push_atlas_release:
     input:
@@ -1613,6 +1619,7 @@ rule push_meshes:
             --dataset-type BrainParcellationMesh \
             --hierarchy-path {input.hierarchy} \
             --atlas-release-id {atlas_release_id} \
+            --atlas-release-rev {atlas_release_rev} \
             --species {params.species} \
             --brain-region None \
             --reference-system-id {params.reference_system} \
@@ -1648,6 +1655,7 @@ rule push_masks:
             --dataset-path {input.masks} \
             --dataset-type BrainParcellationMask \
             --atlas-release-id {atlas_release_id} \
+            --atlas-release-rev {atlas_release_rev} \
             --species {params.species} \
             --hierarchy-path {input.hierarchy} \
             --reference-system-id {params.reference_system} \
@@ -1683,6 +1691,7 @@ rule push_direction_vectors:
             --dataset-path {input.direction_vectors} \
             --dataset-type DirectionVectorsField \
             --atlas-release-id {atlas_release_id} \
+            --atlas-release-rev {atlas_release_rev} \
             --species {params.species} \
             --brain-region {brain_region_id} \
             --hierarchy-path {input.hierarchy} \
@@ -1719,6 +1728,7 @@ rule push_orientation_field:
             --dataset-path {input.orientation_field} \
             --dataset-type CellOrientationField \
             --atlas-release-id {atlas_release_id} \
+            --atlas-release-rev {atlas_release_rev} \
             --species {params.species} \
             --brain-region {brain_region_id} \
             --hierarchy-path {input.hierarchy} \
@@ -1771,6 +1781,7 @@ rule push_glia_densities:
             --dataset-path {input.oligo} \
             --dataset-type GliaCellDensity \
             --atlas-release-id {atlas_release_id} \
+            --atlas-release-rev {atlas_release_rev} \
             --species {params.species} \
             --brain-region {brain_region_id} \
             --hierarchy-path {input.hierarchy} \
@@ -1809,6 +1820,7 @@ rule push_neuron_densities:
             --dataset-path {input.neuron_density} \
             --dataset-type NeuronDensity \
             --atlas-release-id {atlas_release_id} \
+            --atlas-release-rev {atlas_release_rev} \
             --species {params.species} \
             --brain-region {brain_region_id} \
             --hierarchy-path {input.hierarchy} \
@@ -1848,6 +1860,7 @@ rule push_metype_pipeline_datasets:
             --dataset-path {input.excitatory_split_transplanted} \
             --dataset-type METypeDensity \
             --atlas-release-id {atlas_release_id} \
+            --atlas-release-rev {atlas_release_rev} \
             --species {params.species} \
             --brain-region {brain_region_id} \
             --hierarchy-path {input.hierarchy} \
