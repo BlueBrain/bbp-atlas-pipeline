@@ -42,7 +42,7 @@ DISPLAY_HELP = config["DISPLAY_HELP"]
 RESOURCE_TAG = config["RESOURCE_TAG"]
 if RESOURCE_TAG == "None":
     RESOURCE_TAG = f"Atlas pipeline ({datetime.today().strftime('%Y-%m-%dT%H:%M:%S')})"
-ATLAS_CONFIG_PATH = os.path.join(REPO_PATH, config["ATLAS_CONFIG_PATH"])
+NEXUS_REGISTRATION = config["NEXUS_REGISTRATION"]
 NEW_ATLAS = config["NEW_ATLAS"]
 EXPORT_MESHES = config["EXPORT_MESHES"]
 PROVENANCE_METADATA_V2_PATH = f"{WORKING_DIR}/provenance_metadata_v2.json"
@@ -67,6 +67,9 @@ CELL_COMPOSITION_SUMMARY_NAME = config["CELL_COMPOSITION_SUMMARY_NAME"]
 CELL_COMPOSITION_VOLUME_NAME = config["CELL_COMPOSITION_VOLUME_NAME"]
 
 VERSION_FILE = os.path.join(WORKING_DIR, "versions.txt")
+
+if not NEXUS_REGISTRATION:
+    L.info("This is a dryrun execution, no data will be pushed in Nexus")
 
 if not os.path.exists(WORKING_DIR):
     try:
@@ -1592,6 +1595,7 @@ rule push_atlas_release:
             --brain-template-id {params.brain_template} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
+            --dryrun {NEXUS_REGISTRATION} \
             2>&1 | tee {log} ;
         touch {output}
         """
@@ -1629,6 +1633,7 @@ rule push_meshes:
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
+            --dryrun {NEXUS_REGISTRATION} \
             2>&1 | tee {log} ;
         touch {output}
         """
@@ -1665,6 +1670,7 @@ rule push_masks:
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
+            --dryrun {NEXUS_REGISTRATION} \
             2>&1 | tee {log} ;
         touch {output}
         """
@@ -1702,6 +1708,7 @@ rule push_direction_vectors:
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
+            --dryrun {NEXUS_REGISTRATION} \
             2>&1 | tee {log} ;
         touch {output}
         """
@@ -1739,6 +1746,7 @@ rule push_orientation_field:
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
+            --dryrun {NEXUS_REGISTRATION} \
             2>&1 | tee {log} ;
         touch {output}
         """
@@ -1792,6 +1800,7 @@ rule push_glia_densities:
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
+            --dryrun {NEXUS_REGISTRATION} \
             2>&1 | tee {log} ;
         touch {output}
         """
@@ -1831,6 +1840,7 @@ rule push_neuron_densities:
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
+            --dryrun {NEXUS_REGISTRATION} \
             2>&1 | tee {log} ;
         touch {output}
         """
@@ -1871,6 +1881,7 @@ rule push_metype_pipeline_datasets:
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
+            --dryrun {NEXUS_REGISTRATION} \
             2>&1 | tee {log} ;
         touch {output}
         """
@@ -1991,5 +2002,6 @@ rule push_cellcomposition:
             --log-dir {LOG_DIR} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
+            --dryrun {NEXUS_REGISTRATION} \
             2>&1 | tee {log}
         """
