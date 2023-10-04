@@ -1,4 +1,4 @@
-image: python:3.8
+image: python:3.10
 
 include:
   - project: dke/apps/templates/job-templates
@@ -71,7 +71,6 @@ update-pipeline-image:
 # Generate documentation and stores the artifact under doc/generated/html
 generate-documentation:
   stage: generate_doc
-  image: python
   rules:
       - if: $CI_COMMIT_TAG != null  || $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop" || $CI_MERGE_REQUEST_IID || $CI_COMMIT_MESSAGE =~ /DRAFT$/
         when: on_success

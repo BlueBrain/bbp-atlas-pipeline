@@ -68,7 +68,8 @@ CELL_COMPOSITION_VOLUME_NAME = config["CELL_COMPOSITION_VOLUME_NAME"]
 
 VERSION_FILE = os.path.join(WORKING_DIR, "versions.txt")
 
-if not NEXUS_REGISTRATION:
+dryrun = not NEXUS_REGISTRATION
+if dryrun:
     L.info("This is a dryrun execution, no data will be pushed in Nexus")
 
 if not os.path.exists(WORKING_DIR):
@@ -1169,7 +1170,7 @@ rule placement_hints:
         shell("{params.app} --annotation-path {input.annotation} \
             --hierarchy-path {input.hierarchy} \
             --direction-vectors-path {input.direction_vectors} \
-            --output-dir {output} \
+            --output-dir {output.dir} \
             --algorithm voxel-based \
             2>&1 | tee {log}"
         )
@@ -1205,6 +1206,9 @@ rule average_densities_correctednissl:
             2>&1 | tee {log}
         """
 
+root_region_name = "root"
+#root_region_name = "Whole mouse brain"
+
 ##>fit_average_densities_correctednissl : Estimate average cell densities of brain regions.
 rule fit_average_densities_correctednissl:
     input:
@@ -1226,7 +1230,7 @@ rule fit_average_densities_correctednissl:
         f"{LOG_DIR}/fit_average_densities_correctednissl.log"
     shell:
         """{params.app} --hierarchy-path {input.hierarchy} \
-            --region-name "Whole mouse brain" \
+            --region-name {root_region_name} \
             --annotation-path {input.annotation} \
             --average-densities-path {input.average_densities} \
             --neuron-density-path {input.neuron_density} \
@@ -1252,7 +1256,7 @@ rule inhibitory_neuron_densities_linprog_correctednissl:
         f"{LOG_DIR}/inhibitory_neuron_densities_linprog_correctednissl.log"
     shell:
         """{params.app} --hierarchy-path {input.hierarchy} \
-            --region-name "Whole mouse brain" \
+            --region-name {root_region_name} \
             --annotation-path {input.annotation} \
             --neuron-density-path {input.neuron_density} \
             --average-densities-path {input.average_densities} \
@@ -1595,7 +1599,7 @@ rule push_atlas_release:
             --brain-template-id {params.brain_template} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
-            --dryrun {NEXUS_REGISTRATION} \
+            --dryrun {dryrun} \
             2>&1 | tee {log} ;
         touch {output}
         """
@@ -1633,7 +1637,7 @@ rule push_meshes:
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
-            --dryrun {NEXUS_REGISTRATION} \
+            --dryrun {dryrun} \
             2>&1 | tee {log} ;
         touch {output}
         """
@@ -1670,7 +1674,7 @@ rule push_masks:
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
-            --dryrun {NEXUS_REGISTRATION} \
+            --dryrun {dryrun} \
             2>&1 | tee {log} ;
         touch {output}
         """
@@ -1679,7 +1683,7 @@ rule push_masks:
 rule push_direction_vectors:
     input:
         direction_vectors = direction_vectors_isocortex,
-        hierarchy = hierarchy_mba,
+        hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
     params:
         app1=APPS["bba-data-push push-volumetric"].split(),
         token = myTokenFetcher.getAccessToken(),
@@ -1708,7 +1712,7 @@ rule push_direction_vectors:
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
-            --dryrun {NEXUS_REGISTRATION} \
+            --dryrun {dryrun} \
             2>&1 | tee {log} ;
         touch {output}
         """
@@ -1746,7 +1750,7 @@ rule push_orientation_field:
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
-            --dryrun {NEXUS_REGISTRATION} \
+            --dryrun {dryrun} \
             2>&1 | tee {log} ;
         touch {output}
         """
@@ -1768,7 +1772,7 @@ rule push_glia_densities:
         glia = f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['glia_cell_densities_transplant_correctednissl']}/glia_density_v3.nrrd",
         micro = f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['glia_cell_densities_transplant_correctednissl']}/microglia_density_v3.nrrd",
         oligo = f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['glia_cell_densities_transplant_correctednissl']}/oligodendrocyte_density_v3.nrrd",
-        hierarchy = hierarchy_mba,
+        hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
     params:
         app1=APPS["bba-data-push push-volumetric"].split(),
         token = myTokenFetcher.getAccessToken(),
@@ -1800,7 +1804,7 @@ rule push_glia_densities:
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
-            --dryrun {NEXUS_REGISTRATION} \
+            --dryrun {dryrun} \
             2>&1 | tee {log} ;
         touch {output}
         """
@@ -1810,7 +1814,7 @@ rule push_neuron_densities:
     input:
         inhibitory_densities = rules.transplant_inhibitory_neuron_densities_linprog_correctednissl.output,
         neuron_density = f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['glia_cell_densities_transplant_correctednissl']}/neuron_density_v3.nrrd",
-        hierarchy = hierarchy_mba,
+        hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
     params:
         app1=APPS["bba-data-push push-volumetric"].split(),
         token = myTokenFetcher.getAccessToken(),
@@ -1840,7 +1844,7 @@ rule push_neuron_densities:
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
-            --dryrun {NEXUS_REGISTRATION} \
+            --dryrun {dryrun} \
             2>&1 | tee {log} ;
         touch {output}
         """
@@ -1850,7 +1854,7 @@ rule push_metype_pipeline_datasets:
     input:
         excitatory_split_transplanted = rules.transplant_excitatory_split.output,
         densities_from_probability_map_transplanted = rules.transplant_mtypes_densities_from_probability_map.output,
-        hierarchy = hierarchy_mba,
+        hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
     params:
         app1=APPS["bba-data-push push-volumetric"].split(),
         token = myTokenFetcher.getAccessToken(),
@@ -1881,7 +1885,7 @@ rule push_metype_pipeline_datasets:
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
-            --dryrun {NEXUS_REGISTRATION} \
+            --dryrun {dryrun} \
             2>&1 | tee {log} ;
         touch {output}
         """
@@ -1968,7 +1972,7 @@ rule create_cellCompositionSummary_payload:
 ##>push_cellcomposition : Final rule to generate and push into Nexus the CellComposition along with its dependencies (Volume and Summary)
 rule push_cellcomposition:
     input:
-        hierarchy = hierarchy_mba,
+        hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
         volume_path = rules.create_cellCompositionVolume_payload.output.payload,
         summary_path = rules.create_cellCompositionSummary_payload.output.summary_statistics,
     params:
@@ -2002,6 +2006,6 @@ rule push_cellcomposition:
             --log-dir {LOG_DIR} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
-            --dryrun {NEXUS_REGISTRATION} \
+            --dryrun {dryrun} \
             2>&1 | tee {log}
         """

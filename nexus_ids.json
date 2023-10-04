@@ -10,7 +10,7 @@
   "species": "http://purl.obolibrary.org/obo/NCBITaxon_10090",
   "reference_system": "https://bbp.epfl.ch/neurosciencegraph/data/allen_ccfv3_spatial_reference_system",
   "ParcellationOntology": {
-    "allen_mouse_ccf": "http://bbp.epfl.ch/neurosciencegraph/ontologies/core/mba_brainregion_corrected?tag=v0.1.0"
+    "allen_mouse_ccf": "http://bbp.epfl.ch/neurosciencegraph/ontologies/core/mba_brainregion_corrected?tag=v0.2.0"
   },
   "VolumetricDataLayer": {
     "10": {
