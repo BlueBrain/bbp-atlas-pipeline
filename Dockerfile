@@ -36,7 +36,7 @@ RUN git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgi
 RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_token_fetch.git@v0.2.0
 
 # module load py-bba-datafetch
-RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_fetch.git@v0.2.0
+RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_fetch.git@v0.2.2
 
 # temporary test, will be ported into atlas-splitter
 #RUN pip install git+https://bbpgitlab.epfl.ch/conn/structural/validation/cell-density-validations/cell-densities.git@2325c56d
@@ -53,22 +53,22 @@ RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_int
 RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ git+https://bbpgitlab.epfl.ch/nse/cwl-registry.git@cwl-registry-v0.4.3
 
 # module load py-bba-data-push
-RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_push.git@develop
+RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_push.git@945dc37e
 
-RUN pip install git+https://bbpgitlab.epfl.ch/dke/users/jonathanlurie/atlas_cell_transplant.git@develop
+RUN pip install git+https://bbpgitlab.epfl.ch/dke/users/jonathanlurie/atlas_cell_transplant.git@v0.2.0
 
 RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/pipeline-validator.git@0.1.1
 
 RUN git config --global --remove-section url."https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/"
 
 # Need the latest atlas-commons branch until v0.1.5 is cut
-RUN pip install git+https://github.com/BlueBrain/atlas-commons@main
+RUN pip install git+https://github.com/BlueBrain/atlas-commons@b083081
 
 RUN pip install git+https://github.com/BlueBrain/atlas-splitter@v0.1.2
 
-RUN pip install git+https://github.com/BlueBrain/atlas-densities@v0.2.0
+RUN pip install git+https://github.com/Sebastien-PILUSO/atlas-densities@ea9b789
 
 # module load py-atlas-building-tools
-RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "atlas-building-tools>=0.1.9"
+RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "atlas-building-tools==0.1.10"
 
-RUN pip install "snakemake>=7.20.0"
+RUN pip install "snakemake==7.32.3"
