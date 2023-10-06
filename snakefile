@@ -49,16 +49,23 @@ PROVENANCE_METADATA_V2_PATH = f"{WORKING_DIR}/provenance_metadata_v2.json"
 PROVENANCE_METADATA_V3_PATH = f"{WORKING_DIR}/provenance_metadata_v3.json"
 
 IS_PROD_ENV = config["IS_PROD_ENV"]
+if IS_PROD_ENV:
+    env = "prod"
+    NEXUS_ATLAS_ENV = config["NEXUS_PROD_ENV"]
+    NEXUS_DESTINATION_ENV = config["NEXUS_PROD_ENV"]
+else:
+    env = "staging"
+    NEXUS_ATLAS_ENV = config["NEXUS_STAGING_ENV"]
+    NEXUS_DESTINATION_ENV = config["NEXUS_STAGING_ENV"]
+
 ATLAS_RELEASE_NAME = config["ATLAS_RELEASE_NAME"]
 ATLAS_RELEASE_DESC = config["ATLAS_RELEASE_DESCRIPTION"]
 
-NEXUS_ATLAS_ENV = config["NEXUS_ATLAS_ENV"]
 NEXUS_ATLAS_ORG = config["NEXUS_ATLAS_ORG"]
 NEXUS_ATLAS_PROJ = config["NEXUS_ATLAS_PROJ"]
 NEXUS_ONTOLOGY_ORG = config["NEXUS_ONTOLOGY_ORG"]
 NEXUS_ONTOLOGY_PROJ = config["NEXUS_ONTOLOGY_PROJ"]
 
-NEXUS_DESTINATION_ENV = config["NEXUS_DESTINATION_ENV"]
 NEXUS_DESTINATION_ORG = config["NEXUS_DESTINATION_ORG"]
 NEXUS_DESTINATION_PROJ = config["NEXUS_DESTINATION_PROJ"]
 
@@ -174,6 +181,9 @@ except OSError:
 
 # Reading some Nexus file @id mapping
 NEXUS_IDS = json.loads(open(NEXUS_IDS_FILE, 'r').read().strip())
+
+atlas_release_id = NEXUS_IDS["AtlasRelease"][env]
+cell_composition_id = NEXUS_IDS["CellComposition"][env]
 
 # Create the rules configuration files from the template configuration files and annotate the data paths they contains
 rules_config_dir = f"{WORKING_DIR}/rules_config_dir"
@@ -1538,13 +1548,6 @@ rule check_annotation_pipeline_v3:
 ## =========================================================================================
 ## ============================= ANNOTATION PIPELINE USER RULES ============================
 ## =========================================================================================
-
-if IS_PROD_ENV:
-    env = "prod"
-else:
-    env = "staging"
-atlas_release_id = NEXUS_IDS["AtlasRelease"][env]
-cell_composition_id = NEXUS_IDS["CellComposition"][env]
 
 brain_region_id = "http://api.brain-map.org/api/v2/data/Structure/997"
 

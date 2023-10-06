@@ -12,24 +12,22 @@ RESOURCE_TAG: "leaves-only_atlas"  # put None to generate an automatic tag corre
 NEXUS_REGISTRATION: True
 DISPLAY_HELP: False
 
-define: &prod_url "https://bbp.epfl.ch/nexus/v1"
-#define: &staging_url "https://staging.nexus.ocp.bbp.epfl.ch/v1"
-define: &staging_url "https://staging.nise.bbp.epfl.ch/nexus/v1"
+NEXUS_PROD_ENV: "https://bbp.epfl.ch/nexus/v1"
+#NEXUS_STAGING_ENV: "https://staging.nexus.ocp.bbp.epfl.ch/v1"
+NEXUS_STAGING_ENV: "https://staging.nise.bbp.epfl.ch/nexus/v1"
 
 IS_PROD_ENV: False
+
 ATLAS_RELEASE_NAME: "Blue Brain Atlas"
 ATLAS_RELEASE_DESCRIPTION: "The official Atlas of the Blue Brain Project"
 
 # The pipeline will fetch the necessary datasets from:
-#NEXUS_ATLAS_ENV: *prod_url
-NEXUS_ATLAS_ENV: *staging_url
 NEXUS_ATLAS_ORG: "bbp"
 NEXUS_ATLAS_PROJ: "atlas"
 NEXUS_ONTOLOGY_ORG: "neurosciencegraph"
 NEXUS_ONTOLOGY_PROJ: "datamodels"
 
 # The pipeline will push the generated datasets into:
-NEXUS_DESTINATION_ENV: *staging_url
 NEXUS_DESTINATION_ORG: "bbp"
 NEXUS_DESTINATION_PROJ: "atlas"
 
