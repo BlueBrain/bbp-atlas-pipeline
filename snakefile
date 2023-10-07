@@ -1027,7 +1027,6 @@ rule combine_markers:
         tmem119 = rules.fetch_gene_tmem119.output,
         hierarchy = rules.split_barrel_ccfv2_l23split.output.hierarchy,
         annotation = rules.split_barrel_ccfv2_l23split.output.annotation,
-        markers_config_file = f"{rules_config_dir}/combine_markers_config.yaml"
     output:
         oligodendrocyte_volume = f"{COMBINE_MARKERS_CONFIG_FILE['outputCellTypeVolumePath']['oligodendrocyte']}",
         astrocyte_volume = f"{COMBINE_MARKERS_CONFIG_FILE['outputCellTypeVolumePath']['astrocyte']}",
@@ -1035,14 +1034,15 @@ rule combine_markers:
         glia_volume = f"{COMBINE_MARKERS_CONFIG_FILE['outputOverallGliaVolumePath']}",
         cell_proportion = f"{COMBINE_MARKERS_CONFIG_FILE['outputCellTypeProportionsPath']}"
     params:
-        app=APPS["atlas-building-tools combination combine-markers"]
+        app=APPS["atlas-building-tools combination combine-markers"],
+        markers_config_file = f"{rules_config_dir}/combine_markers_config.yaml"
     log:
         f"{LOG_DIR}/combine_markers.log"
     shell:
         """
         {params.app} --hierarchy-path {input.hierarchy} \
             --annotation-path {input.annotation} \
-            --config {input.markers_config_file} \
+            --config {params.markers_config_file} \
             2>&1 | tee {log}
         """
 
