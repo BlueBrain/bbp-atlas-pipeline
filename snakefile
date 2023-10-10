@@ -392,12 +392,15 @@ rule fetch_brain_parcellation_ccfv3:
     shell:
         default_fetch
 
+brain_template_id_tag = NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainTemplateDataLayer"]["average_template_25"],
+brain_template_id = brain_template_id_tag.split("?tag=")[0]
+
 ##>fetch_brain_template : fetch the CCF v3 brain average template volume in the given resolution
 rule fetch_brain_template:
     output:
         f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['average_template_25']}"
     params:
-        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainTemplateDataLayer"]["average_template_25"],
+        nexus_id=brain_template_id_tag,
         app=APPS["bba-data-fetch"],
         token = myTokenFetcher.getAccessToken()
     log:
@@ -1575,7 +1578,7 @@ rule push_atlas_release:
         resource_tag = RESOURCE_TAG,
         species=NEXUS_IDS["species"],
         reference_system=NEXUS_IDS["reference_system"],
-        brain_template=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainTemplateDataLayer"]["average_template_25"],
+        brain_template=brain_template_id,
     output:
         f"{WORKING_DIR}/pushed_atlas_release.log"
     log:
