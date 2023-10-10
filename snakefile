@@ -392,7 +392,7 @@ rule fetch_brain_parcellation_ccfv3:
     shell:
         default_fetch
 
-brain_template_id_tag = NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainTemplateDataLayer"]["average_template_25"],
+brain_template_id_tag = NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainTemplateDataLayer"]["average_template_25"]
 brain_template_id = brain_template_id_tag.split("?tag=")[0]
 
 ##>fetch_brain_template : fetch the CCF v3 brain average template volume in the given resolution

@@ -53,7 +53,7 @@ RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_int
 RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ git+https://bbpgitlab.epfl.ch/nse/cwl-registry.git@cwl-registry-v0.4.3
 
 # module load py-bba-data-push
-RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_push.git@6d959477
+RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_push.git@3417e99d
 
 RUN pip install git+https://bbpgitlab.epfl.ch/dke/users/jonathanlurie/atlas_cell_transplant.git@v0.2.0
 
