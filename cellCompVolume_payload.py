@@ -1,12 +1,13 @@
 import json
 
-def create_payload(forge, atlas_release_id, output_file, n_layer_densities, tag=None):
+def create_payload(forge, atlas_release_id, output_file, n_layer_densities, endpoint, org, project, tag=None):
     base_query = f"""
             ?s a METypeDensity ;
             atlasRelease <{atlas_release_id}>;
             brainLocation / brainRegion ?brainRegion ;
             distribution ?distribution ;
             _deprecated ?_deprecated;
+            _project ?_project;
             """
 
     # Density resources annotated with Mtypes without layers are not released
@@ -18,6 +19,7 @@ def create_payload(forge, atlas_release_id, output_file, n_layer_densities, tag=
             ?distribution name ?nrrd_file ;
             contentUrl ?contentUrl .
             Filter (?_deprecated = 'false'^^xsd:boolean)
+            Filter (?_project = <"""+endpoint+"""/projects/"""+org+"""/"""+project+""">)
         }"""
     all_resources_with_layer = forge.sparql(query_layer, limit=3500, debug=False)
     print(f"{len(all_resources_with_layer)} ME-type densities with layer found in total, filtering those with tag '{tag}'")

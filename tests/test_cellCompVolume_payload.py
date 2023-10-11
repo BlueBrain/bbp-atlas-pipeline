@@ -22,5 +22,5 @@ def test_cellCompVolume_payload():
     forge = KnowledgeGraphForge(forge_config, bucket = "/".join([nexus_org, nexus_proj]), endpoint = nexus_env, token = nexus_token)
                        
     output_file = os.path.join(test_folder, "cellCompositionVolume_payload.json")
-    payload = create_payload(forge, atlasrelease_id, output_file, expected_densities, tag)
+    payload = create_payload(forge, atlasrelease_id, output_file, expected_densities, endpoint=nexus_env, org=nexus_org, project=nexus_proj, tag=tag)
     L.info("Test output %s" % output_file)

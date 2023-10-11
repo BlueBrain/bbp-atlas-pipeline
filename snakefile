@@ -1939,7 +1939,7 @@ rule create_cellCompositionVolume_payload:
             forge = KnowledgeGraphForge(FORGE_CONFIG, bucket = "/".join([NEXUS_DESTINATION_ORG, NEXUS_DESTINATION_PROJ]), endpoint = NEXUS_DESTINATION_ENV, token = myTokenFetcher.getAccessToken())
             from cellCompVolume_payload import create_payload
             logfile.write(f"Creating CellCompositionVolume payload for atlasRelease {atlas_release_id} with tag '{params.resource_tag}'\n")
-            create_payload(forge, atlas_release_id, output.payload, n_layer_densities, params.resource_tag)
+            create_payload(forge, atlas_release_id, output.payload, n_layer_densities, endpoint=NEXUS_DESTINATION_ENV, org=NEXUS_DESTINATION_ORG, proj=NEXUS_DESTINATION_PROJ, tag=params.resource_tag)
             logfile.write(f"CellCompositionVolume payload created: {output.payload}\n")
 
 ##>create_cellCompositionSummary_payload :
