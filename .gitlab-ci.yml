@@ -43,7 +43,7 @@ unit_test:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   before_script:
-    - pip install -r requirements.txt
+    - pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ -r requirements.txt
   script:
     #- !reference [.add_staging_SSL, script]
     - !reference [.unit-tests, script]
@@ -76,7 +76,7 @@ generate-documentation:
         when: on_success
   script: sphinx-build -T --keep-going -b html -c ./$DOC_DIR/source -D language=en ./$DOC_DIR/source $DOC_DIR/$DOC
   before_script:
-    - pip install -r requirements.txt
+    - pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ -r requirements.txt
   artifacts:
     paths:
       - $DOC_DIR/$DOC

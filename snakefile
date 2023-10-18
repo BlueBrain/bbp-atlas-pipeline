@@ -701,10 +701,10 @@ rule fetch_genes_correctednissl:
         rules.fetch_gene_sst_correctednissl.output,
         rules.fetch_gene_vip_correctednissl.output,
         rules.fetch_gene_gad67_correctednissl.output
+    output:
+        touch(f"{WORKING_DIR}/fetched_genes_correctednissl.log")
     log:
         f"{LOG_DIR}/fetch_genes_correctednissl.log"
-    output:
-        temp(touch(f"{WORKING_DIR}/fetch_genes_correctednissl.txt"))
 
 
 ##>fetch_isocortex_metadata : fetch isocortex metadata
@@ -1580,7 +1580,7 @@ rule push_atlas_release:
         reference_system=NEXUS_IDS["reference_system"],
         brain_template=brain_template_id,
     output:
-        f"{WORKING_DIR}/pushed_atlas_release.log"
+        touch(f"{WORKING_DIR}/pushed_atlas_release.log")
     log:
         f"{LOG_DIR}/push_atlas_release.log"
     shell:
@@ -1607,8 +1607,7 @@ rule push_atlas_release:
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
             --dryrun {dryrun} \
-            2>&1 | tee {log} ;
-        touch {output}
+            2>&1 | tee {log}
         """
 
 ##>push_meshes : rule to push into Nexus brain regions meshes
@@ -1623,7 +1622,7 @@ rule push_meshes:
         species=NEXUS_IDS["species"],
         reference_system=NEXUS_IDS["reference_system"],
     output:
-        f"{WORKING_DIR}/pushed_meshes.log"
+        touch(f"{WORKING_DIR}/pushed_meshes.log")
     log:
         f"{LOG_DIR}/push_meshes.log"
     shell:
@@ -1645,8 +1644,7 @@ rule push_meshes:
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
             --dryrun {dryrun} \
-            2>&1 | tee {log} ;
-        touch {output}
+            2>&1 | tee {log}
         """
 
 ##>push_masks : rule to push into Nexus brain regions masks
@@ -1661,7 +1659,7 @@ rule push_masks:
         reference_system=NEXUS_IDS["reference_system"],
         resource_tag = RESOURCE_TAG
     output:
-        f"{WORKING_DIR}/pushed_masks.log"
+        touch(f"{WORKING_DIR}/pushed_masks.log")
     log:
         f"{LOG_DIR}/push_masks.log"
     shell:
@@ -1682,8 +1680,7 @@ rule push_masks:
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
             --dryrun {dryrun} \
-            2>&1 | tee {log} ;
-        touch {output}
+            2>&1 | tee {log}
         """
 
 ##>push_direction_vectors : rule to push into Nexus direction vectors
@@ -1698,7 +1695,7 @@ rule push_direction_vectors:
         reference_system=NEXUS_IDS["reference_system"],
         resource_tag = RESOURCE_TAG
     output:
-        f"{WORKING_DIR}/pushed_direction_vectors.log"
+        touch(f"{WORKING_DIR}/pushed_direction_vectors.log")
     log:
         f"{LOG_DIR}/push_direction_vectors.log"
     shell:
@@ -1720,8 +1717,7 @@ rule push_direction_vectors:
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
             --dryrun {dryrun} \
-            2>&1 | tee {log} ;
-        touch {output}
+            2>&1 | tee {log}
         """
 
 ##>push_orientation_field : rule to push into Nexus orientation fields
@@ -1736,7 +1732,7 @@ rule push_orientation_field:
         reference_system=NEXUS_IDS["reference_system"],
         resource_tag = RESOURCE_TAG
     output:
-        f"{WORKING_DIR}/pushed_orientation_field.log"
+        touch(f"{WORKING_DIR}/pushed_orientation_field.log")
     log:
         f"{LOG_DIR}/push_orientation_field.log"
     shell:
@@ -1758,8 +1754,7 @@ rule push_orientation_field:
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
             --dryrun {dryrun} \
-            2>&1 | tee {log} ;
-        touch {output}
+            2>&1 | tee {log}
         """
 
 ##>generate_annotation_pipeline_v3_datasets : Global rule to generate and check the integrity of every products of the annotation pipeline
@@ -1775,10 +1770,7 @@ rule generate_annotation_pipeline_v3_datasets:
 ##>push_glia_densities : rule to push into Nexus Glia densities
 rule push_glia_densities:
     input:
-        astro = f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['glia_cell_densities_transplant_correctednissl']}/astrocyte_density_v3.nrrd",
-        glia = f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['glia_cell_densities_transplant_correctednissl']}/glia_density_v3.nrrd",
-        micro = f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['glia_cell_densities_transplant_correctednissl']}/microglia_density_v3.nrrd",
-        oligo = f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['glia_cell_densities_transplant_correctednissl']}/oligodendrocyte_density_v3.nrrd",
+        densities_dir = rules.transplant_glia_cell_densities_correctednissl.output,
         hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
     params:
         app1=APPS["bba-data-push push-volumetric"].split(),
@@ -1787,7 +1779,7 @@ rule push_glia_densities:
         reference_system=NEXUS_IDS["reference_system"],
         resource_tag = RESOURCE_TAG
     output:
-        f"{WORKING_DIR}/pushed_glia_densities.log"
+        touch(f"{WORKING_DIR}/pushed_glia_densities.log")
     log:
         f"{LOG_DIR}/push_glia_densities.log"
     shell:
@@ -1798,10 +1790,7 @@ rule push_glia_densities:
             --nexus-proj {NEXUS_DESTINATION_PROJ} \
             --nexus-token {params.token} \
         {params.app1[1]} \
-            --dataset-path {input.astro} \
-            --dataset-path {input.glia} \
-            --dataset-path {input.micro} \
-            --dataset-path {input.oligo} \
+            --dataset-path {input.densities_dir} \
             --dataset-type GliaCellDensity \
             --atlas-release-id {atlas_release_id} \
             --atlas-release-rev {atlas_release_rev} \
@@ -1812,15 +1801,13 @@ rule push_glia_densities:
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
             --dryrun {dryrun} \
-            2>&1 | tee {log} ;
-        touch {output}
+            2>&1 | tee {log}
         """
 
 ##>push_neuron_densities : rule to push into Nexus Neuron densities
 rule push_neuron_densities:
     input:
         inhibitory_densities = rules.transplant_inhibitory_neuron_densities_linprog_correctednissl.output,
-        neuron_density = f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['glia_cell_densities_transplant_correctednissl']}/neuron_density_v3.nrrd",
         hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
     params:
         app1=APPS["bba-data-push push-volumetric"].split(),
@@ -1829,7 +1816,7 @@ rule push_neuron_densities:
         reference_system=NEXUS_IDS["reference_system"],
         resource_tag = RESOURCE_TAG
     output:
-        f"{WORKING_DIR}/pushed_neuron_densities.log"
+        touch(f"{WORKING_DIR}/pushed_neuron_densities.log")
     log:
         f"{LOG_DIR}/push_neuron_densities.log"
     shell:
@@ -1841,7 +1828,6 @@ rule push_neuron_densities:
             --nexus-token {params.token} \
         {params.app1[1]} \
             --dataset-path {input.inhibitory_densities} \
-            --dataset-path {input.neuron_density} \
             --dataset-type NeuronDensity \
             --atlas-release-id {atlas_release_id} \
             --atlas-release-rev {atlas_release_rev} \
@@ -1852,8 +1838,7 @@ rule push_neuron_densities:
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
             --dryrun {dryrun} \
-            2>&1 | tee {log} ;
-        touch {output}
+            2>&1 | tee {log}
         """
 
 ##>push_metype_pipeline_datasets : rule to push into Nexus ME-type densities
@@ -1870,7 +1855,7 @@ rule push_metype_pipeline_datasets:
         reference_system=NEXUS_IDS["reference_system"],
         resource_tag = RESOURCE_TAG
     output:
-        f"{WORKING_DIR}/pushed_metype_datasets.log"
+        touch(f"{WORKING_DIR}/pushed_metype_datasets.log")
     log:
         f"{LOG_DIR}/push_metype_pipeline_datasets.log"
     shell:
@@ -1893,8 +1878,7 @@ rule push_metype_pipeline_datasets:
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
             --dryrun {dryrun} \
-            2>&1 | tee {log} ;
-        touch {output}
+            2>&1 | tee {log}
         """
 
 ##>push_volumetric_datasets : push into Nexus the volumetric datasets that are not inputs of push_atlas_release
@@ -1905,13 +1889,9 @@ rule push_volumetric_datasets:
         rules.push_neuron_densities.output,
         rules.push_metype_pipeline_datasets.output,
     output:
-        touch = temp(touch(f"{WORKING_DIR}/pushed_volumetric_datasets.log"))
+        touch(f"{WORKING_DIR}/pushed_volumetric_datasets.log")
     log:
         f"{LOG_DIR}/push_volumetric_datasets.log"
-    shell:
-        """
-        touch {output}
-        """
 
 
 ##>create_cellCompositionVolume_payload :
@@ -1989,7 +1969,7 @@ rule push_cellcomposition:
         species=NEXUS_IDS["species"],
         reference_system=NEXUS_IDS["reference_system"],
     output:
-        temp(touch(f"{WORKING_DIR}/push_cellcomposition_success.txt"))
+        touch(f"{WORKING_DIR}/pushed_cellcomposition.log")
     log:
         f"{LOG_DIR}/push_cellcomposition.log"
     shell:
@@ -2016,3 +1996,15 @@ rule push_cellcomposition:
             --dryrun {dryrun} \
             2>&1 | tee {log}
         """
+
+##>push_atlas_datasets : push into Nexus all the Atlas datasets
+rule push_atlas_datasets:
+    input:
+        rules.push_atlas_release.output,
+        rules.push_meshes.output,
+        rules.push_volumetric_datasets.output,
+        rules.push_cellcomposition.output
+    output:
+        touch(f"{WORKING_DIR}/pushed_atlas_datasets.log")
+    log:
+        f"{LOG_DIR}/push_atlas_datasets.log"

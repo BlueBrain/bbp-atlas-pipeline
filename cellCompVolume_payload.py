@@ -1,5 +1,8 @@
 import json
 
+hasPart_key = "hasPart"
+
+
 def create_payload(forge, atlas_release_id, output_file, n_layer_densities, endpoint, org, project, tag=None):
     base_query = f"""
             ?s a METypeDensity ;
@@ -72,19 +75,19 @@ def create_payload(forge, atlas_release_id, output_file, n_layer_densities, endp
                 mtype_to_etype[metype_annotation_gen_list[0].id][metype_annotation_gen_list[1].id][resources[i].id] = {"type": resources[i].type, "_rev": resources[i]._store_metadata._rev}
 
     # CellCompositionVolume structure
-    grouped_by_metype = {"hasPart": []}
+    grouped_by_metype = {hasPart_key: []}
     for m_id, m in mtype_to_etype.items():
-        m_content = {"@id": m_id, "label": m["label"], "about": ["https://neuroshapes.org/MType"], "hasPart": []}    
+        m_content = {"@id": m_id, "label": m["label"], "about": ["https://neuroshapes.org/MType"], hasPart_key: []}
         for e_id, e in m.items():
             if e_id != "label":
-                e_content = {"@id": e_id, "label": e["label"], "about": ["https://neuroshapes.org/EType"], "hasPart": []}
+                e_content = {"@id": e_id, "label": e["label"], "about": ["https://neuroshapes.org/EType"], hasPart_key: []}
                 for res_id, res in e.items():
                     if res_id != "label":
-                        e_content["hasPart"].append( {"@id": res_id, "@type": res["type"], "_rev": res["_rev"]} )
-                        m_content["hasPart"].append( e_content )
-        grouped_by_metype["hasPart"].append(m_content)
+                        e_content[hasPart_key].append({"@id": res_id, "@type": res["type"], "_rev": res["_rev"]})
+                        m_content[hasPart_key].append(e_content)
+        grouped_by_metype[hasPart_key].append(m_content)
 
     with open(output_file, "w") as f:
         json.dump(grouped_by_metype, f)
 
-    return output_file
+    return grouped_by_metype
