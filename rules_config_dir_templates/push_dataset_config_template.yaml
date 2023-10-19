@@ -12,9 +12,11 @@ GeneratedDatasetPath:
   VolumetricFile:
     average_template_25: {WORKING_DIR}/average_template_25.nrrd
     annotation_v2_withfiber: {WORKING_DIR}/annotation_v2_withfiber.nrrd
+    annotation_ccfv2: {WORKING_DIR}/annotation_ccfv2.nrrd
     annotation_ccfv2_l23split: {WORKING_DIR}/annotation_ccfv2_l23split.nrrd
     annotation_ccfv2_leaves_only: {WORKING_DIR}/annotation_ccfv2_leaves_only.nrrd
     annotation_ccfv2_l23split_barrelsplit: {WORKING_DIR}/annotation_ccfv2_l23split_barrelsplit.nrrd
+    annotation_ccfv3: {WORKING_DIR}/annotation_ccfv3.nrrd
     annotation_ccfv3_l23split: {WORKING_DIR}/annotation_ccfv3_l23split.nrrd
     annotation_ccfv3_leaves_only: {WORKING_DIR}/annotation_ccfv3_leaves_only.nrrd
     annotation_ccfv3_l23split_barrelsplit: {WORKING_DIR}/annotation_ccfv3_l23split_barrelsplit.nrrd
@@ -22,8 +24,9 @@ GeneratedDatasetPath:
     hemispheres: {WORKING_DIR}/hemispheres_annotation.nrrd
     interpolated_direction_vectors_isocortex_ccfv2: {WORKING_DIR}/interpolated_direction_vectors_isocortex_ccfv2.nrrd
     interpolated_direction_vectors_isocortex_ccfv3: {WORKING_DIR}/interpolated_direction_vectors_isocortex_ccfv3.nrrd
-    direction_vectors_isocortex_ccfv2: {WORKING_DIR}/direction_vectors_isocortex_ccfv2.nrrd
-    direction_vectors_isocortex_ccfv3: {WORKING_DIR}/direction_vectors_isocortex_ccfv3.nrrd
+    direction_vectors_ccfv3: {WORKING_DIR}/direction_vectors/direction_vectors_ccfv3.nrrd
+    direction_vectors_isocortex_ccfv2: {WORKING_DIR}/direction_vectors/direction_vectors_isocortex_ccfv2.nrrd
+    direction_vectors_isocortex_ccfv3: {WORKING_DIR}/direction_vectors/direction_vectors_isocortex_ccfv3.nrrd
     cell_orientations: {WORKING_DIR}/cell_orientations.nrrd
     placement_hints: {WORKING_DIR}/placement_hints
     overall_cell_density_correctednissl: {WORKING_DIR}/overall_cell_density_correctednissl.nrrd

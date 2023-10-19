@@ -29,7 +29,7 @@ NEXUS_DESTINATION_PROJ = default_pipeline.NEXUS_DESTINATION_PROJ
 IS_PROD_ENV = default_pipeline.IS_PROD_ENV
 atlas_release_id = default_pipeline.atlas_release_id
 brain_region_id = default_pipeline.brain_region_id
-
+root_region_name = default_pipeline.root_region_name
 
 with open("customize_pipeline/available_vars.yaml", "r") as vars_file:
     AVAILABLE_VARS = yaml.safe_load(vars_file.read().strip())

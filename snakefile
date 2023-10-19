@@ -134,6 +134,7 @@ APPS = {
     "atlas-building-tools mtype-densities create-from-probability-map": "atlas-densities mtype-densities create-from-probability-map",
     "celltransplant": "celltransplant",
     "brainbuilder cells positions-and-orientations": "brainbuilder cells positions-and-orientations",
+    "atlas-direction-vectors direction-vectors from-center": "atlas-direction-vectors direction-vectors from-center",
     "atlas-building-tools direction-vectors isocortex": "atlas-direction-vectors direction-vectors isocortex",
     "atlas-building-tools direction-vectors cerebellum": "atlas-direction-vectors direction-vectors cerebellum",
     "atlas-building-tools direction-vectors interpolate": "atlas-direction-vectors direction-vectors interpolate",
@@ -352,10 +353,14 @@ rule fetch_ccf_brain_region_hierarchy:
     shell:
         default_fetch.replace("--nexus-id {params.nexus_id}", "--nexus-id {params.nexus_id}  --favor name:1.json")
 
+orig_hierarchy = rules.fetch_ccf_brain_region_hierarchy.output
+root_region_name = "root"
+#root_region_name = "Whole mouse brain"
+
 ##>fetch_brain_parcellation_ccfv2 : fetch the CCF v2 brain parcellation volume in the given resolution
 rule fetch_brain_parcellation_ccfv2:
     output:
-        f"{WORKING_DIR}/brain_parcellation_ccfv2.nrrd"
+        f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['annotation_ccfv2']}"
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["brain_ccfv2"],
         app=APPS["bba-data-fetch"],
@@ -381,7 +386,7 @@ rule fetch_fiber_parcellation_ccfv2:
 ##>fetch_brain_parcellation_ccfv3 : fetch the CCF v3 brain parcellation volume in the given resolution
 rule fetch_brain_parcellation_ccfv3:
     output:
-        f"{WORKING_DIR}/brain_parcellation_ccfv3.nrrd"
+        f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['annotation_ccfv3']}"
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["brain_ccfv3"],
         app=APPS["bba-data-fetch"],
@@ -391,6 +396,8 @@ rule fetch_brain_parcellation_ccfv3:
         f"{LOG_DIR}/fetch_brain_parcellation_ccfv3.log"
     shell:
         default_fetch
+
+orig_annotation_v3 = rules.fetch_brain_parcellation_ccfv3.output
 
 brain_template_id_tag = NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainTemplateDataLayer"]["average_template_25"]
 brain_template_id = brain_template_id_tag.split("?tag=")[0]
@@ -790,11 +797,32 @@ rule fetch_isocortex_23_metadata:
 ## =============================== ANNOTATION PIPELINE PART 1.1 ============================
 ## =========================================================================================
 
+##>direction_vectors_placeholder_ccfv3 : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons.
+rule direction_vectors_placeholder_ccfv3:
+    input:
+        hierarchy= orig_hierarchy,
+        annotation= orig_annotation_v3
+    output:
+        dir = os.path.dirname(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['direction_vectors_ccfv3']}"),
+        file = f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['direction_vectors_ccfv3']}"
+    params:
+        app=APPS["atlas-direction-vectors direction-vectors from-center"]
+    log:
+        f"{LOG_DIR}/direction_vectors_placeholder_ccfv3.log"
+    shell:
+        """{params.app} \
+            --hierarchy-path {input.hierarchy} \
+            --annotation-path {input.annotation} \
+            --region {root_region_name} \
+            --output-path {output.file} \
+            2>&1 | tee {log}
+        """
+
 ##>direction_vectors_isocortex_ccfv2 : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood. The output is only for the top regions of the isocortex.
 rule direction_vectors_isocortex_ccfv2:
     input:
         annotation=rules.combine_v2_annotations.output,
-        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output
+        hierarchy= orig_hierarchy
     output:
         f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['direction_vectors_isocortex_ccfv2']}"
     params:
@@ -813,8 +841,8 @@ rule direction_vectors_isocortex_ccfv2:
 ##>direction_vectors_isocortex_ccfv3 : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons. This uses Regiodesics under the hood. The output is only for the top regions of the isocortex.
 rule direction_vectors_isocortex_ccfv3:
     input:
-        annotation=rules.fetch_brain_parcellation_ccfv3.output,
-        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output
+        annotation= orig_annotation_v3,
+        hierarchy= orig_hierarchy
     output:
         f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['direction_vectors_isocortex_ccfv3']}"
     params:
@@ -829,13 +857,13 @@ rule direction_vectors_isocortex_ccfv3:
             2>&1 | tee {log}
         """
 
-direction_vectors_isocortex = rules.direction_vectors_isocortex_ccfv3.output
+direction_vectors = rules.direction_vectors_isocortex_ccfv3.output
 
 ##>interpolate_direction_vectors_isocortex_ccfv2 : Interpolate the [NaN, NaN, NaN] direction vectors by non-[NaN, NaN, NaN] ones.
 rule interpolate_direction_vectors_isocortex_ccfv2:
     input:
         annotation=rules.combine_v2_annotations.output,
-        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
+        hierarchy= orig_hierarchy,
         direction_vectors=rules.direction_vectors_isocortex_ccfv2.output,
         metadata = rules.fetch_isocortex_metadata.output
     output:
@@ -858,8 +886,8 @@ rule interpolate_direction_vectors_isocortex_ccfv2:
 ##>interpolate_direction_vectors_isocortex_ccfv3 : Interpolate the [NaN, NaN, NaN] direction vectors by non-[NaN, NaN, NaN] ones.
 rule interpolate_direction_vectors_isocortex_ccfv3:
     input:
-        annotation=rules.fetch_brain_parcellation_ccfv3.output,
-        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
+        annotation= orig_annotation_v3,
+        hierarchy= orig_hierarchy,
         direction_vectors=rules.direction_vectors_isocortex_ccfv3.output,
         metadata = rules.fetch_isocortex_metadata.output
     output:
@@ -890,7 +918,7 @@ default_split = """{params.app} \
 ##>split_isocortex_layer_23_ccfv2 : Refine ccfv2 annotation by splitting brain regions
 rule split_isocortex_layer_23_ccfv2:
     input:
-        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
+        hierarchy= orig_hierarchy,
         annotation=rules.combine_v2_annotations.output,
         direction_vectors=rules.interpolate_direction_vectors_isocortex_ccfv2.output
     output:
@@ -906,8 +934,8 @@ rule split_isocortex_layer_23_ccfv2:
 ##>split_isocortex_layer_23_ccfv3 : Refine ccfv3 annotation by splitting brain regions
 rule split_isocortex_layer_23_ccfv3:
     input:
-        hierarchy=rules.fetch_ccf_brain_region_hierarchy.output,
-        annotation=rules.fetch_brain_parcellation_ccfv3.output,
+        hierarchy= orig_hierarchy,
+        annotation= orig_annotation_v3,
         direction_vectors=rules.direction_vectors_isocortex_ccfv3.output
     output:
         hierarchy=f"{PUSH_DATASET_CONFIG_FILE['HierarchyJson']['hierarchy_ccfv3_l23split']}",
@@ -1142,7 +1170,7 @@ rule inhibitory_excitatory_neuron_densities_correctednissl:
 ##>orientation_field : Turn direction vectors into quaternions interpreted as 3D orientations
 rule orientation_field:
     input:
-        direction_vectors = direction_vectors_isocortex,
+        direction_vectors = direction_vectors,
     output:
         f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['cell_orientations']}"
     params:
@@ -1171,7 +1199,7 @@ rule placement_hints:
     input:
         annotation = rules.split_barrel_ccfv3_l23split.output.annotation,
         hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
-        direction_vectors = direction_vectors_isocortex
+        direction_vectors =  direction_vectors
     output:
         dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['placement_hints']}"),
         metadata = os.path.join(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['placement_hints']}", "metadata.json")
@@ -1219,9 +1247,6 @@ rule average_densities_correctednissl:
             --output-path {output} \
             2>&1 | tee {log}
         """
-
-root_region_name = "root"
-#root_region_name = "Whole mouse brain"
 
 ##>fit_average_densities_correctednissl : Estimate average cell densities of brain regions.
 rule fit_average_densities_correctednissl:
@@ -1486,7 +1511,7 @@ hierarchy_jsonld = rules.export_brain_region.output.hierarchy_jsonld
 rule check_annotation_pipeline_v3_volume_datasets:
     input:
         annotation_ccfv3_split=rules.split_isocortex_layer_23_ccfv3.output.annotation,
-        direction_vectors_ccfv3=rules.interpolate_direction_vectors_isocortex_ccfv3.output,
+        direction_vectors_ccfv3=direction_vectors,
         orientation_ccfv3=rules.orientation_field.output,
         placement_hints = rules.placement_hints.output.dir,
         mask_ccfv3_split=rules.export_brain_region.output.mask_dir
@@ -1570,7 +1595,7 @@ rule push_atlas_release:
         hemisphere = rules.create_hemispheres_ccfv3.output,
         placement_hints = rules.placement_hints.output.dir,
         placement_hints_metadata = rules.placement_hints.output.metadata,
-        direction_vectors = direction_vectors_isocortex,
+        direction_vectors =  direction_vectors,
         cell_orientations = rules.orientation_field.output,
     params:
         app=APPS["bba-data-push push-atlasrelease"].split(),
@@ -1686,7 +1711,7 @@ rule push_masks:
 ##>push_direction_vectors : rule to push into Nexus direction vectors
 rule push_direction_vectors:
     input:
-        direction_vectors = direction_vectors_isocortex,
+        direction_vectors =  direction_vectors,
         hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
     params:
         app1=APPS["bba-data-push push-volumetric"].split(),

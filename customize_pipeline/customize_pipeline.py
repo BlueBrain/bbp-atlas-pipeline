@@ -82,7 +82,7 @@ def merge_nrrd_files(region_map: RegionMap, annotation: np.ndarray, region_volum
                 result_volume[:region_mask] = volume[:region_mask]
 
             if metadata_path:
-                metadata_json[default_output].append(region_map.get(region_id, "name"))
+                metadata_json[filename].append(region_map.get(region_id, "name"))
 
         merged_file = os.path.join(merged_output_dir, filename)
         default_volume.with_data(result_volume).save_nrrd(merged_file)
