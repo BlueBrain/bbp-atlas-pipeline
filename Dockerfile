@@ -36,7 +36,7 @@ RUN git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgi
 RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_token_fetch.git@v0.2.0
 
 # module load py-bba-datafetch
-RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_fetch.git@v0.2.2
+RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_fetch.git@v0.2.4
 
 # temporary test, will be ported into atlas-splitter
 #RUN pip install git+https://bbpgitlab.epfl.ch/conn/structural/validation/cell-density-validations/cell-densities.git@2325c56d
