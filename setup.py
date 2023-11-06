@@ -21,7 +21,8 @@ setup(
         "voxcell",
         "sphinx",
         "sphinx-bluebrain-theme",
-        "myst-parser"
+        "myst-parser",
+        "snakemake==7.32.3"
     ],
     extras_require={
         "dev": ["pytest>=4.3", "pytest-cov>=2.8.0"],

@@ -50,7 +50,7 @@ RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_web_expo
 RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_integrity_check.git@v0.1.0
 
 # cwl-registry depends on blue_brain_nexus_push so it must be installed first to not overwrite the blue_brain_nexus_push version
-RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ git+https://bbpgitlab.epfl.ch/nse/cwl-registry.git@cwl-registry-v0.4.5
+RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ cwl-registry==0.4.8
 
 # module load py-bba-data-push
 RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_push.git@01808a4f
