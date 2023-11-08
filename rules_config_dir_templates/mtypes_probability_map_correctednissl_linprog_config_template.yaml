@@ -1,4 +1,8 @@
-probabilityMapPath: {WORKING_DIR}/rules_config_dir/mtypes/probability_map.csv
+L1_probabilityMapPath: {WORKING_DIR}/rules_config_dir/mtypes/probability_map_L1.csv
+L23_probabilityMapPath: {WORKING_DIR}/rules_config_dir/mtypes/probability_map_L23.csv
+L4_probabilityMapPath: {WORKING_DIR}/rules_config_dir/mtypes/probability_map_L4.csv
+L5_probabilityMapPath: {WORKING_DIR}/rules_config_dir/mtypes/probability_map_L5.csv
+L6_probabilityMapPath: {WORKING_DIR}/rules_config_dir/mtypes/probability_map_L6.csv
 molecularTypeDensityPaths:
     gad67: {WORKING_DIR}/inhibitory_neuron_densities_linprog_correctednissl/gad67+_density.nrrd
     pv: {WORKING_DIR}/inhibitory_neuron_densities_linprog_correctednissl/pv+_density.nrrd

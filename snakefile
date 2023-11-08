@@ -486,19 +486,70 @@ rule fetch_mapping_cortex_all_to_exc_mtypes:
     shell:
         default_fetch
 
-##>fetch_probability_map : fetch the probability mapping from https://github.com/BlueBrain/atlas-densities/tree/main/atlas_densities/app/data/mtypes/probability_map
-rule fetch_probability_map:
+##>fetch_probability_map_L1 : fetch the probability mapping for layer 1
+rule fetch_probability_map_L1:
     output:
-        f"{MTYPES_PROBABILITY_MAP_CORRECTEDNISSL_LINPROG_CONFIG_FILE['probabilityMapPath']}"
+        f"{MTYPES_PROBABILITY_MAP_CORRECTEDNISSL_LINPROG_CONFIG_FILE['L1_probabilityMapPath']}"
     params:
-        nexus_id=NEXUS_IDS["metadata"]["probability_map"],
+        nexus_id=NEXUS_IDS["metadata"]["probability_map_L1"],
         app=APPS["bba-data-fetch"],
         token = myTokenFetcher.getAccessToken(),
     log:
-        f"{LOG_DIR}/fetch_probability_map.log"
+        f"{LOG_DIR}/fetch_probability_map_L1.log"
     shell:
         default_fetch
 
+##>fetch_probability_map_L23 : fetch the probability mapping for layer 23
+rule fetch_probability_map_L23:
+    output:
+        f"{MTYPES_PROBABILITY_MAP_CORRECTEDNISSL_LINPROG_CONFIG_FILE['L23_probabilityMapPath']}"
+    params:
+        nexus_id=NEXUS_IDS["metadata"]["probability_map_L23"],
+        app=APPS["bba-data-fetch"],
+        token = myTokenFetcher.getAccessToken(),
+    log:
+        f"{LOG_DIR}/fetch_probability_map_L23.log"
+    shell:
+        default_fetch
+
+##>fetch_probability_map_L4 : fetch the probability mapping for layer 4
+rule fetch_probability_map_L4:
+    output:
+        f"{MTYPES_PROBABILITY_MAP_CORRECTEDNISSL_LINPROG_CONFIG_FILE['L4_probabilityMapPath']}"
+    params:
+        nexus_id=NEXUS_IDS["metadata"]["probability_map_L4"],
+        app=APPS["bba-data-fetch"],
+        token = myTokenFetcher.getAccessToken(),
+    log:
+        f"{LOG_DIR}/fetch_probability_map_L4.log"
+    shell:
+        default_fetch
+
+##>fetch_probability_map_L5 : fetch the probability mapping for layer 5
+rule fetch_probability_map_L5:
+    output:
+        f"{MTYPES_PROBABILITY_MAP_CORRECTEDNISSL_LINPROG_CONFIG_FILE['L5_probabilityMapPath']}"
+    params:
+        nexus_id=NEXUS_IDS["metadata"]["probability_map_L5"],
+        app=APPS["bba-data-fetch"],
+        token = myTokenFetcher.getAccessToken(),
+    log:
+        f"{LOG_DIR}/fetch_probability_map_L5.log"
+    shell:
+        default_fetch
+
+##>fetch_probability_map_L6 : fetch the probability mapping for layer 6
+rule fetch_probability_map_L6:
+    output:
+        f"{MTYPES_PROBABILITY_MAP_CORRECTEDNISSL_LINPROG_CONFIG_FILE['L6_probabilityMapPath']}"
+    params:
+        nexus_id=NEXUS_IDS["metadata"]["probability_map_L6"],
+        app=APPS["bba-data-fetch"],
+        token = myTokenFetcher.getAccessToken(),
+    log:
+        f"{LOG_DIR}/fetch_probability_map_L6.log"
+    shell:
+        default_fetch
 
 ##>combine_v2_annotations : Generate and save the combined annotation file
 rule combine_v2_annotations:
@@ -1364,7 +1415,11 @@ rule create_mtypes_densities_from_probability_map:
         rules.inhibitory_neuron_densities_linprog_correctednissl.output,
         hierarchy = rules.split_barrel_ccfv2_l23split.output.hierarchy,
         annotation = rules.split_barrel_ccfv2_l23split.output.annotation,
-        prob_map = rules.fetch_probability_map.output,
+        L1_prob_map = rules.fetch_probability_map_L1.output,
+        L23_prob_map = rules.fetch_probability_map_L23.output,
+        L4_prob_map = rules.fetch_probability_map_L4.output,
+        L5_prob_map = rules.fetch_probability_map_L5.output,
+        L6_prob_map = rules.fetch_probability_map_L6.output,
         lamp5 = rules.compute_lamp5_density.output
     output:
         directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['mtypes_densities_probability_map']}")
@@ -1373,9 +1428,14 @@ rule create_mtypes_densities_from_probability_map:
     log:
         f"{LOG_DIR}/create_mtypes_densities_from_probability_map.log"
     shell:
-        """{params.app} --hierarchy-path {input.hierarchy} \
+        """{params.app} \
+            --hierarchy-path {input.hierarchy} \
             --annotation-path {input.annotation} \
-            --probability-map {input.prob_map} \
+            --probability-map {input.L1_prob_map} \
+            --probability-map {input.L23_prob_map} \
+            --probability-map {input.L4_prob_map} \
+            --probability-map {input.L5_prob_map} \
+            --probability-map {input.L6_prob_map} \
             --marker gad67 """ + marker_density_map["gad67"] + """ \
             --marker pv """ + marker_density_map["pv"] + """ \
             --marker sst """ + marker_density_map["sst"] + """ \
