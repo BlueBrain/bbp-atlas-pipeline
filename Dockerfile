@@ -66,7 +66,7 @@ RUN pip install git+https://github.com/BlueBrain/atlas-commons@b083081
 
 RUN pip install git+https://github.com/BlueBrain/atlas-splitter@v0.1.2
 
-RUN pip install git+https://github.com/Sebastien-PILUSO/atlas-densities@ea9b789
+RUN pip install git+https://github.com/BlueBrain/atlas-densities@9b324fe
 
 # module load py-atlas-building-tools
 RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "atlas-building-tools==0.1.10"

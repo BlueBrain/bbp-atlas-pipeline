@@ -428,6 +428,19 @@ rule fetch_barrel_positions:
     shell:
         default_fetch
 
+##>fetch_regions_config : fetch configuration of regions groups
+rule fetch_regions_config:
+    output:
+        f"{rules_config_dir}/regions_groups.json"
+    params:
+        nexus_id=NEXUS_IDS["metadata"]["regions_configuration"],
+        app=APPS["bba-data-fetch"],
+        token = myTokenFetcher.getAccessToken()
+    log:
+        f"{LOG_DIR}/fetch_regions_config.log"
+    shell:
+        default_fetch
+
 ##>fetch_corrected_nissl_stained_volume : fetch the corrected nissl stained volume in the given resolution
 rule fetch_corrected_nissl_stained_volume:
     output:
@@ -1134,7 +1147,8 @@ rule cell_density_correctednissl:
     input:
         hierarchy = rules.split_barrel_ccfv2_l23split.output.hierarchy,
         annotation = rules.split_barrel_ccfv2_l23split.output.annotation,
-        nissl_volume = rules.fetch_corrected_nissl_stained_volume.output
+        nissl_volume = rules.fetch_corrected_nissl_stained_volume.output,
+        regions_config = rules.fetch_regions_config.output
     output:
         f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['overall_cell_density_correctednissl']}"
     params:
@@ -1146,6 +1160,7 @@ rule cell_density_correctednissl:
         {params.app} --annotation-path {input.annotation} \
             --hierarchy-path {input.hierarchy} \
             --nissl-path {input.nissl_volume} \
+            --group-ids-config-path {input.regions_config} \
             --output-path {output} \
             2>&1 | tee {log}
 	"""
@@ -1160,7 +1175,8 @@ rule glia_cell_densities_correctednissl:
         astro_density = rules.combine_markers.output.astrocyte_volume,
         oligo_density = rules.combine_markers.output.oligodendrocyte_volume,
         microglia_density = rules.combine_markers.output.microglia_volume,
-        glia_proportion = rules.combine_markers.output.cell_proportion
+        glia_proportion = rules.combine_markers.output.cell_proportion,
+        regions_config = rules.fetch_regions_config.output
     output:
         cell_densities = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['cell_densities_correctednissl']}"),
         glia_density = f"{CELL_POSITIONS_CORRECTEDNISSL_CONFIG_FILE['inputDensityVolumePath']['glia']}",
@@ -1182,6 +1198,7 @@ rule glia_cell_densities_correctednissl:
             --oligodendrocyte-density-path {input.oligo_density} \
             --microglia-density-path {input.microglia_density} \
             --glia-proportions-path {input.glia_proportion} \
+            --group-ids-config-path {input.regions_config} \
             --output-dir {output.cell_densities} \
             2>&1 | tee {log}
         """
@@ -1194,6 +1211,7 @@ rule inhibitory_excitatory_neuron_densities_correctednissl:
         gad1_volume = rules.fetch_gene_gad.output,
         nrn1_volume = rules.fetch_gene_nrn1.output,
         neuron_density = rules.glia_cell_densities_correctednissl.output.neuron_density,
+        regions_config = rules.fetch_regions_config.output
     output:
         neuron_densities = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['neuron_densities_correctednissl']}"),
         inhibitory_neuron_density = f"{CELL_POSITIONS_CORRECTEDNISSL_CONFIG_FILE['inputDensityVolumePath']['inhibitory_neuron']}",
@@ -1209,6 +1227,7 @@ rule inhibitory_excitatory_neuron_densities_correctednissl:
             --gad1-path {input.gad1_volume} \
             --nrn1-path {input.nrn1_volume} \
             --neuron-density-path {input.neuron_density} \
+            --group-ids-config-path {input.regions_config} \
             --output-dir {output.neuron_densities} \
             2>&1 | tee {log}
         """
@@ -1310,7 +1329,8 @@ rule fit_average_densities_correctednissl:
         neuron_density = rules.glia_cell_densities_correctednissl.output.neuron_density,
         average_densities = rules.average_densities_correctednissl.output,
         gene_config = f"{AVERAGE_DENSITIES_CORRECTEDNISSL_CONFIG_FILE}",
-        homogenous_regions_csv = rules.fetch_homogenous_regions.output
+        homogenous_regions_csv = rules.fetch_homogenous_regions.output,
+        regions_config = rules.fetch_regions_config.output
     output:
         fitted_densities = f"{WORKING_DIR}/fitted_densities_correctednissl.csv",
         fitting_maps = f"{WORKING_DIR}/fitting_maps_correctednissl.json"
@@ -1326,6 +1346,7 @@ rule fit_average_densities_correctednissl:
             --neuron-density-path {input.neuron_density} \
             --gene-config-path {input.gene_config} \
             --homogenous-regions-path {input.homogenous_regions_csv} \
+            --group-ids-config-path {input.regions_config} \
             --fitted-densities-output-path {output.fitted_densities} \
             --fitting-maps-output-path {output.fitting_maps} \
             2>&1 | tee {log}
