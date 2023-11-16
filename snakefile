@@ -1019,7 +1019,6 @@ rule create_leaves_only_hierarchy_annotation_ccfv2:
     log:
         f"{LOG_DIR}/create_leaves_only_hierarchy_annotation_ccfv2.log"
     run:
-        from kgforge.core import KnowledgeGraphForge
         from nrrdhlp.region_annotations import AnnotationWrapper
 
         forge = None
@@ -1040,7 +1039,6 @@ rule create_leaves_only_hierarchy_annotation_ccfv3:
     log:
         f"{LOG_DIR}/create_leaves_only_hierarchy_annotation_ccfv3.log"
     run:
-        from kgforge.core import KnowledgeGraphForge
         from nrrdhlp.region_annotations import AnnotationWrapper
 
         forge = None
@@ -2005,7 +2003,7 @@ rule create_cellCompositionVolume_payload:
         input_paths = rules.push_metype_pipeline_datasets.input,
         resource_tag = RESOURCE_TAG
     output:
-        payload = f"{WORKING_DIR}/cellCompositionVolume_payload.json"
+        payload = f"{WORKING_DIR}/cellCompositionVolume_payload_{env}.json"
     log:
         f"{LOG_DIR}/create_cellCompositionVolume_payload.log"
     run:
@@ -2041,23 +2039,28 @@ rule create_cellCompositionSummary_payload:
         f"{LOG_DIR}/create_cellCompositionSummary_payload.log"
     run:
         with open(log[0], "w") as logfile:
-            logfile.write(f"Fetching CellCompositionVolume payload from {input.cellCompositionVolume}\n")
+            logfile.write(f"Reading CellCompositionVolume payload from {input.cellCompositionVolume}\n")
             with open(input.cellCompositionVolume) as volume_json:
-                dataset = json.load(volume_json)
+                volume_dict = json.load(volume_json)
 
                 from kgforge.core import KnowledgeGraphForge
                 forge = KnowledgeGraphForge(FORGE_CONFIG, bucket = "/".join([NEXUS_DESTINATION_ORG, NEXUS_DESTINATION_PROJ]), endpoint = NEXUS_DESTINATION_ENV, token=params.token)
 
                 logfile.write(f"Creating density_distribution in {output.intermediate_density_distribution}\n")
                 from cwl_registry import staging, statistics
-                density_distribution = staging.materialize_density_distribution(forge=forge, dataset=dataset, output_file=output.intermediate_density_distribution)
+                density_distribution = staging.materialize_density_distribution(forge=forge, dataset=volume_dict,
+                    output_file=output.intermediate_density_distribution)
 
                 logfile.write(f"Computing CellCompositionSummary payload\n")
+                import multiprocessing
                 import voxcell
-                summary_statistics = statistics.atlas_densities_composition_summary(density_distribution, voxcell.RegionMap.load_json(input.hierarchy), voxcell.VoxelData.load_nrrd(input.annotation))
-                logfile.write(f"Writing CellCompositionSummary payload in {output.summary_statistics}\n")
-                with open(output.summary_statistics, "w") as outfile:
-                    outfile.write(json.dumps(summary_statistics, indent = 4))
+                with multiprocessing.Pool(processes=workflow.cores) as pool:
+                    summary_statistics = statistics.atlas_densities_composition_summary(density_distribution,
+                        voxcell.RegionMap.load_json(input.hierarchy), voxcell.VoxelData.load_nrrd(input.annotation),
+                        map_function=pool.imap)
+                    logfile.write(f"Writing CellCompositionSummary payload in {output.summary_statistics}\n")
+                    with open(output.summary_statistics, "w") as outfile:
+                        outfile.write(json.dumps(summary_statistics, indent = 4))
 
 ##>push_cellcomposition : Final rule to generate and push into Nexus the CellComposition along with its dependencies (Volume and Summary)
 rule push_cellcomposition:
