@@ -1,4 +1,6 @@
 input:
-  hierarchy: HierarchyJson:hierarchy_ccfv3_l23split_barrelsplit
-  annotation: GeneratedDatasetPath:VolumetricFile:annotation_ccfv3_l23split_barrelsplit
+  hierarchy: HierarchyJson:hierarchy
+  hierarchy_ccfv3_l23split_leavesonly_barrelsplit: HierarchyJson:hierarchy_ccfv3_l23split_barrelsplit
+  annotation_ccfv3: GeneratedDatasetPath:VolumetricFile:annotation_ccfv3
+  annotation_ccfv3_l23split_leavesonly_barrelsplit: GeneratedDatasetPath:VolumetricFile:annotation_ccfv3_l23split_barrelsplit
   direction_vectors: GeneratedDatasetPath:VolumetricFile:direction_vectors_isocortex_ccfv3

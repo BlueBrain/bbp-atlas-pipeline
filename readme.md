@@ -1,130 +1,222 @@
 # Blue Brain Atlas Pipeline
 
-## Installation
-
-_Note: For computation time reason and ease of installation, it is recommended to run the pipeline on BB5._
-
-### Singularity image on BB5
-A CI/CD job creates a Singularity image from the Docker image described below, and deploys it on BB5:  
-`/gpfs/bbp.cscs.ch/data/project/proj83/singularity-images/blue_brain_atlas_pipeline.sif`
-
-so that one can run the corresponding container with  
-`singularity shell /gpfs/bbp.cscs.ch/data/project/proj83/singularity-images/blue_brain_atlas_pipeline.sif`
-
-and access the pipeline files at  
-`Singularity> cd /pipeline/blue_brain_atlas_pipeline/`
-
-Go to [Configuration](#configuration) and [Launch the pipeline](#launch-the-pipeline) for the instructions to run the pipeline.
-
-### Docker image
-A Docker image containing all the pipeline dependecies is automatically built anytime a change is pushed in the relevant files:  
-`bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:latest`
-
-It can be used with  
-`docker run bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:latest`
-
-or converted into an **Apptainer** image with  
-`apptainer pull --docker-login docker://bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:latest`
-
-Alternatively, one can manually install the scheduler and the other package needed as described next.
-
-### Scheduler core
-The pipeline is orchestrated by SnakeMake and the snakefile in the root folder of this repository.
-This means SnakeMake must be installed in one of the following ways:
-
-- Snakemake is available as a BB5 module that can be loaded doing  
-`module load unstable snakemake`
-
-- Conda can be used as explained here : https://snakemake.readthedocs.io/en/stable/getting_started/installation.html. Once Snakemake has been installed in an isolated conda environment, you can use it and install the other pipeline dependencies after activating it:  
-`conda activate <your_snakemake_environment>`
-
-- It is also possible to install it using pip:  
-`pip install snakemake`
-
-_Note: this uses Python 3.6 or more recent._
-
-### Other dependencies
-
-Each module to run as part of the pipeline can be seen as a dependency of this pipeline. Then each module may come with it’s own dependencies (if installed with Conda, Pip or loaded on BB5) or, on some cases, module-level dependencies will have to be installed manually.
-
-List of modules used by the annotation pipeline:
-
-- [bba-datafetch](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-fetch)
-- [atlas-building-tools direction-vectors isocortex](https://bbpteam.epfl.ch/project/spaces/display/BBKG/direction-vectors)
-- [atlas-building-tools orientation-field](https://bbpteam.epfl.ch/project/spaces/display/BBKG/orientation-field)
-- [atlas-building-tools region-splitter split-isocortex-layer-23](https://bbpteam.epfl.ch/project/spaces/display/BBKG/region-splitter)
-- [atlas-building-tools placement-hints isocortex](https://bbpteam.epfl.ch/project/spaces/display/BBKG/placement-hints)
-- [parcellationexport](https://bbpteam.epfl.ch/project/spaces/display/BBKG/parcellationexport)
-- [bba-data-integrity-check nrrd-integrity](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-check)
-- [bba-data-integrity-check meshes-obj-integrity](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-check)
-- [bba-data-push push-volumetric](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-push)
-- [bba-data-push push-meshes](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-push)
-- [bba-data-push push-regionsummary](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-push)
-
-The packages are available as bb5 module using :
-
-```
-module load unstable py-atlas-building-tools \
-py-bba-datafetch \
-py-token-fetch \
-py-data-integrity-check \
-py-nexusforge py-bba-webexporter
-```
-
-Or it can be installed following the ‘Installation’ section in their confluence documentation linked higher.
-
-The CLI bba-data-push is not available as a BB5 module yet. You can install it by following the process detailed in the Installation section of the confluence documentation [here](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-push).
-
-
 ## Introduction
 
-The Atlas Pipeline is a set of processing modules that generate new data such as:
+The Blue Brain Atlas Pipeline (BBAP) is a set of processing modules that generate new data such as:
 
-- Aligned datasets from unaligned gene expression slices
-- A hybrid annotation volume based on Allen Mouse CCF. This includes:
-  - Information from CCFv2 and CCFv3 to reinstate missing brain regions.
-  - Split of layer 2 and 3 of the AIBS mouse isocortex.
+- Direction vectors, orientations and placement hints for selected brain regions,
+- Cell density volumes for several cell types,
+- CellComposition summary of the brain regions.
 
-- Volumes representing cortical and layer depth of Isocortex.
-- Compute direction vectors for selected mouse brain regions.
-- Cell density volumes for several cell types.
-- 3D cell positions in the whole brain.
+Data are always fetched from [Nexus](https://bbp.epfl.ch/nexus/web/). If the data are not yet in Nexus, then a phase of 
+data integration has to happen beforehand. Having a unique source of data enforces reproducibility and favors 
+traceability and provenance. The pipeline input data originally comes from different experiments performed on the 
+"Allen Institute for Brain Science (AIBS)" P56 adult mouse brain.
 
-Data are always fetched from [Nexus](https://bbp.epfl.ch/nexus/web/). If the data are not yet in Nexus, then a phase of data integration has to happen before hand. Having a unique source of data enforces reproducibility and favors traceability and provenance. The pipeline input data originally comes from different experiments performed on the "Allen Institute for Brain Science (AIBS)" P56 adult mouse brain.
+At the present time, the goal of this pipeline is to generate some key reference datasets
+for The Blue Brain Project (BBP) to be used by BBP researchers and engineers.
 
-Historically, the first mission of this pipeline was to generate cell density volumes as well as point cloud datasets with individual cell positions and cell type (the results as well as the methods are detailed in the paper "A Cell Atlas for the Mouse Brain" by Csaba Eroe et al., 2018.)
-As the pipeline was gaining interest and contributors, its scope has broadened, hence the decision to have a more modular approach in terms of software architecture.
 
-At the present time, the goal of this pipeline is to generate some key reference datasets for The Blue Brain Projects to be used by BBP researchers and engineers. In fact, The BBAP can generate datasets and products to be used for the Cell Atlas for the Mouse Brain, the [Circuits building pipeline](https://bbpteam.epfl.ch/documentation/#:~:text=Circuit%20building%20pipeline) and the future new Cell atlas for the Mouse brain.
-For now one part of the BBAP is making the full loop from fetching the data from Nexus to push the generated products back to be visualised in the [Blue Brain Atlas](https://bbpteam.epfl.ch/documentation/#:~:text=Visualize-,Blue%20Brain%20Atlas,-Morphology%20visualization) : the one generating datasets used in the [Circuits building pipeline](https://bbpteam.epfl.ch/documentation/#:~:text=Circuit%20building%20pipeline) referred as the **annotation pipeline**.
+## Installation
 
-## Atlas Annotation Pipeline
+The Blue Brain Atlas Pipeline (BBAP) can be installed in three different ways:
+- via a [Singularity image](#singularity-image-on-bb5) (recommended),
+- via a [Docker image](#docker-image),
+- via this [Git repository](#git-repository).
+
+For computation time reason and ease of installation, it is recommended to run the pipeline 
+on the BB5 cluster via the Singularity image described [hereafter](#singularity-image-on-bb5).
+You can log in to the cluster with  
+`ssh -l <your-Gaspar-username> bbpv1.epfl.ch`  
+and your Gaspar password.
+
+Once the installation step is completed, go to [Run the pipeline](#run-the-pipeline) for the instructions to run the pipeline.
+
+### Singularity image on BB5
+A Singularity image (created from the [Docker image](#docker-image)) is available on BB5 in:  
+`/gpfs/bbp.cscs.ch/data/project/proj83/singularity-images/`
+
+The folder contains
+- `blue_brain_atlas_pipeline_dev.sif`: development image regularly updated,
+- `blue_brain_atlas_pipeline_<tag>.sif`: production image corresponding to a repository [tag](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/-/tags)
+  (such as `v0.5.2`).
+
+One can run the corresponding container with  
+1. `module load unstable singularityce`
+2. `singularity shell /gpfs/bbp.cscs.ch/data/project/proj83/singularity-images/blue_brain_atlas_pipeline_dev.sif`
+
+and access the pipeline files at  
+3. `Singularity> cd /pipeline/blue_brain_atlas_pipeline/`
+
+### Docker image
+A [Docker](https://docs.docker.com/reference) image containing all the pipeline dependencies is available in the Git [registry](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/container_registry/159):  
+`bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:<tag>`  
+where `<tag>` = `dev` or a repository tag. 
+
+It can be pulled and run with  
+1. `docker login bbpgitlab.epfl.ch:5050 -u <your-Gaspar-username> -p <your-Gaspar-password>`
+2. `docker pull bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:<tag>`
+3. `docker run -it bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:<tag> bash`
+
+or converted into an **Apptainer** image with  
+`apptainer pull --docker-login docker://bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:<tag>`
+
+Alternatively, one can manually install the pipeline (and its dependencies) manually as described [next](#git-repository).
+
+### Git repository
+The BBAP can be installed directly from the `setup.py` file available in this repository:
+
+1. `git clone https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline.git`
+2. `pip install blue_brain_atlas_pipeline/`
+
+Each package run as part of the pipeline is considered a pipeline dependency:
+
+- [token-fetch](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_token_fetch)
+- [nexusforge](https://github.com/BlueBrain/nexus-forge)
+- [bba-datafetch](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-fetch)
+- [atlas-direction-vectors](https://bbpteam.epfl.ch/project/spaces/display/BBKG/direction-vectors)
+- [atlas-splitter](https://bbpteam.epfl.ch/project/spaces/display/BBKG/region-splitter)
+- [atlas-placement-hints](https://bbpteam.epfl.ch/project/spaces/display/BBKG/placement-hints)
+- [parcellationexport](https://bbpteam.epfl.ch/project/spaces/display/BBKG/parcellationexport)
+- [bba-data-integrity-check](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-check)
+- [bba-data-push](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-push)
+
+On BB5, most packages are available also as modules:
+```
+module load unstable \
+snakemake \
+py-token-fetch \
+py-nexusforge \
+py-bba-datafetch \
+py-atlas-building-tools \
+py-bba-webexporter \
+py-data-integrity-check \
+py-bba-data-push
+```
+Or they can be installed following the ‘Installation’ section in their Confluence documentation page.
+
+
+## Run the pipeline
+
+Once the pipeline environment is installed, the command to run the pipeline is:
+```
+bbp-atlas  --target-rule <target_rule>  --snakemake-options '<options>'
+```
+where `<target_rule>` represents the target action to execute.
+
+The "highest-level" rules are:
+- `push_atlas_release`: create an AtlasRelease Resource along with all its properties and push it in Nexus;
+- `push_cellcomposition`: generate and push into Nexus the SBO CellComposition along with its properties (CellCompositionVolume and CellCompositionSummary);
+- `push_atlas_datasets`: global rule to generate and push into Nexus every Atlas dataset (triggers both `push_atlas_release` and `push_cellcomposition`).
+
+Those rules trigger all the intermediate rules (as described [below](#blue-brain-atlas-pipeline-1)) needed to produce the final datasets, such as:
+- `placement_hints`: create placement hints for isocortex region;
+- `create_mtypes_densities_from_probability_map`: generate a set of METype densities files based on the input probability map(s).
+
+_Note: the pipeline framework (Snakemake) resolves the data dependencies and automatically schedules the tasks to be 
+run when data are missing. Hence, there is no need to run all the tasks manually, only the target one._
+
+The `push_*` rules requires write access to the Nexus project specified in the pipeline [configuration](#Configuration).
+In order to generate the datasets and skip the Nexus registration, the default value of the configuration variable `NEXUS_REGISTRATION` is `False`.  
+Users will be enabled to register data in Nexus at a later stage.
+
+_Note: Snakemake may ask to specify the maximum number of CPU cores to use during the run.  
+If this occurs, add the argument  `--cores <number_of_cores>` into `--snakemake-options`._
+
+
+### Customize a pipeline rule
+
+It is possible to customize a pipeline rule that generates a (set of) volumetric file (`.nrrd`) in order to change the values of a
+specific region of the volume.
+The customization happens through a configuration file provided by the user following the structure of [this sample configuration](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/-/blob/develop/customize_pipeline/user_config.json):
+- `target_rule`: name of the final rule to execute;
+- `rule`: name of the rule to customize from the default pipeline;
+- `brainRegion`: ID of the brain region to customize;
+- `output_dir`: path of the folder where the volumetric file(s) is generated by the CLI;
+- `CLI`:
+  - `command`: CLI to execute in order to produce the volumetric file with the desired values for the brain region of interest;
+  - `args`: CLI arguments that can reference variables between curly brackets (see below);
+- `container`: URL of the Docker image to use in order to spawn a container where the CLI will be executed. This parameter
+is optional: if not provided, the CLI will be executed in the same environment of the default pipeline (in such a case,
+the user must ensure that the provided CLI is defined therein).
+
+The CLI `args` can reference one or more variables which points to files generated by pipeline rules executed before the
+rule to customize. The list of variables is available in [this file](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/-/blob/develop/customize_pipeline/available_vars.yaml).
+The user must ensure that the files generated by the provided CLI have the same names of the files generated by the rule
+to customize. For example, the rule `direction_vectors_placeholder_ccfv3` in the sample configuration generates one output file `direction_vectors_ccfv3.nrrd`.
+The `placement_hints` rule generates seven volumetric files: `[PH]y.nrrd` and `[PH]layer_n.nrrd` where n = 1, ..., 6.
+
+Once the configuration file is ready, the customized pipeline can be run with the following command:
+```
+bbp-atlas  --target-rule <target_rule>  --user-config-file <user_config_path>  --snakemake-options '<options>'
+```
+where `<target_rule>` is the targeted rule of the pipeline (required if no user configuration is provided),
+and `<user_config_path>` is the path of the user configuration file.
+Snakemake `options` can be listed in a single string via the optional `--snakemake-options` argument.  
+_Note_: the Snakemake option `--use-singularity` must be provided for the configuration parameter `container` to be considered.
+
+
+#### Integration
+In case a user wants to request the integration of the customized version of a dataset:
+1. Open a Merge Request (MR) in this repository including the `user-config-file` and any additional input metadata required.
+2. The MR is then reviewed and, if approved, a new Atlas pipeline dev image is produced accordingly.
+3. The new pipeline is run and the new datasets are registered in Nexus staging for wider tests.
+4. When the new version of the datasets is validated, a new tag of the Atlas pipeline is cut and the corresponding image is used to 
+register the datasets in Nexus prod.
+
+
+### Useful Snakemake command line arguments
+
+Snakemake being a command-line tool, it comes with a multitude of optional arguments to
+execute, debug, and visualize workflows. Here is a selection of the most used:
+
+- `snakemake --dry-run`, `-n` → To conduct a dry run (execute nothing but print a
+summary of jobs that would be done).
+
+- `snakemake --forcerun <some_rule>` → Force a given rule to be re-executed (overwrite
+the already created output).
+
+- `snakemake --list`, `-l` → Print a list of all the available rules from the snakefile.
+
+- `snakemake <some_rule> --dag | dot -Tpdf > <name_of_your_DAG>.svg` → Save in a svg file
+the directed acyclic graph (DAG) of jobs representing the selected workflow in the dot language.
+Note that the package [graphviz](https://graphviz.org/) needs to be installed. On BB5 it is available as a
+module that can be loaded with `module load unstable graphviz`.
+
+Every Snakemake command line argument is listed and described in the Snakemake official documentation page.
+
+
+## Blue Brain Atlas Pipeline
 
 Its workflow consists of 4 steps :
-- Fetch the required datasets from Nexus. These input data consist of the [original AIBS ccfv3 brain parcellation](https://bbp.epfl.ch/nexus/web/bbp/atlas/resources/https%3A%2F%2Fbbp.epfl.ch%2Fneurosciencegraph%2Fdata%2F025eef5f-2a9a-4119-b53f-338452c72f2a) and the [AIBS Mouse CCF Atlas regions hierarchy file](https://bbp.epfl.ch/nexus/web/neurosciencegraph/datamodels/resources/http%3A%2F%2Fbbp.epfl.ch%2Fneurosciencegraph%2Fontologies%2Fmba) as described in the documentation page [Allen Mouse CCF Compatible Data](https://bbpteam.epfl.ch/project/spaces/display/BBKG/Allen+Mouse+CCF+Compatible+Data).
+- Fetch the required datasets from Nexus. These input data consist of the [original AIBS ccfv3 brain parcellation](https://bbp.epfl.ch/nexus/web/bbp/atlas/resources/https%3A%2F%2Fbbp.epfl.ch%2Fneurosciencegraph%2Fdata%2F025eef5f-2a9a-4119-b53f-338452c72f2a) 
+and the [AIBS Mouse CCF Atlas regions hierarchy file](https://bbp.epfl.ch/nexus/web/neurosciencegraph/datamodels/resources/http%3A%2F%2Fbbp.epfl.ch%2Fneurosciencegraph%2Fontologies%2Fmba) 
+as described in the documentation page [Allen Mouse CCF Compatible Data](https://bbpteam.epfl.ch/project/spaces/display/BBKG/Allen+Mouse+CCF+Compatible+Data).
 
-- The fetched datasets are then fed to the rules, and under the hood consumed by atlas modules to generate products. These products consist of [orientation field](https://bbpteam.epfl.ch/project/spaces/display/BBKG/orientation-field), [placement hints](https://bbpteam.epfl.ch/project/spaces/display/BBKG/placement-hints), [splitted annotation volume](https://bbpteam.epfl.ch/project/spaces/display/BBKG/region-splitter) and brain regions [meshes, masks and json summary files](https://bbpteam.epfl.ch/project/spaces/display/BBKG/parcellationexport).
+- The fetched datasets are then fed to the [Snakemake](https://snakemake.readthedocs.io/en/stable/) rules, and under the hood consumed by atlas modules to generate products.
 
-- Each product has its integrity verified based on their format.
+- Each product can (optionally) be pushed into Nexus with a set of metadata automatically filled up and be visualised in 
+the [Blue Brain Atlas](https://bbpteam.epfl.ch/documentation/#:~:text=Visualize-,Blue%20Brain%20Atlas,-Morphology%20visualization).
 
-- Each product can (optionally) be pushed into Nexus with a set of metadata automatically filled up and be visualised in the [Blue Brain Atlas](https://bbpteam.epfl.ch/documentation/#:~:text=Visualize-,Blue%20Brain%20Atlas,-Morphology%20visualization).
+This workflow is illustrated on the following diagram containing the directed acyclic graph (DAG)
+of the Snakemake rules of the BBAP:
 
-This workflow is illustrated on the following diagram containing the directed acyclic graph (DAG) of the [Snakemake](https://snakemake.readthedocs.io/en/stable/) rules of the BBAP:
+![README_pipeline_DAG](doc/source/figures/dag_push_atlas.svg)
 
-
-![README_annotation_pipeline_DAG](doc/source/figures/README_annotation_pipeline_DAG.svg)
-
-
+A more detailed DAG listing the input and ouput files for each step is available [here](doc/source/figures/dag_push_atlas_fg.svg). 
 
 ***
 **Rules and modules**  
-In this document, a “module” is a CLI that could also be launched separately but that was encapsulated inside one of the components of the pipeline. Such component is called a “rule”. This terminology comes from SnakeMake, where a “rule” can leverage one or more “module” and where a “module” can be used by one of more “rule”, usually using a different set of arguments.  
-You can find more informations on rules in the SnakeMake [documentation](https://snakemake.readthedocs.io/en/stable/).
+In this document, a “module” is a CLI encapsulated inside one of the components of the pipeline.
+Such component is called a “rule”. This terminology comes from SnakeMake, where a “rule” 
+can leverage one or more modules and where a module can be used by one of more rules,
+usually using a different set of arguments.  
+You can find more information on rules in the [SnakeMake documentation](https://snakemake.readthedocs.io/en/stable/).
 ***
 
 
-**Additional informations**  
-To see more information about The Blue Brain Atlas Pipeline (BBAP) you can check its [confluence documentation](https://bbpteam.epfl.ch/project/spaces/display/BBKG/Atlas+Pipeline).  
+**Additional information**  
+More information about The Blue Brain Atlas Pipeline (BBAP) are available in its [confluence documentation](https://bbpteam.epfl.ch/project/spaces/display/BBKG/Atlas+Pipeline).  
 This space contains several documentation pages describing:  
 The Allen Mouse CCF Compatible Data : [https://bbpteam.epfl.ch/project/spaces/display/BBKG/Allen+Mouse+CCF+Compatible+Data](https://bbpteam.epfl.ch/project/spaces/display/BBKG/Allen+Mouse+CCF+Compatible+Data)   
 The Atlas Modules : [https://bbpteam.epfl.ch/project/spaces/display/BBKG/Atlas+Modules](https://bbpteam.epfl.ch/project/spaces/display/BBKG/Atlas+Modules)
@@ -132,99 +224,22 @@ The Atlas Modules : [https://bbpteam.epfl.ch/project/spaces/display/BBKG/Atlas+M
 
 ## Configuration
 
-The configuration of the pipeline is provided in the files 'atlasrelease_config_path.json' and 'config.yaml'.  
-Before running the pipeline, make sure to set the AtlasRelease ID of interest in the 'atlasrelease_config_path.json' (atlas releases for the same Allen ccf may have different IDs between the prod and staging Nexus environments).  
-In 'config.yaml' you can modify:
+The configuration of the pipeline is provided in the `config.yaml` file. The most important
+variables that a user can customize are:
 
-- `WORKING_DIR` with a directory of your choice (will contain all the files, temporary or not).
+- `WORKING_DIR`: the output directory of the pipeline files,
+- `NEXUS_IDS_FILE`: the json file containing the Ids of the Nexus Resources to fetch,
+- `FORGE_CONFIG`: the configuration file (yaml) to instantiate nexus-forge,
+- `NEW_ATLAS`: boolean flag to trigger the creation of a brand-new atlas release,
+- `RESOLUTION`: resolution (in μm) of the input volumetric files to be consumed by the pipeline (default to 25),
+- `NEXUS_REGISTRATION`: boolean flag to trigger data registration in Nexus
+- `RESOURCE_TAG`: string to use as tag of the data registered in Nexus
+- `IS_PROD_ENV`: boolean flag to indicate whether the target Nexus environment is production or not (staging),
+- `NEXUS_DESTINATION_ORG`/`NEXUS_DESTINATION_PROJ`: Nexus organization/project where register the pipeline products,
+- `DISPLAY_HELP`: boolean flag to display every rule of the snakefile with its descriptions.
 
-- Optionally `NEW_ATLAS` (`True`/`False`, default: `False`) to trigger the creation of a brand new atlas release.
-
-- Optionally `NEXUS_IDS_FILE` if the @ids have changed or if you are using a different Nexus environment.
-
-- Optionally `FORGE_CONFIG` corresponding to the forge configuration file (yaml) located within the module bba-data-push directory. The default path value assumes that the bba-data-push module folder is in the same directory as the blue_brain_atlas_pipeline folder.
-
-- Optionally `RESOLUTION` if the input volumetric files of the pipeline are in another resolution other than the default one (25 μm).
-
-- Optionally `MODULES_VERBOSE` (`True`/`False`, default: `False`) if you want to enable supplementary verbosity to be displayed during the run.
-
-- Optionally `DISPLAY_HELP` (`True`/`False`, default: `False`) if you want to display in your console every rule from the snakefile with its descriptions.
-
-- The generated data destination aka the Nexus environment `NEXUS_DESTINATION_ENV`, organisation `NEXUS_DESTINATION_ORG` and project `NEXUS_DESTINATION_PROJ` where your datasets will be eventually push into. You can find more details on the generated datasets on the page Pipeline Products as well as informations on the module dedicated to push data into Nexus on the page bba-data-push.
-
-If you do not want to modify the config file, you can still overload the config settings when running the pipeline in command line using the `--config` flag:
-
-`snakemake --config RESOLUTION="10" --forcerun <some_rule>`
-
-
-## Launch the pipeline
-
-> Alternatively to running the pipeline with SnakeMake, it is also possible to use the scripts in the [shell-rules](shell-rules). This method was later developed to be more lightweight.
-
-In a terminal, first cd the workflow folder:
-
-`cd blue_brain_atlas_pipeline`
-
-Then, based on whether the whole pipeline or just a subpart of it needs to be launched, it can be handy to have a list of the tasks:
-
-- `push_volumetric_ccfv{2,3}_l23split`: rule to create/update (see the `NEW_ATLAS` flag in [Configuration](#configuration)) an atlas release and its properties;
-- `push_cellcomposition`: final rule to generate and push into Nexus the SBO CellComposition along with its dependencies (Volume and Summary);
-- `generate_annotation_pipeline_datasets`: global rule to generate and check the integrity of every products of the annotation pipeline;
-- `push_annotation_pipeline_datasets`: global rule to generate, check and push into Nexus every products of the annotation pipeline.
-
-_Note: the pipeline framework (Snakemake) resolves the data dependencies and automatically schedules the tasks to be launched when data are missing. Hence, there is no need to launch all the tasks manually, only the target one._
-
-Then to launch the pipeline up to a certain task:
-
-`snakemake <some_rule>`
-
-where `<some_rule>` is the actual name of a rule, such as `push_annotation_pipeline_datasets`.
-
-Note: Snakemake may ask you to specify the maximum number of CPU cores to use during the run.  
-If this occurs, add the configuration argument  `--cores <number_of_cores>`  before  `<some_rule>`.
-
-
-### Customize a pipeline rule
-
-It is possible to customize a pipeline rule that generates a (set of) volumetric file (`.nrrd`) in order to change the values of a
-specific region of the volume.
-The customization happens through a configuration file provided by the user following the structure of [this sample configuration](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/-/blob/customize_pipeline/customize_pipeline/user_config.json):
-- `rule`: name of the rule to customize from the default pipeline;
-- `brainRegion`: ID of the brain region to customize;
-- `command`: CLI to execute in order to produce the volumetric file with the desired values for the brain regon of interest;
-- `output_dir`: path of the folder where the volumetric file(s) is generated by the CLI;
-- `container`: URL of the Docker image to use in order to spawn a container where the CLI will be executed. This parameter
-is optional: if not provided, the CLI will be executed in the same environment of the default pipeline (in such a case,
-the user must ensure that the provided CLI is defined therein).
-
-The `command` CLI can reference one or more variables which points to files generated by pipeline rules executed before the
-rule to customize. The list of variables is available in [this file](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/-/blob/customize_pipeline/customize_pipeline/available_vars.yaml).  
-The user must ensure that the files generated by the provided CLI have the same names of the files generated by the rule
-to customize. For example, the default rule `placement_hints` in the sample configuration generates seven volumetric files:
-`[PH]y.nrrd` and `[PH]layer_n.nrrd` where n = 1, ..., 6.
-
-Once the configuration file is ready, the customized pipeline can be run with the following command:
-```
-bbp-atlas --target-rule <target_rule> --user-config-file <user_config_path> --snakemake-options '<options>'
-```
-where `<target_rule>` is the targeted rule of the pipeline, and `<user_config_path>` is the path of the user configuration file.  
-Snakemake `options` can be listed in a single string via the optional `--snakemake-options` argument.  
-_Note_: the Snakemake option `--use-singularity` must be provided for the configuration parameter `container` to be considered.
-
-
-### Useful Snakemake command line arguments
-
-Snakemake being a command-line tool, it comes with a multitude of optional arguments to execute, debug, and visualize workflows. Here is a selection of the most used :
-
-- `snakemake --dry-run`, `-n` → To conduct a dry run (execute nothing but print a summary of jobs that would be done).
-
-- `snakemake --forcerun <some_rule>` → Force a given rule to be re-executed  (overwrite the already created output.)
-
-- `snakemake --list`, `-l` → Print a list of all the available rules from the snakefile.
-
-- `snakemake <some_rule> --dag | dot -Tpdf > <name_of_your_DAG>.svg` → Save in a svg file the directed acyclic graph (DAG) of jobs representing your workflow in the dot language. Several DAG of the atlas pipeline workflow are shown here. Note that the package [graphviz](https://graphviz.org/) need to be installed. As it is available as a BB5 module you can load it doing : `module load unstable graphviz`
-
-Every Snakemake CL argument is listed and described in the Snakemake official documentation page.
+It is possible to override the config variables at runtime using the snakemake argument `--config`:  
+`--config <VAR_NAME>=<VALUE>`
 
 
 ## Authors and Contributors :
@@ -234,4 +249,4 @@ Every Snakemake CL argument is listed and described in the Snakemake official do
 * Jonathan Lurie: <jonathan.lurie@epfl.ch>
 
 The BBAP is currently maintained by the BlueBrain DKE team: <bbp-ou-dke@groupes.epfl.ch>.
-If you face any issue using the BBAP, please send a mail to one of the contributors.
+If you face any issue using the BBAP, please send an e-mail to one of the contributors.

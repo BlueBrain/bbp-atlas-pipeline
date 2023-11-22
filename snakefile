@@ -38,7 +38,6 @@ NEXUS_IDS_FILE = os.path.join(REPO_PATH, config["NEXUS_IDS_FILE"])
 FORGE_CONFIG = os.path.join(os.getcwd(), REPO_PATH, config["FORGE_CONFIG"])
 RULES_CONFIG_DIR_TEMPLATES = os.path.join(REPO_PATH, config["RULES_CONFIG_DIR_TEMPLATES"])
 RESOLUTION = str(config["RESOLUTION"])
-MODULES_VERBOSE = config["MODULES_VERBOSE"]
 DISPLAY_HELP = config["DISPLAY_HELP"]
 RESOURCE_TAG = config["RESOURCE_TAG"]
 if RESOURCE_TAG == "None":
@@ -166,8 +165,6 @@ except OSError:
 #for app in APPS:
 
 #    app_name_fixed = app.split()[0]
-#    if MODULES_VERBOSE:
-#        L.info(f"{app} [executable at] {shutil.which(app_name_fixed)}")
 
     # first, we need to check if each CLI is in PATH, if not we abort with exit code 1
 #    if shutil.which(app_name_fixed) is None:
@@ -921,7 +918,7 @@ rule direction_vectors_isocortex_ccfv3:
             2>&1 | tee {log}
         """
 
-direction_vectors = rules.direction_vectors_isocortex_ccfv3.output
+direction_vectors = rules.direction_vectors_placeholder_ccfv3.output.file
 
 ##>interpolate_direction_vectors_isocortex_ccfv2 : Interpolate the [NaN, NaN, NaN] direction vectors by non-[NaN, NaN, NaN] ones.
 rule interpolate_direction_vectors_isocortex_ccfv2:

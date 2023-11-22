@@ -1,6 +1,7 @@
 import os
 import json
 import yaml
+import copy
 
 from customize_pipeline import get_region_id, check_rule_existence, get_merge_rule_name, get_var_path_map
 
@@ -38,10 +39,11 @@ var_path_map = get_var_path_map(AVAILABLE_VARS["input"], PUSH_DATASET_CONFIG)
 user_config_file = "customize_pipeline/user_config.json"
 
 user_config = json.load(open(user_config_file))
+target_rule = user_config["target_rule"]
 user_rules = user_config["rules"]
 for user_rule in user_rules:
     rule_name = user_rule["rule"]
-    default_rule = getattr(rules, rule_name, None)
+    default_rule = workflow.get_rule(rule_name)
     check_rule_existence(default_rule, rule_name)
 
     default_output = getattr(default_rule, "output")
@@ -52,33 +54,53 @@ for user_rule in user_rules:
     for region_customization in user_rule["execute"]:
         region_id = get_region_id(region_customization["brainRegion"])
         region_rule_name = f"{rule_name}_region{region_id}"
+        region_rule_cli = region_customization["CLI"]
+
+        args_vars = re.findall("{(.*?)}", region_rule_cli["args"])
+        args_vars = [args_var.split(".")[1] for args_var in args_vars]
+        region_rule_vars = copy.deepcopy(var_path_map)
+        for var in var_path_map:
+            if var not in args_vars:
+                region_rule_vars.pop(var)
 
         # Define region-specific rule for the region provided in the user-configuration
         rule:
             name: region_rule_name
             input:
-                **var_path_map,
+                **region_rule_vars,
             output:
                 directory(region_customization['output_dir'])
+                #directory(os.path.join(WORKING_DIR, region_customization['output_dir']))
+            params:
+                # Need to split the CLI because snakemake evaluates lambdas after the for loop and so the region_rule
+                # variable in the lambda points always to the last region in the user_config
+                cmd = region_rule_cli["command"],
+                args = lambda wildcards, input: region_rule_cli["args"].format(input = input)
             log:
                 f"{LOG_DIR}/{region_rule_name}.log"
             container:
                 region_customization['container']
             shell:
-                region_customization['command']
+                "{params.cmd} {params.args}"
 
-        custom_regions_rules.append(getattr(rules, region_rule_name))
+        custom_regions_rules.append((workflow.get_rule(region_rule_name), region_rule_vars))
 
-    ##>merge_rule : Merge the outputs from region-specific rules into the default rule output
+    merge_rule_vars = {}
+    for custom_rule in custom_regions_rules:
+        merge_rule_vars.update(custom_rule[1])
     merge_rule_name = get_merge_rule_name(rule_name)
+    merge_rule_flag = f"{WORKING_DIR}/{merge_rule_name.replace('merge_', 'merged_')}.log"
+    ##>merge_rule : Merge the outputs from region-specific rules into the default rule output
     rule:
         name: merge_rule_name
         input:
-            [custom_rule.output for custom_rule in custom_regions_rules],
-            **var_path_map,
+            [custom_rule[0].output for custom_rule in custom_regions_rules],
+            hierarchy = merge_rule_vars["hierarchy"],
+            annotation = merge_rule_vars["annotation_ccfv3"],
             default_output_dir = default_output_dir,
         output:
-            directory(merged_output)
+            dir = directory(merged_output),
+            flag = touch(merge_rule_flag)
         log:
             f"{LOG_DIR}/{merge_rule_name}.log"
         run:
@@ -88,5 +110,7 @@ for user_rule in user_rules:
             if rule_name == "placement_hints":
                 metadata_path = default_output.metadata
             customize_pipeline.main(input.hierarchy, input.annotation, user_rule,
-                input.default_output_dir[0], output[0], metadata_path)
-            shutil.copytree(output, input.default_output_dir[0])
+                input.default_output_dir, output.dir, metadata_path)
+            shutil.copytree(output.dir, input.default_output_dir, dirs_exist_ok=True)
+
+    workflow.get_rule(target_rule).set_input(workflow.get_rule(merge_rule_name).output.flag)

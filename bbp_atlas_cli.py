@@ -4,10 +4,11 @@ import json
 import yaml
 import re
 
+
 @click.command()
 @click.option("--target-rule",
               type=click.STRING,
-              required=True,
+              required=False,
               help="The target rule of the pipeline to execute")
 @click.option("--user-config-file",
               type=click.Path(exists=True),
@@ -20,6 +21,8 @@ import re
 def execute_pipeline(target_rule, user_config_file, snakemake_options):
     pipeline_command = "snakemake"
     if not user_config_file:
+        if not target_rule:
+            raise Exception("A target rule is required if no user configuration is provided")
         pipeline_command += " --snakefile snakefile"
     else:
         from blue_brain_token_fetch.Token_refresher import TokenFetcher
@@ -44,6 +47,7 @@ def execute_pipeline(target_rule, user_config_file, snakemake_options):
         pipeline_validator(user_config_file, token_fetcher.getAccessToken(), whitelisted_vars)
 
         user_config_json = json.load(open(user_config_file))
+        target_rule = user_config_json["target_rule"]
         priority_rules = []
         for user_rule_name in [user_rule["rule"] for user_rule in user_config_json["rules"]]:
             merge_rule_name = get_merge_rule_name(user_rule_name)
@@ -60,4 +64,5 @@ def execute_pipeline(target_rule, user_config_file, snakemake_options):
         pipeline_command += " " + snakemake_options
 
     pipeline_command += " " + target_rule
+    print("\nExecuting command:\n", pipeline_command)
     os.system(pipeline_command)

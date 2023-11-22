@@ -7,9 +7,8 @@ RULES_CONFIG_DIR_TEMPLATES: rules_config_dir_templates
 NEW_ATLAS: False
 RESOLUTION: "25"
 EXPORT_MESHES: True
-MODULES_VERBOSE: True
+NEXUS_REGISTRATION: False
 RESOURCE_TAG: "leaves-only_atlas"  # put None to generate an automatic tag corresponding to the timestamp
-NEXUS_REGISTRATION: True
 DISPLAY_HELP: False
 
 NEXUS_PROD_ENV: "https://bbp.epfl.ch/nexus/v1"
