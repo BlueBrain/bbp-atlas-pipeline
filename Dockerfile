@@ -33,10 +33,10 @@ RUN pip install blue_brain_atlas_pipeline/
 RUN git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/".insteadOf https://bbpgitlab.epfl.ch/
 
 # module load py-token-fetch
-RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_token_fetch.git@v0.2.0
+RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "blue-brain-token-fetch==1.0.0"
 
 # module load py-bba-datafetch
-RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_fetch.git@v0.2.4
+RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "bba-data-fetch==0.3.0"
 
 # temporary test, will be ported into atlas-splitter
 #RUN pip install git+https://bbpgitlab.epfl.ch/conn/structural/validation/cell-density-validations/cell-densities.git@2325c56d
@@ -44,29 +44,28 @@ RUN git clone --branch new_regions_hier https://bbpgitlab.epfl.ch/conn/structura
 RUN cd cell-density-validation  &&  git checkout 94c2f3aa  &&  pip install cell-densities/
 
 # module load py-bba-webexporter
-RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_web_exporter.git@v2.0.3
+RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "blue-brain-atlas-web-exporter==2.1.0"
 
 # module load py-data-integrity-check
-RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_integrity_check.git@v0.1.0
+RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "bba-data-integrity-check==0.2.0"
 
 # cwl-registry depends on blue_brain_nexus_push so it must be installed first to not overwrite the blue_brain_nexus_push version
 RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ cwl-registry==0.4.8
 
 # module load py-bba-data-push
-RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_push.git@851d7306
+RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "bba-data-push==2.0.0" 
 
 RUN pip install git+https://bbpgitlab.epfl.ch/dke/users/jonathanlurie/atlas_cell_transplant.git@v0.2.0
 
-RUN pip install git+https://bbpgitlab.epfl.ch/dke/apps/pipeline-validator.git@0.1.1
+RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "pipeline-validator==0.3.1"
 
 RUN git config --global --remove-section url."https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/"
 
-# Need the latest atlas-commons branch until v0.1.5 is cut
-RUN pip install git+https://github.com/BlueBrain/atlas-commons@b083081
+RUN pip install "atlas-commons==0.1.5"
 
-RUN pip install git+https://github.com/BlueBrain/atlas-splitter@v0.1.2
+RUN pip install "atlas-splitter==0.1.2"
 
-RUN pip install git+https://github.com/BlueBrain/atlas-densities@9b324fe
+RUN pip install "atlas-densities==0.2.1"
 
 # module load py-atlas-building-tools
 RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "atlas-building-tools==0.1.10"

@@ -33,7 +33,7 @@ def execute_pipeline(target_rule, user_config_file, snakemake_options):
             pipeline_config = yaml.safe_load(pipeline_config_file.read().strip())
         keycloak_config = pipeline_config["KEYCLOAK_CONFIG"]
         working_dir = pipeline_config["WORKING_DIR"]
-        token_fetcher = TokenFetcher(keycloak_config_file=keycloak_config)
+        token_fetcher = TokenFetcherUser(keycloak_config_file=keycloak_config)
 
         with open("rules_config_dir_templates/push_dataset_config_template.yaml", "r") as push_dataset_config_template:
             push_dataset_config = re.sub("{WORKING_DIR}", working_dir, push_dataset_config_template.read())

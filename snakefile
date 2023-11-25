@@ -327,7 +327,7 @@ rule help:
 
 
 # Launch the automatic token refreshing
-myTokenFetcher = TokenFetcher(keycloak_config_file=KEYCLOAK_CONFIG)
+myTokenFetcher = TokenFetcherUser(keycloak_config_file=KEYCLOAK_CONFIG)
 
 default_fetch = """{params.app} \
                     --forge-config {FORGE_CONFIG} \
