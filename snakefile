@@ -2005,7 +2005,7 @@ rule create_cellCompositionVolume_payload:
     output:
         payload = f"{WORKING_DIR}/cellCompositionVolume_payload_{env}.json"
     log:
-        f"{LOG_DIR}/create_cellCompositionVolume_payload.log"
+        f"{LOG_DIR}/create_cellCompositionVolume_payload_{env}.log"
     run:
         with open(log[0], "w") as logfile:
             n_layer_densities = 0
@@ -2019,7 +2019,7 @@ rule create_cellCompositionVolume_payload:
             from kgforge.core import KnowledgeGraphForge
             forge = KnowledgeGraphForge(FORGE_CONFIG, bucket = "/".join([NEXUS_DESTINATION_ORG, NEXUS_DESTINATION_PROJ]), endpoint = NEXUS_DESTINATION_ENV, token = myTokenFetcher.getAccessToken())
             from cellCompVolume_payload import create_payload
-            logfile.write(f"Creating CellCompositionVolume payload for atlasRelease {atlas_release_id} with tag '{params.resource_tag}'\n")
+            logfile.write(f"Creating CellCompositionVolume payload for atlasRelease {atlas_release_id} with tag '{params.resource_tag}' from Nexus {env}\n")
             create_payload(forge, atlas_release_id, output.payload, n_layer_densities, endpoint=NEXUS_DESTINATION_ENV, org=NEXUS_DESTINATION_ORG, project=NEXUS_DESTINATION_PROJ, tag=params.resource_tag)
             logfile.write(f"CellCompositionVolume payload created: {output.payload}\n")
 
@@ -2033,10 +2033,10 @@ rule create_cellCompositionSummary_payload:
         app=APPS["cwl-registry"],
         token = myTokenFetcher.getAccessToken(),
     output:
-        intermediate_density_distribution = f"{WORKING_DIR}/density_distribution.json",
-        summary_statistics = f"{WORKING_DIR}/cellCompositionSummary_payload.json"
+        intermediate_density_distribution = f"{WORKING_DIR}/density_distribution_{env}.json",
+        summary_statistics = f"{WORKING_DIR}/cellCompositionSummary_payload_{env}.json"
     log:
-        f"{LOG_DIR}/create_cellCompositionSummary_payload.log"
+        f"{LOG_DIR}/create_cellCompositionSummary_payload_{env}.log"
     run:
         with open(log[0], "w") as logfile:
             logfile.write(f"Reading CellCompositionVolume payload from {input.cellCompositionVolume}\n")
@@ -2046,12 +2046,12 @@ rule create_cellCompositionSummary_payload:
                 from kgforge.core import KnowledgeGraphForge
                 forge = KnowledgeGraphForge(FORGE_CONFIG, bucket = "/".join([NEXUS_DESTINATION_ORG, NEXUS_DESTINATION_PROJ]), endpoint = NEXUS_DESTINATION_ENV, token=params.token)
 
-                logfile.write(f"Creating density_distribution in {output.intermediate_density_distribution}\n")
+                logfile.write(f"Creating density_distribution from Nexus {env} in {output.intermediate_density_distribution}\n")
                 from cwl_registry import staging, statistics
                 density_distribution = staging.materialize_density_distribution(forge=forge, dataset=volume_dict,
                     output_file=output.intermediate_density_distribution)
 
-                logfile.write(f"Computing CellCompositionSummary payload\n")
+                logfile.write(f"Computing CellCompositionSummary payload for Nexus {env}\n")
                 import multiprocessing
                 import voxcell
                 with multiprocessing.Pool(processes=workflow.cores) as pool:

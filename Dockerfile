@@ -50,7 +50,7 @@ RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "blue-brain-
 RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "bba-data-integrity-check==0.2.0"
 
 # cwl-registry depends on blue_brain_nexus_push so it must be installed first to not overwrite the blue_brain_nexus_push version
-RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ cwl-registry==0.4.8
+RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ cwl-registry==0.4.14
 
 # module load py-bba-data-push
 RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "bba-data-push==2.0.0" 
