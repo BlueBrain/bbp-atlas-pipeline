@@ -25,7 +25,7 @@ from uuid import uuid4
 # from importlib.metadata import distribution
 from platform import python_version
 from snakemake.logging import logger as L
-from blue_brain_token_fetch.Token_refresher import TokenFetcher
+from blue_brain_token_fetch.token_fetcher_user import TokenFetcherUser
 
 # loading the config
 configfile: "config.yaml"
