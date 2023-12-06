@@ -864,7 +864,7 @@ rule direction_vectors_placeholder_ccfv3:
         hierarchy= orig_hierarchy,
         annotation= orig_annotation_v3
     output:
-        dir = os.path.dirname(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['direction_vectors_ccfv3']}"),
+        dir = directory(os.path.dirname(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['direction_vectors_ccfv3']}")),
         file = f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['direction_vectors_ccfv3']}"
     params:
         app=APPS["atlas-direction-vectors direction-vectors from-center"]
