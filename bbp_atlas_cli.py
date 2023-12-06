@@ -44,7 +44,7 @@ def execute_pipeline(target_rule, user_config_file, snakemake_options):
         var_path_map = get_var_path_map(available_vars[input_group], push_dataset_config_dict)
         whitelisted_vars = [f"{input_group}.{var}" for var in var_path_map.keys()]
 
-        pipeline_validator(user_config_file, token_fetcher.getAccessToken(), whitelisted_vars)
+        pipeline_validator(user_config_file, token_fetcher.get_access_token(), whitelisted_vars)
 
         user_config_json = json.load(open(user_config_file))
         target_rule = user_config_json["target_rule"]

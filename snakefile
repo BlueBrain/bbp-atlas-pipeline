@@ -343,7 +343,7 @@ rule fetch_ccf_brain_region_hierarchy:
     params:
         nexus_id=NEXUS_IDS["ParcellationOntology"]["allen_mouse_ccf"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken(),
+        token = myTokenFetcher.get_access_token(),
         #derivation = PROVENANCE_METADATA_V2["input_dataset_used"].update({"hierarchy" : {"id":NEXUS_IDS["ParcellationOntology"]["allen_mouse_ccf"], "type":"ParcellationOntology"}})
     log:
         f"{LOG_DIR}/fetch_ccf_brain_region_hierarchy.log"
@@ -361,7 +361,7 @@ rule fetch_brain_parcellation_ccfv2:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["brain_ccfv2"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken(),
+        token = myTokenFetcher.get_access_token(),
     log:
         f"{LOG_DIR}/fetch_brain_parcellation_ccfv2.log"
     shell:
@@ -374,7 +374,7 @@ rule fetch_fiber_parcellation_ccfv2:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["fiber_ccfv2"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.get_access_token()
     log:
         f"{LOG_DIR}/fetch_fiber_parcellation_ccfv2.log"
     shell:
@@ -387,7 +387,7 @@ rule fetch_brain_parcellation_ccfv3:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["brain_ccfv3"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken(),
+        token = myTokenFetcher.get_access_token(),
         derivation = PROVENANCE_METADATA_V2["input_dataset_used"].update({"brain_parcellation_ccfv3" : {"id":NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["brain_ccfv3"], "type":"BrainParcellationDataLayer"}})
     log:
         f"{LOG_DIR}/fetch_brain_parcellation_ccfv3.log"
@@ -406,7 +406,7 @@ rule fetch_brain_template:
     params:
         nexus_id=brain_template_id_tag,
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.get_access_token()
     log:
         f"{LOG_DIR}/fetch_brain_template.log"
     shell:
@@ -419,7 +419,7 @@ rule fetch_barrel_positions:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["barrel_positions_25"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.get_access_token()
     log:
         f"{LOG_DIR}/fetch_barrel_positions.log"
     shell:
@@ -432,7 +432,7 @@ rule fetch_regions_config:
     params:
         nexus_id=NEXUS_IDS["metadata"]["regions_configuration"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.get_access_token()
     log:
         f"{LOG_DIR}/fetch_regions_config.log"
     shell:
@@ -445,7 +445,7 @@ rule fetch_corrected_nissl_stained_volume:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["NISSLImageDataLayer"]["corrected_nissl"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.get_access_token()
     log:
         f"{LOG_DIR}/fetch_corrected_nissl_stained_volume.log"
     shell:
@@ -458,7 +458,7 @@ rule fetch_annotation_stack_ccfv2_coronal:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["ImageStack"]["annotation_stack_ccfv2_coronal"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.get_access_token()
     log:
         f"{LOG_DIR}/fetch_annotation_stack_ccfv2_coronal.log"
     shell:
@@ -474,7 +474,7 @@ rule fetch_nissl_stack_ccfv2_coronal:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["ImageStack"]["nissl_stack_ccfv2_coronal"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.get_access_token()
     log:
         f"{LOG_DIR}/fetch_nissl_stack_ccfv2_coronal.log"
     shell:
@@ -490,7 +490,7 @@ rule fetch_mapping_cortex_all_to_exc_mtypes:
     params:
         nexus_id=NEXUS_IDS["metadata"]["mapping_cortex_all_to_exc_mtypes"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken(),
+        token = myTokenFetcher.get_access_token(),
     log:
         f"{LOG_DIR}/fetch_mapping_cortex_all_to_exc_mtypes.log"
     shell:
@@ -503,7 +503,7 @@ rule fetch_probability_map_L1:
     params:
         nexus_id=NEXUS_IDS["metadata"]["probability_map_L1"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken(),
+        token = myTokenFetcher.get_access_token(),
     log:
         f"{LOG_DIR}/fetch_probability_map_L1.log"
     shell:
@@ -516,7 +516,7 @@ rule fetch_probability_map_L23:
     params:
         nexus_id=NEXUS_IDS["metadata"]["probability_map_L23"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken(),
+        token = myTokenFetcher.get_access_token(),
     log:
         f"{LOG_DIR}/fetch_probability_map_L23.log"
     shell:
@@ -529,7 +529,7 @@ rule fetch_probability_map_L4:
     params:
         nexus_id=NEXUS_IDS["metadata"]["probability_map_L4"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken(),
+        token = myTokenFetcher.get_access_token(),
     log:
         f"{LOG_DIR}/fetch_probability_map_L4.log"
     shell:
@@ -542,7 +542,7 @@ rule fetch_probability_map_L5:
     params:
         nexus_id=NEXUS_IDS["metadata"]["probability_map_L5"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken(),
+        token = myTokenFetcher.get_access_token(),
     log:
         f"{LOG_DIR}/fetch_probability_map_L5.log"
     shell:
@@ -555,7 +555,7 @@ rule fetch_probability_map_L6:
     params:
         nexus_id=NEXUS_IDS["metadata"]["probability_map_L6"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken(),
+        token = myTokenFetcher.get_access_token(),
     log:
         f"{LOG_DIR}/fetch_probability_map_L6.log"
     shell:
@@ -594,7 +594,7 @@ rule combine_v2_annotations:
 #    params:
 #        nexus_id = lambda wildcards:NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"][wildcards.sample],
 #        app=APPS["bba-datafetch"],
-#        token = myTokenFetcher.getAccessToken()
+#        token = myTokenFetcher.get_access_token()
 #    shell:
 #        """
 #        {params.app} --nexus-env {NEXUS_ATLAS_ENV} \
@@ -613,7 +613,7 @@ rule fetch_gene_gad:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["gad"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.get_access_token()
     log:
         f"{LOG_DIR}/fetch_gene_gad.log"
     shell:
@@ -626,7 +626,7 @@ rule fetch_gene_nrn1:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["nrn1"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.get_access_token()
     log:
         f"{LOG_DIR}/fetch_gene_nrn1.log"
     shell:
@@ -639,7 +639,7 @@ rule fetch_gene_aldh1l1:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["aldh1l1"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.get_access_token()
     log:
         f"{LOG_DIR}/fetch_gene_aldh1l1.log"
     shell:
@@ -652,7 +652,7 @@ rule fetch_gene_cnp:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["cnp"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.get_access_token()
     log:
         f"{LOG_DIR}/fetch_gene_cnp.log"
     shell:
@@ -665,7 +665,7 @@ rule fetch_gene_mbp:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["mbp"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.get_access_token()
     log:
         f"{LOG_DIR}/fetch_gene_mbp.log"
     shell:
@@ -678,7 +678,7 @@ rule fetch_gene_gfap:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["gfap"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.get_access_token()
     log:
         f"{LOG_DIR}/fetch_gene_gfap.log"
     shell:
@@ -691,7 +691,7 @@ rule fetch_gene_s100b:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["s100b"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.get_access_token()
     log:
         f"{LOG_DIR}/fetch_gene_s100b.log"
     shell:
@@ -704,7 +704,7 @@ rule fetch_gene_tmem119:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["tmem119"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.get_access_token()
     log:
         f"{LOG_DIR}/fetch_gene_tmem119.log"
     shell:
@@ -717,7 +717,7 @@ rule fetch_gene_pv_correctednissl:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["pv_correctednissl"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.get_access_token()
     log:
         f"{LOG_DIR}/fetch_gene_pv_correctednissl.log"
     shell:
@@ -730,7 +730,7 @@ rule fetch_gene_sst_correctednissl:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["sst_correctednissl"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.get_access_token()
     log:
         f"{LOG_DIR}/fetch_gene_sst_correctednissl.log"
     shell:
@@ -743,7 +743,7 @@ rule fetch_gene_vip_correctednissl:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["vip_correctednissl"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.get_access_token()
     log:
         f"{LOG_DIR}/fetch_gene_vip_correctednissl.log"
     shell:
@@ -756,7 +756,7 @@ rule fetch_gene_gad67_correctednissl:
     params:
         nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["GeneExpressionVolumetricDataLayer"]["gad67_correctednissl"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.get_access_token()
     log:
         f"{LOG_DIR}/fetch_gene_gad67_correctednissl.log"
     shell:
@@ -782,7 +782,7 @@ rule fetch_isocortex_metadata:
     params:
         nexus_id=NEXUS_IDS["metadata"]["isocortex"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.get_access_token()
     log:
         f"{LOG_DIR}/fetch_isocortex_metadata.log"
     shell:
@@ -795,7 +795,7 @@ rule fetch_measurements:
     params:
         nexus_id=NEXUS_IDS["metadata"]["measurements"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.get_access_token()
     log:
         f"{LOG_DIR}/fetch_measurements.log"
     shell:
@@ -808,7 +808,7 @@ rule fetch_realigned_slices:
     params:
         nexus_id=NEXUS_IDS["metadata"]["realigned_slices"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.get_access_token()
     log:
         f"{LOG_DIR}/fetch_realigned_slices.log"
     shell:
@@ -821,7 +821,7 @@ rule fetch_std_cells:
     params:
         nexus_id=NEXUS_IDS["metadata"]["std_cells"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.get_access_token()
     log:
         f"{LOG_DIR}/fetch_std_cells.log"
     shell:
@@ -834,7 +834,7 @@ rule fetch_homogenous_regions:
     params:
         nexus_id=NEXUS_IDS["metadata"]["homogenous_regions"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.get_access_token()
     log:
         f"{LOG_DIR}/fetch_homogenous_regions.log"
     shell:
@@ -847,7 +847,7 @@ rule fetch_isocortex_23_metadata:
     params:
         nexus_id=NEXUS_IDS["metadata"]["isocortex_23"],
         app=APPS["bba-data-fetch"],
-        token = myTokenFetcher.getAccessToken()
+        token = myTokenFetcher.get_access_token()
     log:
         f"{LOG_DIR}/fetch_isocortex_23_metadata.log"
     shell:
@@ -1658,7 +1658,7 @@ brain_region_id = "http://api.brain-map.org/api/v2/data/Structure/997"
 
 from kgforge.core import KnowledgeGraphForge
 forge = KnowledgeGraphForge(FORGE_CONFIG, bucket = "/".join([NEXUS_ATLAS_ORG, NEXUS_ATLAS_PROJ]),
-    endpoint = NEXUS_ATLAS_ENV, token = myTokenFetcher.getAccessToken())
+    endpoint = NEXUS_ATLAS_ENV, token = myTokenFetcher.get_access_token())
 atlas_release_res = forge.retrieve(atlas_release_id)
 atlas_release_rev = atlas_release_res._store_metadata._rev
 
@@ -1675,7 +1675,7 @@ rule push_atlas_release:
         cell_orientations = rules.orientation_field.output,
     params:
         app=APPS["bba-data-push push-atlasrelease"].split(),
-        token = myTokenFetcher.getAccessToken(),
+        token = myTokenFetcher.get_access_token(),
         resource_tag = RESOURCE_TAG,
         species=NEXUS_IDS["species"],
         reference_system=NEXUS_IDS["reference_system"],
@@ -1718,7 +1718,7 @@ rule push_meshes:
         meshes = rules.export_brain_region.output.mesh_dir,
     params:
         app=APPS["bba-data-push push-meshes"].split(),
-        token = myTokenFetcher.getAccessToken(),
+        token = myTokenFetcher.get_access_token(),
         resource_tag = RESOURCE_TAG,
         species=NEXUS_IDS["species"],
         reference_system=NEXUS_IDS["reference_system"],
@@ -1755,7 +1755,7 @@ rule push_masks:
         hierarchy = hierarchy_mba,
     params:
         app1=APPS["bba-data-push push-volumetric"].split(),
-        token = myTokenFetcher.getAccessToken(),
+        token = myTokenFetcher.get_access_token(),
         species=NEXUS_IDS["species"],
         reference_system=NEXUS_IDS["reference_system"],
         resource_tag = RESOURCE_TAG
@@ -1791,7 +1791,7 @@ rule push_direction_vectors:
         hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
     params:
         app1=APPS["bba-data-push push-volumetric"].split(),
-        token = myTokenFetcher.getAccessToken(),
+        token = myTokenFetcher.get_access_token(),
         species=NEXUS_IDS["species"],
         reference_system=NEXUS_IDS["reference_system"],
         resource_tag = RESOURCE_TAG
@@ -1828,7 +1828,7 @@ rule push_orientation_field:
         hierarchy = hierarchy_mba,
     params:
         app1=APPS["bba-data-push push-volumetric"].split(),
-        token = myTokenFetcher.getAccessToken(),
+        token = myTokenFetcher.get_access_token(),
         species=NEXUS_IDS["species"],
         reference_system=NEXUS_IDS["reference_system"],
         resource_tag = RESOURCE_TAG
@@ -1875,7 +1875,7 @@ rule push_glia_densities:
         hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
     params:
         app1=APPS["bba-data-push push-volumetric"].split(),
-        token = myTokenFetcher.getAccessToken(),
+        token = myTokenFetcher.get_access_token(),
         species=NEXUS_IDS["species"],
         reference_system=NEXUS_IDS["reference_system"],
         resource_tag = RESOURCE_TAG
@@ -1912,7 +1912,7 @@ rule push_neuron_densities:
         hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
     params:
         app1=APPS["bba-data-push push-volumetric"].split(),
-        token = myTokenFetcher.getAccessToken(),
+        token = myTokenFetcher.get_access_token(),
         species=NEXUS_IDS["species"],
         reference_system=NEXUS_IDS["reference_system"],
         resource_tag = RESOURCE_TAG
@@ -1950,7 +1950,7 @@ rule push_metype_pipeline_datasets:
         hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
     params:
         app1=APPS["bba-data-push push-volumetric"].split(),
-        token = myTokenFetcher.getAccessToken(),
+        token = myTokenFetcher.get_access_token(),
         create_provenance_json = write_json(PROVENANCE_METADATA_V3_PATH, PROVENANCE_METADATA_V3, rule_name = "push_metype_pipeline_datasets"),
         species=NEXUS_IDS["species"],
         reference_system=NEXUS_IDS["reference_system"],
@@ -2017,7 +2017,7 @@ rule create_cellCompositionVolume_payload:
             logfile.write(f"Expecting {n_layer_densities} densities with layer in the CellCompositionVolume payload\n")
 
             from kgforge.core import KnowledgeGraphForge
-            forge = KnowledgeGraphForge(FORGE_CONFIG, bucket = "/".join([NEXUS_DESTINATION_ORG, NEXUS_DESTINATION_PROJ]), endpoint = NEXUS_DESTINATION_ENV, token = myTokenFetcher.getAccessToken())
+            forge = KnowledgeGraphForge(FORGE_CONFIG, bucket = "/".join([NEXUS_DESTINATION_ORG, NEXUS_DESTINATION_PROJ]), endpoint = NEXUS_DESTINATION_ENV, token = myTokenFetcher.get_access_token())
             from cellCompVolume_payload import create_payload
             logfile.write(f"Creating CellCompositionVolume payload for atlasRelease {atlas_release_id} with tag '{params.resource_tag}' from Nexus {env}\n")
             create_payload(forge, atlas_release_id, output.payload, n_layer_densities, endpoint=NEXUS_DESTINATION_ENV, org=NEXUS_DESTINATION_ORG, project=NEXUS_DESTINATION_PROJ, tag=params.resource_tag)
@@ -2031,7 +2031,7 @@ rule create_cellCompositionSummary_payload:
         cellCompositionVolume = rules.create_cellCompositionVolume_payload.output.payload
     params:
         app=APPS["cwl-registry"],
-        token = myTokenFetcher.getAccessToken(),
+        token = myTokenFetcher.get_access_token(),
     output:
         intermediate_density_distribution = f"{WORKING_DIR}/density_distribution_{env}.json",
         summary_statistics = f"{WORKING_DIR}/cellCompositionSummary_payload_{env}.json"
@@ -2070,7 +2070,7 @@ rule push_cellcomposition:
         summary_path = rules.create_cellCompositionSummary_payload.output.summary_statistics,
     params:
         app=APPS["bba-data-push push-cellcomposition"].split(),
-        token = myTokenFetcher.getAccessToken(),
+        token = myTokenFetcher.get_access_token(),
         resource_tag = RESOURCE_TAG,
         species=NEXUS_IDS["species"],
         reference_system=NEXUS_IDS["reference_system"],
