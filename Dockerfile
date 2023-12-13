@@ -38,6 +38,9 @@ RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "blue-brain-
 # module load py-bba-datafetch
 RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "bba-data-fetch==0.3.0"
 
+# densities validation
+RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "densities-validation==0.0.6"
+
 # temporary test, will be ported into atlas-splitter
 #RUN pip install git+https://bbpgitlab.epfl.ch/conn/structural/validation/cell-density-validations/cell-densities.git@2325c56d
 RUN git clone --branch new_regions_hier https://bbpgitlab.epfl.ch/conn/structural/validation/cell-density-validations.git cell-density-validation

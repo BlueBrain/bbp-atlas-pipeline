@@ -42,6 +42,9 @@ and run the following commands to copy the pipeline files in a path (e.g `$HOME`
 4. `cd blue_brain_atlas_pipeline`  
 5. `export PYTHONPATH=.:$PYTHONPATH`
 
+Now you can go to [Run the pipeline](#run-the-pipeline) for the instructions to run the pipeline.
+
+
 ### Docker image
 A [Docker](https://docs.docker.com/reference) image containing all the pipeline dependencies is available in the Git [registry](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/container_registry/159):  
 `bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:<tag>`  
@@ -55,7 +58,8 @@ It can be pulled and run with
 or converted into an **Apptainer** image with  
 `apptainer pull --docker-login docker://bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:<tag>`
 
-Alternatively, one can manually install the pipeline (and its dependencies) manually as described [next](#git-repository).
+Now you can go to [Run the pipeline](#run-the-pipeline) for the instructions to run the pipeline.
+
 
 ### Git repository
 The BBAP can be installed directly from the `setup.py` file available in this repository:
@@ -88,6 +92,8 @@ py-data-integrity-check \
 py-bba-data-push
 ```
 Or they can be installed following the ‘Installation’ section in their Confluence documentation page.
+
+Now you can go to [Run the pipeline](#run-the-pipeline) for the instructions to run the pipeline.
 
 
 ## Run the pipeline
