@@ -1248,15 +1248,15 @@ rule glia_cell_densities_correctednissl:
             2>&1 | tee {log}
         """
 
-##>validate_glia_cell_densities : validate glia cell densities
-rule validate_glia_cell_densities:
+##>validate_neuron_glia_cell_densities : validate neuron and glia densities
+rule validate_neuron_glia_cell_densities:
     input:
         annotation = annotation_v2,
         density = rules.glia_cell_densities_correctednissl.output.cell_densities
     output:
         directory("".join([rules.glia_cell_densities_correctednissl.output.cell_densities, "_validated"]))
     log:
-        f"{LOG_DIR}/validate_glia_cell_densities.log"
+        f"{LOG_DIR}/validate_neuron_glia_cell_densities.log"
     shell:
         """
         densities-validation --annotation {input.annotation} \
@@ -1265,8 +1265,8 @@ rule validate_glia_cell_densities:
         ln -s {input.density} {output}
         """
 
-glia_cell_densities = rules.validate_glia_cell_densities.output[0]
-neuron_density = os.path.join(glia_cell_densities, "neuron_density.nrrd")
+neuron_glia_densities = rules.validate_neuron_glia_cell_densities.output[0]
+neuron_density = os.path.join(neuron_glia_densities, "neuron_density.nrrd")
 
 ##>inhibitory_excitatory_neuron_densities_correctednissl : Compute the inhibitory and excitatory neuron densities
 rule inhibitory_excitatory_neuron_densities_correctednissl:
@@ -1444,7 +1444,10 @@ rule inhibitory_neuron_densities_linprog_correctednissl:
 rule validate_inhibitory_densities:
     input:
         annotation = annotation_v2,
-        density = rules.inhibitory_neuron_densities_linprog_correctednissl.output
+        density = rules.inhibitory_neuron_densities_linprog_correctednissl.output,
+        hierarchy = rules.split_barrel_ccfv2_l23split.output.hierarchy,
+        overall_cell_density = overall_cell_density,
+        neuron_glia_densities = neuron_glia_densities
     output:
         directory("".join([rules.inhibitory_neuron_densities_linprog_correctednissl.output[0], "_validated"]))
     log:
@@ -1453,6 +1456,9 @@ rule validate_inhibitory_densities:
         """
         densities-validation --annotation {input.annotation} \
             --inhibitory_density_folder {input.density} \
+            --hierarchy {input.hierarchy} \
+            --cell_density {input.overall_cell_density} \
+            --neuron_glia_density_folder {input.neuron_glia_densities} \
             2>&1 | tee {log}  && \
         ln -s {input.density} {output}
         """
@@ -1608,7 +1614,7 @@ rule transplant_glia_cell_densities_correctednissl:
         hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
         src_annotation = annotation_v2,
         dst_annotation = annotation_v3,
-        src_cell_volume = glia_cell_densities
+        src_cell_volume = neuron_glia_densities
     output:
         directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['glia_cell_densities_transplant_correctednissl']}")
     params:
