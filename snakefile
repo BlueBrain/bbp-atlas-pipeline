@@ -1248,13 +1248,16 @@ rule glia_cell_densities_correctednissl:
             2>&1 | tee {log}
         """
 
+validated_cell_densities = "".join([rules.glia_cell_densities_correctednissl.output.cell_densities, "_validated"])
+
 ##>validate_neuron_glia_cell_densities : validate neuron and glia densities
 rule validate_neuron_glia_cell_densities:
     input:
         annotation = annotation_v2,
         density = rules.glia_cell_densities_correctednissl.output.cell_densities
     output:
-        directory("".join([rules.glia_cell_densities_correctednissl.output.cell_densities, "_validated"]))
+        cell_densities = directory(validated_cell_densities),
+        neuron_density = os.path.join(validated_cell_densities, "neuron_density.nrrd")
     log:
         f"{LOG_DIR}/validate_neuron_glia_cell_densities.log"
     shell:
@@ -1265,8 +1268,8 @@ rule validate_neuron_glia_cell_densities:
         ln -s {input.density} {output}
         """
 
-neuron_glia_densities = rules.validate_neuron_glia_cell_densities.output[0]
-neuron_density = os.path.join(neuron_glia_densities, "neuron_density.nrrd")
+neuron_glia_densities = rules.validate_neuron_glia_cell_densities.output.cell_densities
+neuron_density = rules.validate_neuron_glia_cell_densities.output.neuron_density
 
 ##>inhibitory_excitatory_neuron_densities_correctednissl : Compute the inhibitory and excitatory neuron densities
 rule inhibitory_excitatory_neuron_densities_correctednissl:
