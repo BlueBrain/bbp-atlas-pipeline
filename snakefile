@@ -1091,13 +1091,15 @@ rule validate_annotation_v2:
         rules.split_barrel_ccfv2_l23split.output.annotation
     output:
         rules.split_barrel_ccfv2_l23split.output.annotation.replace(nrrd_ext, "_validated"+nrrd_ext)
+    params:
+        os.path.basename(rules.split_barrel_ccfv2_l23split.output.annotation)
     log:
         f"{LOG_DIR}/validate_annotation_v2.log"
     shell:
         """
         densities-validation --annotation {input} \
             2>&1 | tee {log}  && \
-        ln -s {input} {output}
+        ln -s {params} {output}
         """
 
 ##>validate_annotation_v3 : validate CCFv3 annotation
@@ -1106,13 +1108,15 @@ rule validate_annotation_v3:
         rules.split_barrel_ccfv3_l23split.output.annotation
     output:
         rules.split_barrel_ccfv3_l23split.output.annotation.replace(nrrd_ext, "_validated"+nrrd_ext)
+    params:
+        os.path.basename(rules.split_barrel_ccfv3_l23split.output.annotation)
     log:
         f"{LOG_DIR}/validate_annotation_v3.log"
     shell:
         """
         densities-validation --annotation {input} \
             2>&1 | tee {log}  && \
-        ln -s {input} {output}
+        ln -s {params} {output}
         """
 
 # Blue Brain default version (Allen_v3 + layer_2/3_split + leaves_only + barrel_split)
@@ -1198,6 +1202,8 @@ rule validate_cell_density:
         density = rules.cell_density_correctednissl.output
     output:
         rules.cell_density_correctednissl.output[0].replace(nrrd_ext, "_validated"+nrrd_ext)
+    params:
+        os.path.basename(rules.cell_density_correctednissl.output[0])
     log:
         f"{LOG_DIR}/validate_cell_density.log"
     shell:
@@ -1205,7 +1211,7 @@ rule validate_cell_density:
         densities-validation --annotation {input.annotation} \
             --cell_density {input.density} \
             2>&1 | tee {log}  && \
-        ln -s {input.density} {output}
+        ln -s {params} {output}
         """
 
 overall_cell_density = rules.validate_cell_density.output
@@ -1254,18 +1260,21 @@ validated_cell_densities = "".join([rules.glia_cell_densities_correctednissl.out
 rule validate_neuron_glia_cell_densities:
     input:
         annotation = annotation_v2,
-        density = rules.glia_cell_densities_correctednissl.output.cell_densities
+        densities_dir = ancient(rules.glia_cell_densities_correctednissl.output.cell_densities)
     output:
         cell_densities = directory(validated_cell_densities),
         neuron_density = os.path.join(validated_cell_densities, "neuron_density.nrrd")
+    params:
+        os.path.basename(rules.glia_cell_densities_correctednissl.output.cell_densities)
     log:
         f"{LOG_DIR}/validate_neuron_glia_cell_densities.log"
     shell:
         """
         densities-validation --annotation {input.annotation} \
-            --neuron_glia_density_folder {input.density} \
+            --neuron_glia_density_folder {input.densities_dir} \
             2>&1 | tee {log}  && \
-        ln -s {input.density} {output}
+        ln -s {params} {output.cell_densities}  && \
+        touch {output.neuron_density}
         """
 
 neuron_glia_densities = rules.validate_neuron_glia_cell_densities.output.cell_densities
@@ -1447,12 +1456,14 @@ rule inhibitory_neuron_densities_linprog_correctednissl:
 rule validate_inhibitory_densities:
     input:
         annotation = annotation_v2,
-        density = rules.inhibitory_neuron_densities_linprog_correctednissl.output,
+        density = ancient(rules.inhibitory_neuron_densities_linprog_correctednissl.output),
         hierarchy = rules.split_barrel_ccfv2_l23split.output.hierarchy,
         overall_cell_density = overall_cell_density,
-        neuron_glia_densities = neuron_glia_densities
+        neuron_glia_densities = ancient(neuron_glia_densities)
     output:
         directory("".join([rules.inhibitory_neuron_densities_linprog_correctednissl.output[0], "_validated"]))
+    params:
+        os.path.basename(rules.inhibitory_neuron_densities_linprog_correctednissl.output[0])
     log:
         f"{LOG_DIR}/validate_inhibitory_densities.log"
     shell:
@@ -1463,7 +1474,7 @@ rule validate_inhibitory_densities:
             --cell_density {input.overall_cell_density} \
             --neuron_glia_density_folder {input.neuron_glia_densities} \
             2>&1 | tee {log}  && \
-        ln -s {input.density} {output}
+        ln -s {params} {output}
         """
 
 inhibitory_densities_dir = rules.validate_inhibitory_densities.output[0]
@@ -1529,6 +1540,8 @@ rule validate_excitatory_ME_densities:
         density = rules.excitatory_split.output
     output:
         directory("".join([rules.excitatory_split.output[0], "_validated"]))
+    params:
+        os.path.basename(rules.excitatory_split.output[0])
     log:
         f"{LOG_DIR}/validate_excitatory_ME_densities.log"
     shell:
@@ -1536,7 +1549,7 @@ rule validate_excitatory_ME_densities:
         densities-validation --annotation {input.annotation} \
             --excitatory_ME_types_folder {input.density} \
             2>&1 | tee {log}  && \
-        ln -s {input.density} {output}
+        ln -s {params} {output}
         """
 
 excitatory_ME_densities_dir = rules.validate_excitatory_ME_densities.output[0]
@@ -1586,6 +1599,8 @@ rule validate_inhibitory_ME_densities:
         density = rules.create_mtypes_densities_from_probability_map.output
     output:
         directory("".join([rules.create_mtypes_densities_from_probability_map.output[0], "_validated"]))
+    params:
+        os.path.basename(rules.create_mtypes_densities_from_probability_map.output[0])
     log:
         f"{LOG_DIR}/validate_inhibitory_ME_densities.log"
     shell:
@@ -1593,7 +1608,7 @@ rule validate_inhibitory_ME_densities:
         densities-validation --annotation {input.annotation} \
             --inhibitory_ME_types_folder {input.density} \
             2>&1 | tee {log}  && \
-        ln -s {input.density} {output}
+        ln -s {params} {output}
         """
 
 inhibitory_ME_densities_dir = rules.validate_inhibitory_ME_densities.output[0]
