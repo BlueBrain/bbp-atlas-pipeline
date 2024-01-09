@@ -1265,7 +1265,7 @@ rule validate_neuron_glia_cell_densities:
         cell_densities = directory(validated_cell_densities),
         neuron_density = os.path.join(validated_cell_densities, "neuron_density.nrrd")
     params:
-        os.path.basename(rules.glia_cell_densities_correctednissl.output.cell_densities)
+        rules.glia_cell_densities_correctednissl.output.cell_densities
     log:
         f"{LOG_DIR}/validate_neuron_glia_cell_densities.log"
     shell:
@@ -1273,8 +1273,7 @@ rule validate_neuron_glia_cell_densities:
         densities-validation --annotation {input.annotation} \
             --neuron_glia_density_folder {input.densities_dir} \
             2>&1 | tee {log}  && \
-        ln -s {params} {output.cell_densities}  && \
-        touch {output.neuron_density}
+        ln -s -r {params}/* {output.cell_densities}
         """
 
 neuron_glia_densities = rules.validate_neuron_glia_cell_densities.output.cell_densities
