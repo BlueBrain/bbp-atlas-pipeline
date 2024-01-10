@@ -8,5 +8,5 @@ myst-parser
 numpy
 voxcell
 click
-git+https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/nse/cwl-registry.git@cwl-registry-v0.4.5
-git+https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/pipeline-validator.git@0.2.0
+cwl-registry==0.4.14
+pipeline-validator==0.3.1

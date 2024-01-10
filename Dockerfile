@@ -41,10 +41,8 @@ RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "bba-data-fe
 # densities validation
 RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "densities-validation==0.0.6"
 
-# temporary test, will be ported into atlas-splitter
-#RUN pip install git+https://bbpgitlab.epfl.ch/conn/structural/validation/cell-density-validations/cell-densities.git@2325c56d
-RUN git clone --branch new_regions_hier https://bbpgitlab.epfl.ch/conn/structural/validation/cell-density-validations.git cell-density-validation
-RUN cd cell-density-validation  &&  git checkout 79612ac6  &&  pip install cell-densities/
+# leaves-only
+RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "cell-densities==0.1.0"
 
 # module load py-bba-webexporter
 RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "blue-brain-atlas-web-exporter==2.1.0"
