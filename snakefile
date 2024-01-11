@@ -7,7 +7,6 @@
 ##
 
 import os
-import time
 from datetime import datetime
 import fnmatch
 import subprocess
@@ -16,8 +15,6 @@ import json
 import yaml
 import re
 import logging
-import threading
-import getpass
 import sysconfig
 from copy import deepcopy
 from uuid import uuid4

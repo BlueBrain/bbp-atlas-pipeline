@@ -27,7 +27,7 @@ COPY .. .
 #	export PATH=$PATH:$PWD/build/bin
 
 # Install the pipeline repository (along with the bbp-atlas CLI)
-RUN pip install blue_brain_atlas_pipeline/
+RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ blue_brain_atlas_pipeline/
 
 # For install dependencies
 RUN git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/".insteadOf https://bbpgitlab.epfl.ch/
