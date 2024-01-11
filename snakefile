@@ -20,12 +20,13 @@ import threading
 import getpass
 import sysconfig
 from copy import deepcopy
-from pathlib import Path
 from uuid import uuid4
 # from importlib.metadata import distribution
 from platform import python_version
 from snakemake.logging import logger as L
+from kgforge.core import KnowledgeGraphForge
 from blue_brain_token_fetch.token_fetcher_user import TokenFetcherUser
+from blue_brain_token_fetch.token_fetcher_service import TokenFetcherService
 
 # loading the config
 configfile: "config.yaml"
@@ -34,6 +35,9 @@ configfile: "config.yaml"
 WORKING_DIR = config["WORKING_DIR"]
 REPO_PATH = config["REPO_PATH"]
 KEYCLOAK_CONFIG = os.path.join(REPO_PATH, config["KEYCLOAK_CONFIG"])
+TOKEN_USERNAME = config["TOKEN_USERNAME"]
+TOKEN_PASSWORD = config["TOKEN_PASSWORD"]
+SERVICE_TOKEN = config["SERVICE_TOKEN"]
 NEXUS_IDS_FILE = os.path.join(REPO_PATH, config["NEXUS_IDS_FILE"])
 FORGE_CONFIG = os.path.join(os.getcwd(), REPO_PATH, config["FORGE_CONFIG"])
 RULES_CONFIG_DIR_TEMPLATES = os.path.join(REPO_PATH, config["RULES_CONFIG_DIR_TEMPLATES"])
@@ -68,6 +72,7 @@ NEXUS_ONTOLOGY_PROJ = config["NEXUS_ONTOLOGY_PROJ"]
 
 NEXUS_DESTINATION_ORG = config["NEXUS_DESTINATION_ORG"]
 NEXUS_DESTINATION_PROJ = config["NEXUS_DESTINATION_PROJ"]
+NEXUS_DESTINATION_BUCKET = "/".join([NEXUS_DESTINATION_ORG, NEXUS_DESTINATION_PROJ])
 
 CELL_COMPOSITION_NAME = config["CELL_COMPOSITION_NAME"]
 CELL_COMPOSITION_SUMMARY_NAME = config["CELL_COMPOSITION_SUMMARY_NAME"]
@@ -75,9 +80,9 @@ CELL_COMPOSITION_VOLUME_NAME = config["CELL_COMPOSITION_VOLUME_NAME"]
 
 VERSION_FILE = os.path.join(WORKING_DIR, "versions.txt")
 
-dryrun = not NEXUS_REGISTRATION
-if dryrun:
-    L.info("This is a dryrun execution, no data will be pushed in Nexus")
+nexus_dryrun = not NEXUS_REGISTRATION
+if nexus_dryrun:
+    L.info("This is a Nexus dryrun execution, no data will be pushed in Nexus")
 
 if not os.path.exists(WORKING_DIR):
     try:
@@ -149,8 +154,7 @@ APPS = {
     "bba-data-push push-meshes": "bba-data-push push-meshes",
     "bba-data-push push-cellrecords": "bba-data-push push-cellrecords",
     "bba-data-push push-regionsummary": "bba-data-push push-regionsummary",
-    "bba-data-push push-cellcomposition": "bba-data-push push-cellcomposition",
-    "cwl-registry": "cwl-registry"
+    "bba-data-push push-cellcomposition": "bba-data-push push-cellcomposition"
 }
 
 # delete the log of app versions
@@ -327,7 +331,13 @@ rule help:
 
 
 # Launch the automatic token refreshing
-myTokenFetcher = TokenFetcherUser(keycloak_config_file=KEYCLOAK_CONFIG)
+if not SERVICE_TOKEN:
+    myTokenFetcher = TokenFetcherUser(TOKEN_USERNAME, TOKEN_PASSWORD, keycloak_config_file=KEYCLOAK_CONFIG)
+else:
+    myTokenFetcher = TokenFetcherService(TOKEN_USERNAME, TOKEN_PASSWORD, keycloak_config_file=KEYCLOAK_CONFIG)
+
+forge = KnowledgeGraphForge(FORGE_CONFIG, bucket = "/".join([NEXUS_ATLAS_ORG, NEXUS_ATLAS_PROJ]),
+    endpoint = NEXUS_ATLAS_ENV, token = myTokenFetcher.get_access_token())
 
 default_fetch = """{params.app} \
                     --forge-config {FORGE_CONFIG} \
@@ -1018,15 +1028,8 @@ rule create_leaves_only_hierarchy_annotation_ccfv2:
         annotation=f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['annotation_ccfv2_leaves_only']}"
     log:
         f"{LOG_DIR}/create_leaves_only_hierarchy_annotation_ccfv2.log"
-    run:
-        from nrrdhlp.region_annotations import AnnotationWrapper
-
-        forge = None
-        # a "forge" argument is needed in the next line to fetch the hierarchy/annotation in case "use_{hier,anno}_file" is None
-        w = AnnotationWrapper(forge, method_dict={"root": "create"}, use_hier_file=input.hierarchy, use_anno_file=input.annotation)
-        w.fix(fn_hier_out = output.hierarchy,
-              fn_ann_out = output.annotation,
-              fn_log = log[0])
+    script:
+        "scripts/leaves_only.py"
 
 ##>create_leaves_only_hierarchy_annotation_ccfv3 :
 rule create_leaves_only_hierarchy_annotation_ccfv3:
@@ -1038,15 +1041,8 @@ rule create_leaves_only_hierarchy_annotation_ccfv3:
         annotation=f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['annotation_ccfv3_leaves_only']}"
     log:
         f"{LOG_DIR}/create_leaves_only_hierarchy_annotation_ccfv3.log"
-    run:
-        from nrrdhlp.region_annotations import AnnotationWrapper
-
-        forge = None
-        # a "forge" argument is needed in the next line to fetch the hierarchy/annotation in case "use_{hier,anno}_file" is None
-        w = AnnotationWrapper(forge, method_dict={"root": "create"}, use_hier_file=input.hierarchy, use_anno_file=input.annotation)
-        w.fix(fn_hier_out = output.hierarchy,
-              fn_ann_out = output.annotation,
-              fn_log = log[0])
+    script:
+        "scripts/leaves_only.py"
 
 ##>split_barrel_ccfv2_l23split : Refine ccfv2_l23split annotation by splitting barrel regions
 rule split_barrel_ccfv2_l23split:
@@ -1134,13 +1130,8 @@ rule create_hemispheres_ccfv3:
         f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['hemispheres']}"
     log:
         f"{LOG_DIR}/create_hemispheres_ccfv3.log"
-    run:
-        import voxcell
-        from atlas_commons.utils import assign_hemispheres
-
-        annotation = voxcell.VoxelData.load_nrrd(input)
-        hemispheres = assign_hemispheres(annotation)
-        hemispheres.save_nrrd(output)
+    script:
+        "scripts/create_hemispheres.py"
 
 ##>combine_markers : Generate and save the combined glia files and the global celltype scaling factors
 rule combine_markers:
@@ -1330,15 +1321,6 @@ rule orientation_field:
             2>&1 | tee {log}
         """
 
-def create_placement_hints_metadata(ph_dir, region_name, output_path):
-    ph_files = [str(path) for path in Path(ph_dir).rglob("*" + nrrd_ext)]
-    ph_region_map = {}
-    for ph_file in ph_files:
-        ph_region_map[os.path.basename(ph_file)] = [region_name]
-
-    with open(output_path, "w") as outfile:
-        outfile.write(json.dumps(ph_region_map, indent=4))
-
 ##>placement_hints : Generate and save the placement hints of different regions of the AIBS mouse brain
 rule placement_hints:
     input:
@@ -1350,18 +1332,13 @@ rule placement_hints:
         metadata = os.path.join(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['placement_hints']}", "metadata.json")
     params:
         app=APPS["atlas-building-tools placement-hints isocortex"],
+        files_ext = nrrd_ext,
+        region = "Isocortex",
         derivation = PROVENANCE_METADATA_V3["derivations"].update({"placement_hints_ccfv3_l23split": "annotation_ccfv3_l23split"})
     log:
         f"{LOG_DIR}/placement_hints.log"
-    run:
-        shell("{params.app} --annotation-path {input.annotation} \
-            --hierarchy-path {input.hierarchy} \
-            --direction-vectors-path {input.direction_vectors} \
-            --output-dir {output.dir} \
-            --algorithm voxel-based \
-            2>&1 | tee {log}"
-        )
-        create_placement_hints_metadata(output.dir, "Isocortex", output.metadata)
+    script:
+        "scripts/placement_hints.py"
 
 ## =========================================================================================
 ## ============================== CELL DENSITY PIPELINE PART 2 =============================
@@ -1491,21 +1468,17 @@ marker_density_map = {
 rule compute_lamp5_density:
     input:
         inhibitory_densities_dir
+    params:
+        gad67 = marker_density_map["gad67"],
+        vip = marker_density_map["vip"],
+        sst = marker_density_map["sst"],
+        pv = marker_density_map["pv"]
     log:
         f"{LOG_DIR}/compute_lamp5_density.log"
     output:
         marker_density_map["lamp5"]
-    run:
-        from voxcell import VoxelData
-
-        gad67 = VoxelData.load_nrrd(marker_density_map["gad67"])
-        vip = VoxelData.load_nrrd(marker_density_map["vip"])
-        sst = VoxelData.load_nrrd(marker_density_map["sst"])
-        pv = VoxelData.load_nrrd(marker_density_map["pv"])
-        lamp5 = VoxelData(gad67.raw - vip.raw - sst.raw - pv.raw,
-            gad67.voxel_dimensions, gad67.offset)
-
-        lamp5.save_nrrd(output)
+    script:
+        "scripts/compute_lamp5.py"
 
 ##>excitatory_split : Subdivide excitatory files into pyramidal subtypes
 rule excitatory_split:
@@ -1706,23 +1679,11 @@ rule export_brain_region:
         hierarchy_jsonld = f"{PUSH_DATASET_CONFIG_FILE['HierarchyJson']['mba_hierarchy_ld']}"
     params:
         app=APPS["parcellationexport"],
+        export_meshes = EXPORT_MESHES
     log:
         f"{LOG_DIR}/export_brain_region.log"
-    run:
-        mesh_dir_option = ""
-        if EXPORT_MESHES:
-            mesh_dir_option = " --out-mesh-dir {output.mesh_dir}"
-        else:
-            os.makedirs(output.mesh_dir, exist_ok = True)
-        shell("{params.app} --hierarchy {input.hierarchy} \
-            --parcellation-volume {input.annotation} \
-            " + mesh_dir_option + " \
-            --out-mask-dir {output.mask_dir} \
-            --out-metadata {output.json_metadata_parcellations} \
-            --out-hierarchy-volume {output.hierarchy_volume} \
-            --out-hierarchy-jsonld {output.hierarchy_jsonld} \
-            2>&1 | tee {log}"
-        )
+    script:
+        "scripts/create_meshes.py"
 
 hierarchy_mba = rules.export_brain_region.output.hierarchy_volume
 hierarchy_jsonld = rules.export_brain_region.output.hierarchy_jsonld
@@ -1804,9 +1765,6 @@ rule check_annotation_pipeline_v3:
 
 brain_region_id = "http://api.brain-map.org/api/v2/data/Structure/997"
 
-from kgforge.core import KnowledgeGraphForge
-forge = KnowledgeGraphForge(FORGE_CONFIG, bucket = "/".join([NEXUS_ATLAS_ORG, NEXUS_ATLAS_PROJ]),
-    endpoint = NEXUS_ATLAS_ENV, token = myTokenFetcher.get_access_token())
 atlas_release_res = forge.retrieve(atlas_release_id)
 atlas_release_rev = atlas_release_res._store_metadata._rev
 
@@ -1855,7 +1813,7 @@ rule push_atlas_release:
             --brain-template-id {params.brain_template} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
-            --dryrun {dryrun} \
+            --dryrun {nexus_dryrun} \
             2>&1 | tee {log}
         """
 
@@ -1892,7 +1850,7 @@ rule push_meshes:
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
-            --dryrun {dryrun} \
+            --dryrun {nexus_dryrun} \
             2>&1 | tee {log}
         """
 
@@ -1928,7 +1886,7 @@ rule push_masks:
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
-            --dryrun {dryrun} \
+            --dryrun {nexus_dryrun} \
             2>&1 | tee {log}
         """
 
@@ -1965,7 +1923,7 @@ rule push_direction_vectors:
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
-            --dryrun {dryrun} \
+            --dryrun {nexus_dryrun} \
             2>&1 | tee {log}
         """
 
@@ -2002,7 +1960,7 @@ rule push_orientation_field:
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
-            --dryrun {dryrun} \
+            --dryrun {nexus_dryrun} \
             2>&1 | tee {log}
         """
 
@@ -2049,7 +2007,7 @@ rule push_glia_densities:
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
-            --dryrun {dryrun} \
+            --dryrun {nexus_dryrun} \
             2>&1 | tee {log}
         """
 
@@ -2086,7 +2044,7 @@ rule push_neuron_densities:
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
-            --dryrun {dryrun} \
+            --dryrun {nexus_dryrun} \
             2>&1 | tee {log}
         """
 
@@ -2126,7 +2084,7 @@ rule push_metype_pipeline_datasets:
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
-            --dryrun {dryrun} \
+            --dryrun {nexus_dryrun} \
             2>&1 | tee {log}
         """
 
@@ -2149,27 +2107,19 @@ rule create_cellCompositionVolume_payload:
         rules.push_metype_pipeline_datasets.output
     params:
         input_paths = rules.push_metype_pipeline_datasets.input,
+        files_ext = nrrd_ext,
+        forge_config = FORGE_CONFIG,
+        nexus_env = NEXUS_DESTINATION_ENV,
+        nexus_bucket = NEXUS_DESTINATION_BUCKET,
+        nexus_token = myTokenFetcher.get_access_token(),
+        atlas_release_id = atlas_release_id,
         resource_tag = RESOURCE_TAG
     output:
         payload = f"{WORKING_DIR}/cellCompositionVolume_payload_{env}.json"
     log:
         f"{LOG_DIR}/create_cellCompositionVolume_payload_{env}.log"
-    run:
-        with open(log[0], "w") as logfile:
-            n_layer_densities = 0
-            for folder in params.input_paths:
-                densities = Path(folder).rglob("*"+nrrd_ext)
-                for dens in densities:
-                    if re.match("^L(\d){1,}_", dens.name):
-                        n_layer_densities += 1
-            logfile.write(f"Expecting {n_layer_densities} densities with layer in the CellCompositionVolume payload\n")
-
-            from kgforge.core import KnowledgeGraphForge
-            forge = KnowledgeGraphForge(FORGE_CONFIG, bucket = "/".join([NEXUS_DESTINATION_ORG, NEXUS_DESTINATION_PROJ]), endpoint = NEXUS_DESTINATION_ENV, token = myTokenFetcher.get_access_token())
-            from cellCompVolume_payload import create_payload
-            logfile.write(f"Creating CellCompositionVolume payload for atlasRelease {atlas_release_id} with tag '{params.resource_tag}' from Nexus {env}\n")
-            create_payload(forge, atlas_release_id, output.payload, n_layer_densities, endpoint=NEXUS_DESTINATION_ENV, org=NEXUS_DESTINATION_ORG, project=NEXUS_DESTINATION_PROJ, tag=params.resource_tag)
-            logfile.write(f"CellCompositionVolume payload created: {output.payload}\n")
+    script:
+        "scripts/cellCompositionVolume_payload.py"
 
 ##>create_cellCompositionSummary_payload :
 rule create_cellCompositionSummary_payload:
@@ -2178,37 +2128,17 @@ rule create_cellCompositionSummary_payload:
         annotation = annotation_v3,
         cellCompositionVolume = rules.create_cellCompositionVolume_payload.output.payload
     params:
-        app=APPS["cwl-registry"],
-        token = myTokenFetcher.get_access_token(),
+        forge_config = FORGE_CONFIG,
+        nexus_env = NEXUS_DESTINATION_ENV,
+        nexus_bucket = NEXUS_DESTINATION_BUCKET,
+        nexus_token = myTokenFetcher.get_access_token()
     output:
         intermediate_density_distribution = f"{WORKING_DIR}/density_distribution_{env}.json",
         summary_statistics = f"{WORKING_DIR}/cellCompositionSummary_payload_{env}.json"
     log:
         f"{LOG_DIR}/create_cellCompositionSummary_payload_{env}.log"
-    run:
-        with open(log[0], "w") as logfile:
-            logfile.write(f"Reading CellCompositionVolume payload from {input.cellCompositionVolume}\n")
-            with open(input.cellCompositionVolume) as volume_json:
-                volume_dict = json.load(volume_json)
-
-                from kgforge.core import KnowledgeGraphForge
-                forge = KnowledgeGraphForge(FORGE_CONFIG, bucket = "/".join([NEXUS_DESTINATION_ORG, NEXUS_DESTINATION_PROJ]), endpoint = NEXUS_DESTINATION_ENV, token=params.token)
-
-                logfile.write(f"Creating density_distribution from Nexus {env} in {output.intermediate_density_distribution}\n")
-                from cwl_registry import staging, statistics
-                density_distribution = staging.materialize_density_distribution(forge=forge, dataset=volume_dict,
-                    output_file=output.intermediate_density_distribution)
-
-                logfile.write(f"Computing CellCompositionSummary payload for Nexus {env}\n")
-                import multiprocessing
-                import voxcell
-                with multiprocessing.Pool(processes=workflow.cores) as pool:
-                    summary_statistics = statistics.atlas_densities_composition_summary(density_distribution,
-                        voxcell.RegionMap.load_json(input.hierarchy), voxcell.VoxelData.load_nrrd(input.annotation),
-                        map_function=pool.imap)
-                    logfile.write(f"Writing CellCompositionSummary payload in {output.summary_statistics}\n")
-                    with open(output.summary_statistics, "w") as outfile:
-                        outfile.write(json.dumps(summary_statistics, indent = 4))
+    script:
+        "scripts/cellCompositionSummary_payload.py"
 
 ##>push_cellcomposition : Final rule to generate and push into Nexus the CellComposition along with its dependencies (Volume and Summary)
 rule push_cellcomposition:
@@ -2247,7 +2177,7 @@ rule push_cellcomposition:
             --log-dir {LOG_DIR} \
             --resource-tag '{params.resource_tag}' \
             --is-prod-env {IS_PROD_ENV} \
-            --dryrun {dryrun} \
+            --dryrun {nexus_dryrun} \
             2>&1 | tee {log}
         """
 

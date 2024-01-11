@@ -22,7 +22,9 @@ setup(
         "sphinx",
         "sphinx-bluebrain-theme",
         "myst-parser",
-        "snakemake==7.32.3"
+        "snakemake==7.32.3",
+        "blue-brain-token-fetch==1.0.0",
+        "cwl-registry==0.4.14"
     ],
     extras_require={
         "dev": ["pytest>=4.3", "pytest-cov>=2.8.0"],

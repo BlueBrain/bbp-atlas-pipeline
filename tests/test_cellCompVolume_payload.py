@@ -21,12 +21,12 @@ atlasrelease_id = "https://bbp.epfl.ch/neurosciencegraph/data/brainatlasrelease/
 
 
 def test_cellCompVolume_payload():
-    forge = KnowledgeGraphForge(forge_config, bucket="/".join([nexus_org, nexus_proj]),
-                                endpoint=nexus_env, token=nexus_token)
+    bucket = "/".join([nexus_org, nexus_proj])
+    forge = KnowledgeGraphForge(forge_config, bucket=bucket, endpoint=nexus_env, token=nexus_token)
                        
     output_file = os.path.join(test_folder, "cellCompositionVolume_payload.json")
     payload = create_payload(forge, atlasrelease_id, output_file, expected_densities,
-        endpoint=nexus_env, org=nexus_org, project=nexus_proj, tag=tag)
+        endpoint=nexus_env, bucket=bucket, tag=tag)
     L.info("Test output: %s" % output_file)
 
     validate_schema(data=payload, schema_name="cell_composition_volume_distribution.yml")
