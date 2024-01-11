@@ -28,6 +28,7 @@ NEXUS_DESTINATION_ENV = default_pipeline.NEXUS_DESTINATION_ENV
 NEXUS_DESTINATION_ORG = default_pipeline.NEXUS_DESTINATION_ORG
 NEXUS_DESTINATION_PROJ = default_pipeline.NEXUS_DESTINATION_PROJ
 IS_PROD_ENV = default_pipeline.IS_PROD_ENV
+nexus_dryrun = default_pipeline.nexus_dryrun
 atlas_release_id = default_pipeline.atlas_release_id
 brain_region_id = default_pipeline.brain_region_id
 root_region_name = default_pipeline.root_region_name
@@ -101,16 +102,12 @@ for user_rule in user_rules:
         output:
             dir = directory(merged_output),
             flag = touch(merge_rule_flag)
+        params:
+            user_rule = user_rule,
+            metadata_path = default_output.metadata if rule_name in ["placement_hints"] else None
         log:
             f"{LOG_DIR}/{merge_rule_name}.log"
-        run:
-            import shutil
-            import customize_pipeline
-            metadata_path = None
-            if rule_name == "placement_hints":
-                metadata_path = default_output.metadata
-            customize_pipeline.main(input.hierarchy, input.annotation, user_rule,
-                input.default_output_dir, output.dir, metadata_path)
-            shutil.copytree(output.dir, input.default_output_dir, dirs_exist_ok=True)
+        script:
+            "../scripts/merge_rule.py"
 
     workflow.get_rule(target_rule).set_input(workflow.get_rule(merge_rule_name).output.flag)
