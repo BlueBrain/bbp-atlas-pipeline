@@ -343,6 +343,13 @@ default_fetch = """{params.app} \
                     --out {output} --nexus-id {params.nexus_id} \
                     --verbose 2>&1 | tee {log}"""
 
+default_push = """{params.app[0]} \
+                  --forge-config-file {FORGE_CONFIG} \
+                  --nexus-env {NEXUS_DESTINATION_ENV} \
+                  --nexus-org {NEXUS_DESTINATION_ORG} \
+                  --nexus-proj {NEXUS_DESTINATION_PROJ} \
+                  --nexus-token {params.token}"""
+
 ##>fetch_ccf_brain_region_hierarchy : fetch the hierarchy file, originally called 1.json
 rule fetch_ccf_brain_region_hierarchy:
     output:
@@ -1323,7 +1330,7 @@ rule placement_hints:
     input:
         annotation = annotation_v3,
         hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
-        direction_vectors =  direction_vectors
+        direction_vectors = direction_vectors
     output:
         dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['placement_hints']}"),
         metadata = os.path.join(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['placement_hints']}", "metadata.json")
@@ -1788,12 +1795,7 @@ rule push_atlas_release:
     log:
         f"{LOG_DIR}/push_atlas_release.log"
     shell:
-        """
-        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
-            --nexus-env {NEXUS_DESTINATION_ENV} \
-            --nexus-org {NEXUS_DESTINATION_ORG} \
-            --nexus-proj {NEXUS_DESTINATION_PROJ} \
-            --nexus-token {params.token} \
+        default_push + """ \
         {params.app[1]} \
             --hierarchy-path {input.hierarchy} \
             --hierarchy-ld-path {input.hierarchy_jsonld} \
@@ -1809,7 +1811,6 @@ rule push_atlas_release:
             --reference-system-id {params.reference_system} \
             --brain-template-id {params.brain_template} \
             --resource-tag '{params.resource_tag}' \
-            --is-prod-env {IS_PROD_ENV} \
             --dryrun {nexus_dryrun} \
             2>&1 | tee {log}
         """
@@ -1830,12 +1831,7 @@ rule push_meshes:
     log:
         f"{LOG_DIR}/push_meshes.log"
     shell:
-        """
-        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
-            --nexus-env {NEXUS_DESTINATION_ENV} \
-            --nexus-org {NEXUS_DESTINATION_ORG} \
-            --nexus-proj {NEXUS_DESTINATION_PROJ} \
-            --nexus-token {params.token} \
+        default_push + """ \
         {params.app[1]} \
             --dataset-path {input.meshes} \
             --dataset-type BrainParcellationMesh \
@@ -1846,7 +1842,6 @@ rule push_meshes:
             --brain-region None \
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
-            --is-prod-env {IS_PROD_ENV} \
             --dryrun {nexus_dryrun} \
             2>&1 | tee {log}
         """
@@ -1857,7 +1852,7 @@ rule push_masks:
         masks = rules.export_brain_region.output.mask_dir,
         hierarchy = hierarchy_mba,
     params:
-        app1=APPS["bba-data-push push-volumetric"].split(),
+        app=APPS["bba-data-push push-volumetric"].split(),
         token = myTokenFetcher.get_access_token(),
         species=NEXUS_IDS["species"],
         reference_system=NEXUS_IDS["reference_system"],
@@ -1867,13 +1862,8 @@ rule push_masks:
     log:
         f"{LOG_DIR}/push_masks.log"
     shell:
-        """
-        {params.app1[0]} --forge-config-file {FORGE_CONFIG} \
-            --nexus-env {NEXUS_DESTINATION_ENV} \
-            --nexus-org {NEXUS_DESTINATION_ORG} \
-            --nexus-proj {NEXUS_DESTINATION_PROJ} \
-            --nexus-token {params.token} \
-        {params.app1[1]} \
+        default_push + """ \
+        {params.app[1]} \
             --dataset-path {input.masks} \
             --dataset-type BrainParcellationMask \
             --atlas-release-id {atlas_release_id} \
@@ -1882,7 +1872,6 @@ rule push_masks:
             --hierarchy-path {input.hierarchy} \
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
-            --is-prod-env {IS_PROD_ENV} \
             --dryrun {nexus_dryrun} \
             2>&1 | tee {log}
         """
@@ -1890,10 +1879,10 @@ rule push_masks:
 ##>push_direction_vectors : rule to push into Nexus direction vectors
 rule push_direction_vectors:
     input:
-        direction_vectors =  direction_vectors,
+        direction_vectors = direction_vectors,
         hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
     params:
-        app1=APPS["bba-data-push push-volumetric"].split(),
+        app=APPS["bba-data-push push-volumetric"].split(),
         token = myTokenFetcher.get_access_token(),
         species=NEXUS_IDS["species"],
         reference_system=NEXUS_IDS["reference_system"],
@@ -1903,13 +1892,8 @@ rule push_direction_vectors:
     log:
         f"{LOG_DIR}/push_direction_vectors.log"
     shell:
-        """
-        {params.app1[0]} --forge-config-file {FORGE_CONFIG} \
-            --nexus-env {NEXUS_DESTINATION_ENV} \
-            --nexus-org {NEXUS_DESTINATION_ORG} \
-            --nexus-proj {NEXUS_DESTINATION_PROJ} \
-            --nexus-token {params.token} \
-        {params.app1[1]} \
+        default_push + """ \
+        {params.app[1]} \
             --dataset-path {input.direction_vectors} \
             --dataset-type DirectionVectorsField \
             --atlas-release-id {atlas_release_id} \
@@ -1919,7 +1903,6 @@ rule push_direction_vectors:
             --hierarchy-path {input.hierarchy} \
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
-            --is-prod-env {IS_PROD_ENV} \
             --dryrun {nexus_dryrun} \
             2>&1 | tee {log}
         """
@@ -1928,9 +1911,9 @@ rule push_direction_vectors:
 rule push_orientation_field:
     input:
         orientation_field = rules.orientation_field.output,
-        hierarchy = hierarchy_mba,
+        hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
     params:
-        app1=APPS["bba-data-push push-volumetric"].split(),
+        app=APPS["bba-data-push push-volumetric"].split(),
         token = myTokenFetcher.get_access_token(),
         species=NEXUS_IDS["species"],
         reference_system=NEXUS_IDS["reference_system"],
@@ -1940,13 +1923,8 @@ rule push_orientation_field:
     log:
         f"{LOG_DIR}/push_orientation_field.log"
     shell:
-        """
-        {params.app1[0]} --forge-config-file {FORGE_CONFIG} \
-            --nexus-env {NEXUS_DESTINATION_ENV} \
-            --nexus-org {NEXUS_DESTINATION_ORG} \
-            --nexus-proj {NEXUS_DESTINATION_PROJ} \
-            --nexus-token {params.token} \
-        {params.app1[1]} \
+        default_push + """ \
+        {params.app[1]} \
             --dataset-path {input.orientation_field} \
             --dataset-type CellOrientationField \
             --atlas-release-id {atlas_release_id} \
@@ -1956,7 +1934,6 @@ rule push_orientation_field:
             --hierarchy-path {input.hierarchy} \
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
-            --is-prod-env {IS_PROD_ENV} \
             --dryrun {nexus_dryrun} \
             2>&1 | tee {log}
         """
@@ -1977,7 +1954,7 @@ rule push_glia_densities:
         densities_dir = rules.transplant_glia_cell_densities_correctednissl.output,
         hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
     params:
-        app1=APPS["bba-data-push push-volumetric"].split(),
+        app=APPS["bba-data-push push-volumetric"].split(),
         token = myTokenFetcher.get_access_token(),
         species=NEXUS_IDS["species"],
         reference_system=NEXUS_IDS["reference_system"],
@@ -1987,13 +1964,8 @@ rule push_glia_densities:
     log:
         f"{LOG_DIR}/push_glia_densities.log"
     shell:
-        """
-        {params.app1[0]} --forge-config-file {FORGE_CONFIG} \
-            --nexus-env {NEXUS_DESTINATION_ENV} \
-            --nexus-org {NEXUS_DESTINATION_ORG} \
-            --nexus-proj {NEXUS_DESTINATION_PROJ} \
-            --nexus-token {params.token} \
-        {params.app1[1]} \
+        default_push + """ \
+        {params.app[1]} \
             --dataset-path {input.densities_dir} \
             --dataset-type GliaCellDensity \
             --atlas-release-id {atlas_release_id} \
@@ -2003,7 +1975,6 @@ rule push_glia_densities:
             --hierarchy-path {input.hierarchy} \
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
-            --is-prod-env {IS_PROD_ENV} \
             --dryrun {nexus_dryrun} \
             2>&1 | tee {log}
         """
@@ -2014,7 +1985,7 @@ rule push_neuron_densities:
         inhibitory_densities = rules.transplant_inhibitory_neuron_densities_linprog_correctednissl.output,
         hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
     params:
-        app1=APPS["bba-data-push push-volumetric"].split(),
+        app=APPS["bba-data-push push-volumetric"].split(),
         token = myTokenFetcher.get_access_token(),
         species=NEXUS_IDS["species"],
         reference_system=NEXUS_IDS["reference_system"],
@@ -2024,13 +1995,8 @@ rule push_neuron_densities:
     log:
         f"{LOG_DIR}/push_neuron_densities.log"
     shell:
-        """
-        {params.app1[0]} --forge-config-file {FORGE_CONFIG} \
-            --nexus-env {NEXUS_DESTINATION_ENV} \
-            --nexus-org {NEXUS_DESTINATION_ORG} \
-            --nexus-proj {NEXUS_DESTINATION_PROJ} \
-            --nexus-token {params.token} \
-        {params.app1[1]} \
+        default_push + """ \
+        {params.app[1]} \
             --dataset-path {input.inhibitory_densities} \
             --dataset-type NeuronDensity \
             --atlas-release-id {atlas_release_id} \
@@ -2040,7 +2006,6 @@ rule push_neuron_densities:
             --hierarchy-path {input.hierarchy} \
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
-            --is-prod-env {IS_PROD_ENV} \
             --dryrun {nexus_dryrun} \
             2>&1 | tee {log}
         """
@@ -2052,7 +2017,7 @@ rule push_metype_pipeline_datasets:
         densities_from_probability_map_transplanted = rules.transplant_mtypes_densities_from_probability_map.output,
         hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
     params:
-        app1=APPS["bba-data-push push-volumetric"].split(),
+        app=APPS["bba-data-push push-volumetric"].split(),
         token = myTokenFetcher.get_access_token(),
         create_provenance_json = write_json(PROVENANCE_METADATA_V3_PATH, PROVENANCE_METADATA_V3, rule_name = "push_metype_pipeline_datasets"),
         species=NEXUS_IDS["species"],
@@ -2063,13 +2028,8 @@ rule push_metype_pipeline_datasets:
     log:
         f"{LOG_DIR}/push_metype_pipeline_datasets.log"
     shell:
-        """
-        {params.app1[0]} --forge-config-file {FORGE_CONFIG} \
-            --nexus-env {NEXUS_DESTINATION_ENV} \
-            --nexus-org {NEXUS_DESTINATION_ORG} \
-            --nexus-proj {NEXUS_DESTINATION_PROJ} \
-            --nexus-token {params.token} \
-        {params.app1[1]} \
+        default_push + """ \
+        {params.app[1]} \
             --dataset-path {input.densities_from_probability_map_transplanted} \
             --dataset-path {input.excitatory_split_transplanted} \
             --dataset-type METypeDensity \
@@ -2080,7 +2040,6 @@ rule push_metype_pipeline_datasets:
             --hierarchy-path {input.hierarchy} \
             --reference-system-id {params.reference_system} \
             --resource-tag '{params.resource_tag}' \
-            --is-prod-env {IS_PROD_ENV} \
             --dryrun {nexus_dryrun} \
             2>&1 | tee {log}
         """
@@ -2154,12 +2113,7 @@ rule push_cellcomposition:
     log:
         f"{LOG_DIR}/push_cellcomposition.log"
     shell:
-        """
-        {params.app[0]} --forge-config-file {FORGE_CONFIG} \
-            --nexus-env {NEXUS_DESTINATION_ENV} \
-            --nexus-org {NEXUS_DESTINATION_ORG} \
-            --nexus-proj "atlasdatasetrelease" \
-            --nexus-token {params.token} \
+        default_push.replace("{NEXUS_DESTINATION_PROJ}", "atlasdatasetrelease") + """ \
         {params.app[1]} \
             --atlas-release-id {atlas_release_id} \
             --atlas-release-rev {atlas_release_rev} \
@@ -2173,7 +2127,6 @@ rule push_cellcomposition:
             --name '{CELL_COMPOSITION_NAME}' '{CELL_COMPOSITION_SUMMARY_NAME}' '{CELL_COMPOSITION_VOLUME_NAME}' \
             --log-dir {LOG_DIR} \
             --resource-tag '{params.resource_tag}' \
-            --is-prod-env {IS_PROD_ENV} \
             --dryrun {nexus_dryrun} \
             2>&1 | tee {log}
         """
