@@ -15,28 +15,28 @@
   "VolumetricDataLayer": {
     "10": {
       "BrainParcellationDataLayer": {
-          "brain_ccfv2" : "https://bbp.epfl.ch/neurosciencegraph/data/7f85cd66-d212-4799-bb4c-0732b8534442?tag=v0.1.0",
-          "brain_ccfv3" : "https://bbp.epfl.ch/neurosciencegraph/data/e238a1f6-0b30-48df-ac8b-6185efe10a59?tag=v0.1.1",
-          "fiber_ccfv2" : "https://bbp.epfl.ch/neurosciencegraph/data/2f26c63b-6d01-4540-bf8b-b0a2a7c59597?tag=v0.1.0"
+        "brain_ccfv2": "https://bbp.epfl.ch/neurosciencegraph/data/7f85cd66-d212-4799-bb4c-0732b8534442?tag=v0.1.0",
+        "brain_ccfv3": "https://bbp.epfl.ch/neurosciencegraph/data/e238a1f6-0b30-48df-ac8b-6185efe10a59?tag=v0.1.1",
+        "fiber_ccfv2": "https://bbp.epfl.ch/neurosciencegraph/data/2f26c63b-6d01-4540-bf8b-b0a2a7c59597?tag=v0.1.0"
       },
       "NISSLImageDataLayer": {
-          "ara_nissl" : "https://bbp.epfl.ch/neurosciencegraph/data/c1f768f8-5bbb-46ea-aeee-bc92909a0b52?tag=v0.1.0"
+        "ara_nissl": "https://bbp.epfl.ch/neurosciencegraph/data/c1f768f8-5bbb-46ea-aeee-bc92909a0b52?tag=v0.1.0"
       }
     },
     "25": {
       "BrainParcellationDataLayer": {
-        "brain_ccfv2" : "https://bbp.epfl.ch/neurosciencegraph/data/7b4b36ad-911c-4758-8686-2bf7943e10fb?tag=v0.1.1",
-        "brain_ccfv3" : "https://bbp.epfl.ch/neurosciencegraph/data/025eef5f-2a9a-4119-b53f-338452c72f2a?tag=v0.1.1",
-        "brain_realigned" : "https://bbp.epfl.ch/neurosciencegraph/data/d318062c-b24e-4eab-830c-37d2b0ec4c00?tag=v0.1.0",
-        "fiber_ccfv2" : "https://bbp.epfl.ch/neurosciencegraph/data/a4552116-607b-469e-ad2a-50bba00c23d8?tag=v0.1.1",
-        "barrel_positions_25" : "https://bbp.epfl.ch/data/bbp/mmb-barrel-cortex/a48c0db0-5fde-4912-a702-595c15a380b6?tag=v0.1.0"
+        "brain_ccfv2": "https://bbp.epfl.ch/neurosciencegraph/data/7b4b36ad-911c-4758-8686-2bf7943e10fb?tag=v0.1.1",
+        "brain_ccfv3": "https://bbp.epfl.ch/neurosciencegraph/data/025eef5f-2a9a-4119-b53f-338452c72f2a?tag=v0.1.1",
+        "brain_realigned": "https://bbp.epfl.ch/neurosciencegraph/data/d318062c-b24e-4eab-830c-37d2b0ec4c00?tag=v0.1.0",
+        "fiber_ccfv2": "https://bbp.epfl.ch/neurosciencegraph/data/a4552116-607b-469e-ad2a-50bba00c23d8?tag=v0.1.1",
+        "barrel_positions_25": "https://bbp.epfl.ch/data/bbp/mmb-barrel-cortex/a48c0db0-5fde-4912-a702-595c15a380b6?tag=v0.1.0"
       },
       "NISSLImageDataLayer": {
-        "ara_nissl" : "https://bbp.epfl.ch/neurosciencegraph/data/9768fb11-6461-4705-995f-7ad40b3aab77?tag=v0.1.1",
-        "corrected_nissl" : "https://bbp.epfl.ch/neurosciencegraph/data/35cb6642-db10-49e9-8f9c-46be17a9c376?tag=v0.1.1"
+        "ara_nissl": "https://bbp.epfl.ch/neurosciencegraph/data/9768fb11-6461-4705-995f-7ad40b3aab77?tag=v0.1.1",
+        "corrected_nissl": "https://bbp.epfl.ch/neurosciencegraph/data/35cb6642-db10-49e9-8f9c-46be17a9c376?tag=v0.1.1"
       },
       "BrainTemplateDataLayer": {
-        "average_template_25" : "https://bbp.epfl.ch/neurosciencegraph/data/dca40f99-b494-4d2c-9a2f-c407180138b7?tag=v0.1.1"
+        "average_template_25": "https://bbp.epfl.ch/neurosciencegraph/data/dca40f99-b494-4d2c-9a2f-c407180138b7?tag=v0.1.1"
       },
       "GeneExpressionVolumetricDataLayer": {
         "aldh1l1": "https://bbp.epfl.ch/neurosciencegraph/data/9e2c3aa7-3b19-4da6-9623-f864368326e6?tag=v0.1.1",
@@ -62,7 +62,7 @@
       }
     }
   },
-  "metadata" :{
+  "metadata": {
     "isocortex": "https://bbp.epfl.ch/neurosciencegraph/data/6a593672-9e7d-45aa-8740-19d79da9b3d3?tag=v0.1.1",
     "isocortex_23": "https://bbp.epfl.ch/neurosciencegraph/data/6b711d4c-ff0b-4e87-89b7-5390fc0fc4d0?tag=v0.1.1",
     "regions_configuration": "https://bbp.epfl.ch/data/bbp/atlas/d5c83a1f-222d-4b15-a18d-cc66de3dc548?tag=v0.2.0",
