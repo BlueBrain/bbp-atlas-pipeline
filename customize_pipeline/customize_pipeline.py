@@ -71,8 +71,13 @@ def merge_nrrd_files(region_map: RegionMap, annotation: np.ndarray, region_volum
             if not ids_reg:
                 print(f"Warning: region {region_id} is not found in the hierarchy provided")
                 continue
+
             volume_file = os.path.join(volume_path, filename)
+            if not os.path.isfile(volume_file):
+                print(f"Warning: no file {filename} found in {volume_path}, skipping it.")
+                continue
             volume = VoxelData.load_nrrd(volume_file).raw
+
             # Get region mask
             region_mask = np.isin(annotation, list(ids_reg))
             # Supersede region {region_id} in result with values from volume
