@@ -40,7 +40,6 @@ One can spawn the corresponding container with (example with dev)
 and run the following commands to copy the pipeline files in a path (e.g `$HOME`) where snakemake can write:  
 3. `cp -r /pipeline/blue_brain_atlas_pipeline $HOME`  
 4. `cd blue_brain_atlas_pipeline`  
-5. `export PYTHONPATH=.:$PYTHONPATH`
 
 Now you can go to [Run the pipeline](#run-the-pipeline) for the instructions to run the pipeline.
 
@@ -54,6 +53,7 @@ It can be pulled and run with
 1. `docker login bbpgitlab.epfl.ch:5050 -u <your-Gaspar-username> -p <your-Gaspar-password>`
 2. `docker pull bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:<tag>`
 3. `docker run -it bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:<tag> bash`
+4. `cd blue_brain_atlas_pipeline`
 
 or converted into an **Apptainer** image with  
 `apptainer pull --docker-login docker://bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:<tag>`
@@ -66,6 +66,7 @@ The BBAP can be installed directly from the `setup.py` file available in this re
 
 1. `git clone https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline.git`
 2. `pip install blue_brain_atlas_pipeline/`
+3. `cd blue_brain_atlas_pipeline`
 
 Each package run as part of the pipeline is considered a pipeline dependency:
 
@@ -98,13 +99,16 @@ Now you can go to [Run the pipeline](#run-the-pipeline) for the instructions to 
 
 ## Run the pipeline
 
-Once the pipeline environment is installed, the general command to run the pipeline is:
+Once the pipeline environment is installed, from the root directory execute  
+`export PYTHONPATH=.:$PYTHONPATH`  
+and the general command to run the pipeline is available:
 ```
 bbp-atlas  --target-rule <target_rule>  --snakemake-options '<options>'
 ```
 where
 - `<target_rule>` represents the target action to execute.
-- `<options>` represents the snakemake options. A set of most common options is available [here](#useful-snakemake-options). 
+- `<options>` represents the snakemake options.  
+A set of most common options is available [here](#useful-snakemake-options). 
 The option  `--cores <number_of_cores>` is mandatory for now, unless the `--dryrun` option is used,
 and must be provided as last option.
 
@@ -197,14 +201,14 @@ register the datasets in Nexus prod.
 Snakemake being a command-line tool, it comes with a multitude of optional arguments to
 execute, debug, and visualize workflows. Here is a selection of the most used:
 
-- `--cores <number_of_cores>` → to specify the number of cores snakemake can use.
-
-- `--dry-run`, `-n` → To conduct a dry run (execute nothing but print a
-summary of jobs that would be done).
-
-- `--forcerun <some_rule>` → Force a given rule to be re-executed (overwrite
-the already created output).
-
+- `--cores <number_of_cores>`, `-c <number_of_cores>` → Specify the number of cores 
+snakemake can use.
+- `--dry-run`, `-n` → Perform a dry run (execute nothing but print the list of rules
+that would be executed).
+- `--rerun-trigger mtime` → Use only the modification time (`mtime`) of the existing 
+output files to determine which rules to execute.
+- `--forcerun <some_rule>` → Force a given rule to be re-executed (overwrite the output 
+if it already exists).
 - `--list`, `-l` → Print a list of all the available rules from the snakefile.
 
 Every Snakemake command line argument is listed and described in the [Snakemake](https://snakemake.readthedocs.io/en/stable/) official documentation page.
@@ -212,14 +216,12 @@ Every Snakemake command line argument is listed and described in the [Snakemake]
 
 ## Blue Brain Atlas Pipeline
 
-Its workflow consists of 4 steps :
-- Fetch the required datasets from Nexus. These input data consist of the [original AIBS ccfv3 brain parcellation](https://bbp.epfl.ch/nexus/web/bbp/atlas/resources/https%3A%2F%2Fbbp.epfl.ch%2Fneurosciencegraph%2Fdata%2F025eef5f-2a9a-4119-b53f-338452c72f2a) 
-and the [AIBS Mouse CCF Atlas regions hierarchy file](https://bbp.epfl.ch/nexus/web/neurosciencegraph/datamodels/resources/http%3A%2F%2Fbbp.epfl.ch%2Fneurosciencegraph%2Fontologies%2Fmba) 
+Its workflow consists of the following steps:
+1. Fetch the required datasets from Nexus. These input data consist of the [original AIBS ccfv3 brain parcellation](https://bbp.epfl.ch/nexus/web/bbp/atlas/resources/https%3A%2F%2Fbbp.epfl.ch%2Fneurosciencegraph%2Fdata%2F025eef5f-2a9a-4119-b53f-338452c72f2a), 
+the [AIBS Mouse CCF Atlas regions hierarchy file](https://bbp.epfl.ch/nexus/web/neurosciencegraph/datamodels/resources/http%3A%2F%2Fbbp.epfl.ch%2Fneurosciencegraph%2Fontologies%2Fmba) and a series of Nissl and ISH volumes 
 as described in the documentation page [Allen Mouse CCF Compatible Data](https://bbpteam.epfl.ch/project/spaces/display/BBKG/Allen+Mouse+CCF+Compatible+Data).
-
-- The fetched datasets are then fed to the [Snakemake](https://snakemake.readthedocs.io/en/stable/) rules, and under the hood consumed by atlas modules to generate products.
-
-- Each product can (optionally) be pushed into Nexus with a set of metadata automatically filled up and be visualised in 
+2. The fetched datasets are then fed to the [Snakemake](https://snakemake.readthedocs.io/en/stable/) rules, and under the hood consumed by atlas modules to generate products. 
+3. Each product can (optionally) be pushed into Nexus with a set of metadata automatically filled up and be visualised in 
 the [Blue Brain Atlas](https://bbpteam.epfl.ch/documentation/#:~:text=Visualize-,Blue%20Brain%20Atlas,-Morphology%20visualization).
 
 This workflow is illustrated on the following diagram containing the directed acyclic graph (DAG)
@@ -229,17 +231,30 @@ of the Snakemake rules of the BBAP:
 
 A more detailed DAG listing the input and ouput files for each step is available [here](doc/source/figures/dag_push_atlas_fg.svg). 
 
-***
-**Rules and modules**  
+#### Rules and modules  
 In this document, a “module” is a CLI encapsulated inside one of the components of the pipeline.
 Such component is called a “rule”. This terminology comes from SnakeMake, where a “rule” 
 can leverage one or more modules and where a module can be used by one of more rules,
 usually using a different set of arguments.  
 You can find more information on rules in the [SnakeMake documentation](https://snakemake.readthedocs.io/en/stable/).
-***
+
+#### Fetch rules
+The rules starting with "fetch_" are used to download a given file from Nexus.  
+The IDs of the corresponding Nexus Resource (containing a description of the file to 
+fetch) are listed in the [nexus_ids.json](nexus_ids.json) (the explicit link between a fetch 
+rule and the corresponding Resource ID lays in the `nexus_id` parameter of the rule 
+definition in the [snakefile](snakefile)).  
+_Note_: the rule "fetch_genes_correctednissl" is not linked to a specific Resource, it's 
+used just to trigger the execution of a set of single "fetch_gene_" rules needed by the
+"fit-average-densities" step.
+
+In order to run the pipeline with a different version of a fetched file, one can just
+execute the corresponding fetch rule and subsequently replace the downloaded file with 
+the desired version, by keeping the same name of the originally fetched file.  
+The `--rerun-trigger mtime` [option](#useful-snakemake-options) may be useful here.
 
 
-**Additional information**  
+#### Additional information  
 More information about The Blue Brain Atlas Pipeline (BBAP) are available in its [confluence documentation](https://bbpteam.epfl.ch/project/spaces/display/BBKG/Atlas+Pipeline).  
 This space contains several documentation pages describing:  
 The Allen Mouse CCF Compatible Data : [https://bbpteam.epfl.ch/project/spaces/display/BBKG/Allen+Mouse+CCF+Compatible+Data](https://bbpteam.epfl.ch/project/spaces/display/BBKG/Allen+Mouse+CCF+Compatible+Data)   
@@ -266,7 +281,7 @@ It is possible to override the config variables at runtime using the snakemake a
 `--config <VAR_NAME>=<VALUE>`
 
 
-## Authors and Contributors :
+## Authors and Contributors
 
 * Leonardo Cristella: <leonardo.cristella@epfl.ch>
 * Nabil Alibou: <nabil.alibou@epfl.ch>

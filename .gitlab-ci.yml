@@ -17,7 +17,6 @@ stages:
 variables:
   DOC_DIR: "doc"
   DOC: "generated/html"
-  NEXUS_IDS_PATH: 'nexus_ids.json'
   DEV_BRANCH: "develop"
 
 
@@ -67,12 +66,13 @@ nexus-synchronization:
     - !reference [.deploy_rules, rules]
   variables:
     NEXUS_STAGING_TOKEN: '$NEXUS_STAGING_TOKEN'
-    NEXUS_IDS_PATH: '$NEXUS_IDS_PATH'
+    NEXUS_IDS_PATH: "nexus_ids.json"
   script:
+    - pip install "nexusforge==0.8.1"
     - python synch_nexus.py
     - git add $NEXUS_IDS_PATH
     - git diff-index --quiet HEAD  ||  git commit -m "Update $NEXUS_IDS_PATH"
-    - git push origin $DEV_BRANCH
+    - git push origin $(git branch --show-current):$DEV_BRANCH
 
 # Build image for pipeline
 update-pipeline-image:
