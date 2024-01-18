@@ -1514,21 +1514,14 @@ rule validate_excitatory_ME_densities:
     input:
         annotation = annotation_v2,
         density = rules.excitatory_split.output
-    output:
-        directory("".join([rules.excitatory_split.output[0], "_validated"]))
-    params:
-        os.path.basename(rules.excitatory_split.output[0])
     log:
         f"{LOG_DIR}/validate_excitatory_ME_densities.log"
     shell:
         """
         densities-validation --annotation {input.annotation} \
             --excitatory_ME_types_folder {input.density} \
-            2>&1 | tee {log}  && \
-        ln -s {params} {output}
+            2>&1 | tee {log}
         """
-
-excitatory_ME_densities_dir = rules.validate_excitatory_ME_densities.output[0]
 
 ##>create_mtypes_densities_from_probability_map : Create neuron density nrrd files for the mtypes listed in the probability mapping csv file.
 rule create_mtypes_densities_from_probability_map:
@@ -1573,21 +1566,41 @@ rule validate_inhibitory_ME_densities:
     input:
         annotation = annotation_v2,
         density = rules.create_mtypes_densities_from_probability_map.output
-    output:
-        directory("".join([rules.create_mtypes_densities_from_probability_map.output[0], "_validated"]))
-    params:
-        os.path.basename(rules.create_mtypes_densities_from_probability_map.output[0])
     log:
         f"{LOG_DIR}/validate_inhibitory_ME_densities.log"
     shell:
         """
         densities-validation --annotation {input.annotation} \
             --inhibitory_ME_types_folder {input.density} \
-            2>&1 | tee {log}  && \
-        ln -s {params} {output}
+            2>&1 | tee {log}
         """
 
-inhibitory_ME_densities_dir = rules.validate_inhibitory_ME_densities.output[0]
+##>validate_all_ME_densities : validate all ME densities
+rule validate_all_ME_densities:
+    input:
+        annotation = annotation_v2,
+        densities_inh = rules.create_mtypes_densities_from_probability_map.output,
+        densities_exc = rules.excitatory_split.output
+    output:
+        densities_inh = directory("".join([rules.create_mtypes_densities_from_probability_map.output[0], "_validated"])),
+        densities_exc = directory("".join([rules.excitatory_split.output[0], "_validated"]))
+    params:
+        densities_inh = os.path.basename(rules.create_mtypes_densities_from_probability_map.output[0]),
+        densities_exc = os.path.basename(rules.excitatory_split.output[0])
+    log:
+        f"{LOG_DIR}/validate_sll_ME_densities.log"
+    shell:
+        """
+        densities-validation --annotation {input.annotation} \
+            --inhibitory_ME_types_folder {input.densities_inh} \
+            --excitatory_ME_types_folder {input.densities_exc} \
+            2>&1 | tee {log}  && \
+        ln -s {params.densities_inh} {output.densities_inh}  && \
+        ln -s {params.densities_exc} {output.densities_exc}
+        """
+
+inhibitory_ME_densities_dir = rules.validate_all_ME_densities.output.densities_inh
+excitatory_ME_densities_dir = rules.validate_all_ME_densities.output.densities_exc
 
 ## =========================================================================================
 ## ======================== TRANSPLANT DENSITIES ===========================================

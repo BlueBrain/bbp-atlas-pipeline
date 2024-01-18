@@ -67,12 +67,15 @@ nexus-synchronization:
   variables:
     NEXUS_STAGING_TOKEN: '$NEXUS_STAGING_TOKEN'
     NEXUS_IDS_PATH: "nexus_ids.json"
+    REPO_PUSH_TOKEN: $OAUTH2_TOKEN
   script:
     - pip install "nexusforge==0.8.1"
     - python synch_nexus.py
+    - git checkout $DEV_BRANCH
     - git add $NEXUS_IDS_PATH
     - git diff-index --quiet HEAD  ||  git commit -m "Update $NEXUS_IDS_PATH"
-    - git push origin $(git branch --show-current):$DEV_BRANCH
+    - git remote add gitlab https://ci:$REPO_PUSH_TOKEN@bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline
+    - git push -o ci.skip gitlab $DEV_BRANCH
 
 # Build image for pipeline
 update-pipeline-image:
