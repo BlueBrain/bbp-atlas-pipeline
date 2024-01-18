@@ -8,6 +8,7 @@ include:
 
 stages:
   - unit-test
+  - nexus_synchronization
   - deploy_image
   - convert_and_deployToBB5
   - generate_doc
@@ -16,6 +17,8 @@ stages:
 variables:
   DOC_DIR: "doc"
   DOC: "generated/html"
+  NEXUS_IDS_PATH: 'nexus_ids.json'
+  DEV_BRANCH: "develop"
 
 
 .deploy_rules:
@@ -25,7 +28,7 @@ variables:
       variables:
         CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE
         REGISTRY_IMAGE_TAG: $CI_COMMIT_TAG
-    - if: $CI_COMMIT_BRANCH == "develop"
+    - if: $CI_COMMIT_BRANCH == $DEV_BRANCH
       when: on_success
       variables:
         CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE
@@ -56,6 +59,20 @@ unit_test:
     SERVICE_TOKEN_PASSWORD: '$SERVICE_TOKEN_PASSWORD'
     KUBERNETES_MEMORY_LIMIT: 8Gi
     KUBERNETES_MEMORY_REQUEST: 8Gi
+
+# Update Nexus Resources
+nexus-synchronization:
+  stage: nexus_synchronization
+  rules:
+    - !reference [.deploy_rules, rules]
+  variables:
+    NEXUS_STAGING_TOKEN: '$NEXUS_STAGING_TOKEN'
+    NEXUS_IDS_PATH: '$NEXUS_IDS_PATH'
+  script:
+    - python synch_nexus.py
+    - git add $NEXUS_IDS_PATH
+    - git diff-index --quiet HEAD  ||  git commit -m "Update $NEXUS_IDS_PATH"
+    - git push origin $DEV_BRANCH
 
 # Build image for pipeline
 update-pipeline-image:
