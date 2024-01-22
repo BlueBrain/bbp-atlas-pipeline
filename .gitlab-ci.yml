@@ -39,6 +39,12 @@ variables:
     - echo "$BBP_CA_CERT" >> $CA_BUNDLE
     - export SSL_CERT_FILE=$CA_BUNDLE
 
+.git_setup:
+  - git remote add gitlab https://ci:$REPO_PUSH_TOKEN@bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline
+  - git config user.name "$COMMIT_SHA"
+  - git config user.email "bbp-ou-dke@groupes.epfl.ch"
+  - git checkout $DEV_BRANCH
+
 unit_test:
   stage: unit-test
   extends: .unit-tests
@@ -67,14 +73,17 @@ nexus-synchronization:
   variables:
     NEXUS_STAGING_TOKEN: '$NEXUS_STAGING_TOKEN'
     NEXUS_IDS_PATH: "nexus_ids.json"
+    METADATA_DIR: "metadata"
+    FILE_NEXUS_ID_MAP: "file_nexus_map.json"
+    COMMIT_SHA: $CI_COMMIT_SHA
     REPO_PUSH_TOKEN: $OAUTH2_TOKEN
+  before_script:
+    - !reference [.git_setup]
   script:
     - pip install "nexusforge==0.8.1"
     - python synch_nexus.py
-    - git checkout $DEV_BRANCH
-    - git add $NEXUS_IDS_PATH
+    - git add $NEXUS_IDS_PATH $METADATA_DIR/$FILE_NEXUS_ID_MAP
     - git diff-index --quiet HEAD  ||  git commit -m "Update $NEXUS_IDS_PATH"
-    - git remote add gitlab https://ci:$REPO_PUSH_TOKEN@bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline
     - git push -o ci.skip gitlab $DEV_BRANCH
 
 # Build image for pipeline
