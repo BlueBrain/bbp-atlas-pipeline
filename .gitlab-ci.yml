@@ -18,6 +18,8 @@ variables:
   DOC_DIR: "doc"
   DOC: "generated/html"
   DEV_BRANCH: "develop"
+  REPO_PUSH_TOKEN: $OAUTH2_TOKEN
+  COMMIT_SHA: $CI_COMMIT_SHA
 
 
 .deploy_rules:
@@ -75,8 +77,6 @@ nexus-synchronization:
     NEXUS_IDS_PATH: "nexus_ids.json"
     METADATA_DIR: "metadata"
     FILE_NEXUS_ID_MAP: "file_nexus_map.json"
-    COMMIT_SHA: $CI_COMMIT_SHA
-    REPO_PUSH_TOKEN: $OAUTH2_TOKEN
   before_script:
     - !reference [.git_setup]
   script:
