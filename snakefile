@@ -25,10 +25,10 @@ from kgforge.core import KnowledgeGraphForge
 from blue_brain_token_fetch.token_fetcher_user import TokenFetcherUser
 from blue_brain_token_fetch.token_fetcher_service import TokenFetcherService
 
-# loading the config
+# Loading the config
 configfile: "config.yaml"
 
-# placing the config values into local variable
+# Placing the config values into local variables
 WORKING_DIR = config["WORKING_DIR"]
 REPO_PATH = config["REPO_PATH"]
 KEYCLOAK_CONFIG = os.path.join(REPO_PATH, config["KEYCLOAK_CONFIG"])
@@ -88,7 +88,7 @@ if not os.path.exists(WORKING_DIR):
     except OSError:
         L.error(f"creation of the directory {WORKING_DIR} failed")
 
-# Create Logs directory
+# Create logs directory
 LOG_DIR = os.path.join(WORKING_DIR, "logs")
 snakemake_run_logs = os.path.join(LOG_DIR, "snakemake_run_logs")
 if not os.path.exists(LOG_DIR):
@@ -160,7 +160,7 @@ try:
 except OSError:
     pass
 
-# UNCOMMENT TO CHECK SYSTEMATICALY EVERY MODULES PRESENCE BEFORE RUNNING THE PIPELINE:
+# UNCOMMENT TO CHECK SYSTEMATICALLY EVERY MODULE PRESENCE BEFORE RUNNING THE PIPELINE:
 # fetch version of each app and write it down in a file
 # #applications = {"applications": {}}
 #for app in APPS:
@@ -242,7 +242,7 @@ provenance_dict_v2 = {
     "softwareagent_name" : "Blue Brain Atlas Annotation Pipeline",
     "software_version": "0.1.0", # later f"{distribution('pipeline').version}" or version.py
     "runtime_platform": f"{sysconfig.get_platform()}",
-    "repo_adress": "https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline",
+    "repo_address": "https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline",
     "language": f"python {python_version()}",
     "start_time" : f"{datetime.today().strftime('%Y-%m-%dT%H:%M:%S')}",
     "input_dataset_used": {
@@ -270,7 +270,7 @@ provenance_dict_v3 = {
     "softwareagent_name" : "Blue Brain Atlas Annotation Pipeline",
     "software_version": "0.1.0", # later f"{distribution('pipeline').version}" or version.py
     "runtime_platform": f"{sysconfig.get_platform()}",
-    "repo_adress": "https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline",
+    "repo_address": "https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline",
     "language": f"python {python_version()}",
     "start_time" : f"{datetime.today().strftime('%Y-%m-%dT%H:%M:%S')}",
     "input_dataset_used": {
@@ -307,19 +307,19 @@ with open(PROVENANCE_METADATA_V3_PATH, "r+") as provenance_file:
     provenance_file.seek(0)
     PROVENANCE_METADATA_V3 = json.loads(provenance_file.read())
 
-help_file = "HELP_RULES.txt"
+help_filepath = os.path.join(WORKING_DIR, "HELP_RULES.txt")
 if DISPLAY_HELP:
     try:
-        L.info((open(help_file, "r")).read())
+        L.info((open(help_filepath, "r")).read())
         os._exit(0)
     except OSError as e:
-        L.error(f"{e}. Could not open '{help_file}'. Its content can also be accessed by running the 'help' rule.")
+        L.error(f"{e}. Could not open '{help_filepath}'. Its content can also be accessed by running the 'help' rule.")
 
 
 ##>help : prints help comments for Snakefile
 rule help:
     input: "snakefile"
-    output: help_file
+    output: help_filepath
     shell:
         """
         sed -n 's/^##//p' {input} \
@@ -1252,6 +1252,9 @@ rule glia_cell_densities_correctednissl:
 validated_cell_densities = "".join([rules.glia_cell_densities_correctednissl.output.cell_densities, "_validated"])
 
 ##>validate_neuron_glia_cell_densities : validate neuron and glia densities
+# No need to manually create the destination directory of the ln command below because
+# snakemake creates it in advance being marked as a "directory" and having more than
+# one output
 rule validate_neuron_glia_cell_densities:
     input:
         annotation = annotation_v2,
@@ -2032,7 +2035,7 @@ rule push_metype_pipeline_datasets:
     params:
         app=APPS["bba-data-push push-volumetric"].split(),
         token = myTokenFetcher.get_access_token(),
-        create_provenance_json = write_json(PROVENANCE_METADATA_V3_PATH, PROVENANCE_METADATA_V3, rule_name = "push_metype_pipeline_datasets"),
+        #create_provenance_json = write_json(PROVENANCE_METADATA_V3_PATH, PROVENANCE_METADATA_V3, rule_name = "push_metype_pipeline_datasets"),
         species=NEXUS_IDS["species"],
         reference_system=NEXUS_IDS["reference_system"],
         resource_tag = RESOURCE_TAG

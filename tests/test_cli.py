@@ -11,7 +11,7 @@ def test_cli():
     for rule, total in rule_total.items():
         cli_command = f"bbp-atlas --target-rule {rule} " \
             f"--snakemake-options '--config WORKING_DIR={working_dir} " \
-            f"TOKEN_USERNAME={token_username} TOKEN_PASSWORD={token_password} SERVICE_TOKEN=True  -c1  --dryrun'"
+            f"SERVICE_TOKEN=True TOKEN_USERNAME={token_username} TOKEN_PASSWORD={token_password}  -c1  --dryrun'"
         result = os.popen(cli_command).read()
 
         if "Exception" in result:

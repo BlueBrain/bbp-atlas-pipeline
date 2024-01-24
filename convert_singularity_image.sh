@@ -38,8 +38,8 @@ ls -la $tmpimage
 #echo "Run tests: as a demo, just check if we can get the help of 2048"
 #singularity exec --containall ${TMPDIR}/blue_brain_atlas_pipeline.sif 2048 -h
 
-echo "Deploying the image to proj83"
-export GPFSDIR=/gpfs/bbp.cscs.ch/data/project/proj83/singularity-images
+echo "Deploying the image to proj84"
+export GPFSDIR=/gpfs/bbp.cscs.ch/data/project/proj84/atlas_singularity_images
 export NAME_WITH_TIMESTAMP=$image-$(date +%Y-%m-%dT%H:%M:%S).sif
 mkdir -p ${GPFSDIR}
 mv $tmpimage ${GPFSDIR}/${NAME_WITH_TIMESTAMP}

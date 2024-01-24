@@ -60,9 +60,10 @@ def execute_pipeline(target_rule, user_config_file, snakemake_options):
         if priority_rules:
             pipeline_command += f" --prioritize {' '.join(priority_rules)}"
 
+    full_snakemake_options = " --printshellcmds"
     if snakemake_options:
-        pipeline_command += " " + snakemake_options
+        full_snakemake_options += " " + snakemake_options
 
-    pipeline_command += " " + target_rule
+    pipeline_command += " ".join([full_snakemake_options, target_rule])
     print("\nExecuting command:\n", pipeline_command)
     os.system(pipeline_command)

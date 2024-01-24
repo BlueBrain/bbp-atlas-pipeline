@@ -73,16 +73,20 @@ update_dags:
   stage: update-dag
   rules:
     - changes:
-        - snakefile
+        paths:
+          - snakefile
+        compare_to: 'refs/heads/develop'
   before_script:
+    - apt update
+    - apt-get -y install graphviz
     - pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ .[dev]
     - !reference [.git_setup]
   script:
     - echo "Update DAG"
-    - snakemake  --config TOKEN_USERNAME=$SERVICE_TOKEN_USERNAME TOKEN_PASSWORD=$SERVICE_TOKEN_PASSWORD  --dag  push_atlas_datasets > $DAG_DIR/dag_push_atlas.gv
+    - snakemake  --config SERVICE_TOKEN=True TOKEN_USERNAME=$SERVICE_TOKEN_USERNAME TOKEN_PASSWORD=$SERVICE_TOKEN_PASSWORD  --dag  push_atlas_datasets > $DAG_DIR/dag_push_atlas.gv
     - dot -Tsvg $DAG_DIR/dag_push_atlas.gv > $DAG_DIR/dag_push_atlas.svg
     - echo "Update detailed DAG"
-    - snakemake  --config TOKEN_USERNAME=$SERVICE_TOKEN_USERNAME TOKEN_PASSWORD=$SERVICE_TOKEN_PASSWORD  --filegraph  push_atlas_datasets > $DAG_DIR/dag_push_atlas_fg.gv
+    - snakemake  --config SERVICE_TOKEN=True TOKEN_USERNAME=$SERVICE_TOKEN_USERNAME TOKEN_PASSWORD=$SERVICE_TOKEN_PASSWORD  --filegraph  push_atlas_datasets > $DAG_DIR/dag_push_atlas_fg.gv
     - dot -Tsvg $DAG_DIR/dag_push_atlas_fg.gv > $DAG_DIR/dag_push_atlas_fg.svg
     - git add $DAG_DIR/dag_push_atlas*
     - git diff-index --quiet HEAD  ||  git commit -m "Update DAGs"
@@ -130,7 +134,7 @@ generate-documentation:
         when: on_success
   script: sphinx-build -T --keep-going -b html -c ./$DOC_DIR/source -D language=en ./$DOC_DIR/source $DOC_DIR/$DOC
   before_script:
-    - pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ -r requirements.txt
+    - pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ -r requirements_doc.txt
   artifacts:
     paths:
       - $DOC_DIR/$DOC

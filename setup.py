@@ -19,16 +19,14 @@ setup(
         "pynrrd>=0.4.0",
         "PyYAML>=5.3.1",
         "voxcell",
-        "sphinx",
-        "sphinx-bluebrain-theme",
-        "myst-parser",
-        "pulp==2.7.0", # snakemake 7.32.3 breaks with pulp==2.8.0
+        "pulp==2.7.0",  # snakemake 7.32.3 breaks with pulp==2.8.0
         "snakemake==7.32.3",
         "blue-brain-token-fetch==1.0.0",
         "cwl-registry==0.4.14"
     ],
     extras_require={
         "dev": ["pytest>=4.3", "pytest-cov>=2.8.0"],
+        "docs": ["sphinx==7.1.2", "sphinx-bluebrain-theme", "myst-parser"]
     },
     packages=find_packages(),
     include_package_data=True,
