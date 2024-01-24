@@ -8,6 +8,7 @@ include:
 
 stages:
   - unit-test
+  - update-dag
   - nexus_synchronization
   - deploy_image
   - convert_and_deployToBB5
@@ -16,6 +17,7 @@ stages:
 
 variables:
   DOC_DIR: "doc"
+  DAG_DIR: "$DOC_DIR/source/figures"
   DOC: "generated/html"
   DEV_BRANCH: "develop"
   REPO_PUSH_TOKEN: $OAUTH2_TOKEN
@@ -66,6 +68,26 @@ unit_test:
     SERVICE_TOKEN_PASSWORD: '$SERVICE_TOKEN_PASSWORD'
     KUBERNETES_MEMORY_LIMIT: 8Gi
     KUBERNETES_MEMORY_REQUEST: 8Gi
+
+update_dags:
+  stage: update-dag
+  rules:
+    - changes:
+        - snakefile
+  before_script:
+    - pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ .[dev]
+    - !reference [.git_setup]
+  script:
+    - echo "Update DAG"
+    - snakemake  --config TOKEN_USERNAME=$SERVICE_TOKEN_USERNAME TOKEN_PASSWORD=$SERVICE_TOKEN_PASSWORD  --dag  push_atlas_datasets > $DAG_DIR/dag_push_atlas.gv
+    - dot -Tsvg $DAG_DIR/dag_push_atlas.gv > $DAG_DIR/dag_push_atlas.svg
+    - echo "Update detailed DAG"
+    - snakemake  --config TOKEN_USERNAME=$SERVICE_TOKEN_USERNAME TOKEN_PASSWORD=$SERVICE_TOKEN_PASSWORD  --filegraph  push_atlas_datasets > $DAG_DIR/dag_push_atlas_fg.gv
+    - dot -Tsvg $DAG_DIR/dag_push_atlas_fg.gv > $DAG_DIR/dag_push_atlas_fg.svg
+    - git add $DAG_DIR/dag_push_atlas*
+    - git diff-index --quiet HEAD  ||  git commit -m "Update DAGs"
+    - git push -o ci.skip gitlab $DEV_BRANCH
+
 
 # Update Nexus Resources
 nexus-synchronization:

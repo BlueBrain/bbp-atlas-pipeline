@@ -153,7 +153,18 @@ A specific config file can be provided via the `--configfile` option:
 ```
 bbp-atlas  --target-rule <target_rule>  --snakemake-options '--configfile <config_file_path>'
 ```
-
+***
+**NOTE**  
+To run the pipeline skipping the generation of datasets already available (in 
+case a previous run failed at an intermediate step for instance), the [option](#useful-snakemake-options) 
+`--rerun-trigger mtime` can be used as in the following command:
+```
+bbp-atlas  --target-rule <target_rule>  --snakemake-options '--rerun-trigger mtime  --cores 1'
+```
+Such an option allows to skip the execution of the pipeline steps whose output 
+files exist and have a modification time (`mtime`) more recent than any of their
+input files.
+***
 
 ### Customize a pipeline rule
 
