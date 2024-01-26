@@ -1,0 +1,5 @@
+This file divides the cortical molecular types into layer 5 inhibitory types, across all cortical re-gions. Each row of assignments must sum to 1.
+
+Assigments are based on the following reference:
+
+Roussel Y, Verasztó C, Rodarie D, Damart T, Reimann M, Ramaswamy S, Markram H, Keller D. Mapping of morpho-electric features to molecular identity of cortical inhibitory neurons. PLoS Comput Biol. 2023 Jan 5;19(1):e1010058. doi: 10.1371/journal.pcbi.1010058. eCollection 2023 Jan.

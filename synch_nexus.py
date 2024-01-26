@@ -13,9 +13,10 @@ commit_sha = os.environ["COMMIT_SHA"]
 nexus_env = "https://staging.nise.bbp.epfl.ch/nexus/v1"
 
 
-def create_prob_map_resource(name):
+def create_prob_map_resource(name, description):
     res = Resource(
         name=name,
+        description=description,
         type=["Dataset", "PipelineConfigResource"],
         generation=Resource(
             type="Generation",
@@ -50,6 +51,12 @@ def synch_nexus():
 
     prob_maps = [str(path) for path in Path(metadata_dir).rglob("probability_map_*.csv")]
     for prob_map_path in prob_maps:
+        prob_map_doc_path = prob_map_path.replace(metadata_dir, os.path.join(metadata_dir, "docs")).replace(".csv", ".txt")
+        if not os.path.isfile(prob_map_doc_path):
+            raise Exception(f"No file {prob_map_doc_path} found, please provide it")
+        with open(prob_map_doc_path) as prob_map_doc:
+            prob_map_desc = prob_map_doc.read()
+
         nexus_id_path = nexus_ids[metadata_dir]
 
         prob_map = os.path.basename(prob_map_path)
@@ -57,7 +64,7 @@ def synch_nexus():
         if prob_map not in file_nexus_map:
             print(f"File {prob_map} not found in map {file_nexus_map_path}, a new Resource will be created")
             new_file = True
-            res = create_prob_map_resource(prob_map)
+            res = create_prob_map_resource(prob_map, prob_map_desc)
         else:
             file_nexus_map_keys.remove(prob_map)
 
@@ -80,6 +87,7 @@ def synch_nexus():
                     print(f"Hash of Resource distribution is identical to current file, nothing to update")
                     continue
             print(f"Hash of Resource distribution is different from hash of current file, updating the Resource")
+            res.description = prob_map_desc
 
         res.distribution = forge.attach(prob_map_path, content_type="text/csv")
         if new_file:
@@ -88,6 +96,7 @@ def synch_nexus():
             res_id_tag = res_tag_sep.join([res.id, new_tag])
             updated_map = True
         else:
+            res._store_metadata._rev += 1  # current rev = tagged rev + 1
             forge.update(res)
             res_id, res_tag = res_id_tag.split(res_tag_sep)
             print(f"Increment minor version of tag '{res_tag}' for Resource id '{res_id}'")
