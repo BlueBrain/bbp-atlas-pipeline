@@ -101,7 +101,7 @@ Now you can go to [Run the pipeline](#run-the-pipeline) for the instructions to 
 
 ## Run the pipeline
 
-Once the pipeline environment is installed, from the root directory execute  
+Once the pipeline environment is [installed](#installation), from the root directory execute  
 `export PYTHONPATH=.:$PYTHONPATH`  
 and the general command to run the pipeline is available:
 ```
@@ -173,9 +173,9 @@ input files.
 It is possible to customize a pipeline rule that generates a (set of) volumetric file 
 (`.nrrd`) in order to change the values of a specific region of the volume (and leave 
 the rest of the volume unchanged).
-The customization happens via the configuration file [customize_pipeline/user_config.json](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/-/blob/develop/customize_pipeline/user_config.json)
+The customization happens via the configuration file [`customize_pipeline/user_config.json`](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/-/blob/develop/customize_pipeline/user_config.json)
 with the following structure:
-- `target_rule`: name of the final rule to execute;
+- `target_rule`: name of the final rule to execute (replaces the `--target-rule` CLI argument);
 - `rule`: name of the rule to customize from the default pipeline;
 - `brainRegion`: ID of the brain region to customize;
 - `CLI`:
@@ -197,10 +197,8 @@ volumetric files: `[PH]y.nrrd` and `[PH]layer_n.nrrd` where n = 1, ..., 6.
 Once the configuration file is ready, the customized pipeline can be run with the 
 following command:
 ```
-bbp-atlas  --target-rule <target_rule>  --user-config-file customize_pipeline/user_config.json  --snakemake-options '<options>'
+bbp-atlas  --user-config-file customize_pipeline/user_config.json  --snakemake-options '<options>'
 ```
-where `<target_rule>` is the targeted rule of the pipeline (required if no user 
-configuration is provided).  
 _Note_: the Snakemake option `--use-singularity` must be provided for the configuration parameter `container` to be considered.
 
 When a rule is customized as described above, the pipeline will run
@@ -212,11 +210,20 @@ values of that region from the region-specific file(s) (step 2).
 
 #### Integration
 In case a user wants to request the integration of the customized version of a dataset:
-1. Open a Merge Request (MR) in this repository including the `user-config-file` and any additional input metadata required.
+1. Open a Merge Request (MR) in this repository including the updated `user-config-file`
+and any additional input [metadata](#metadata) required.
 2. The MR is then reviewed and, if approved, a new Atlas pipeline dev image is produced accordingly.
 3. The new pipeline is run and the new datasets are registered in Nexus staging for wider tests.
-4. When the new version of the datasets is validated, a new tag of the Atlas pipeline is cut and the corresponding image is used to 
-register the datasets in Nexus prod.
+4. When the new version of the datasets is validated, a new tag of the Atlas pipeline is
+cut and the corresponding image is used to register the datasets in Nexus prod.
+
+##### Metadata
+Some pipeline steps require metadata as input, which are fetched from Nexus.  
+Currently, the files available in the [`metadata`](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/-/tree/develop/metadata)
+directory are automatically synchronized with their Nexus versions.  
+If you want to update/add one metadata file, make sure to update/add also the 
+corresponding documentation file in the [`metadata/docs`](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/-/tree/develop/metadata/docs)
+directory, keeping the current naming convention (`probability_map_*{.csv,.txt}`).
 
 
 ### Useful Snakemake options

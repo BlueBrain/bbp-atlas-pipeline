@@ -25,6 +25,11 @@ def execute_pipeline(target_rule, user_config_file, snakemake_options):
             raise Exception("A target rule is required if no user configuration is provided")
         pipeline_command += " --snakefile snakefile"
     else:
+        if target_rule:
+            raise Exception(f"When a user configuration is provided (-user-config-file {user_config_file}),"
+                            " the target rule must be specified in the user configuration"
+                            " file (first key) and not via the '--target-rule' argument.")
+
         from blue_brain_token_fetch.token_fetcher_user import TokenFetcherUser
         from pipeline_validator.pipeline_validator import pipeline_validator
         from customize_pipeline.customize_pipeline import get_merge_rule_name, get_var_path_map
