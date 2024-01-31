@@ -47,7 +47,6 @@ variables:
   - git remote add gitlab https://ci:$REPO_PUSH_TOKEN@bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline
   - git config user.name "$COMMIT_SHA"
   - git config user.email "bbp-ou-dke@groupes.epfl.ch"
-  - git checkout $DEV_BRANCH
 
 unit_test:
   stage: unit-test
@@ -81,6 +80,7 @@ update_dags:
     - apt-get -y install graphviz
     - pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ .[dev]
     - !reference [.git_setup]
+    - git checkout $CI_COMMIT_BRANCH
   script:
     - echo "Update DAG"
     - snakemake  --config SERVICE_TOKEN=True TOKEN_USERNAME=$SERVICE_TOKEN_USERNAME TOKEN_PASSWORD=$SERVICE_TOKEN_PASSWORD  --dag  push_atlas_datasets > $DAG_DIR/dag_push_atlas.gv
@@ -90,7 +90,7 @@ update_dags:
     - dot -Tsvg $DAG_DIR/dag_push_atlas_fg.gv > $DAG_DIR/dag_push_atlas_fg.svg
     - git add $DAG_DIR/dag_push_atlas*
     - git diff-index --quiet HEAD  ||  git commit -m "Update DAGs"
-    - git push -o ci.skip gitlab $DEV_BRANCH
+    - git push -o ci.skip gitlab $CI_COMMIT_BRANCH
 
 
 # Update Nexus Resources
@@ -105,6 +105,7 @@ nexus-synchronization:
     FILE_NEXUS_ID_MAP: "file_nexus_map.json"
   before_script:
     - !reference [.git_setup]
+    - git checkout $DEV_BRANCH
   script:
     - pip install "nexusforge==0.8.1"
     - python synch_nexus.py
