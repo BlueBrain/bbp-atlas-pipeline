@@ -66,7 +66,7 @@ RUN pip install "atlas-commons==0.1.5"
 
 RUN pip install "atlas-splitter==0.1.2"
 
-RUN pip install "atlas-densities==0.2.1"
+RUN pip install "atlas-densities==0.2.2"
 
 # module load py-atlas-building-tools
 RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "atlas-building-tools==0.1.10"
