@@ -81,6 +81,8 @@ nexus_dryrun = not NEXUS_REGISTRATION
 if nexus_dryrun:
     L.info("This is a Nexus dryrun execution, no data will be pushed in Nexus")
 
+L.info(f"Executing pipeline with {workflow.cores} cores (snakemake option '--cores')")
+
 if not os.path.exists(WORKING_DIR):
     try:
         os.mkdir(WORKING_DIR)
