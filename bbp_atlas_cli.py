@@ -7,23 +7,29 @@ import re
 
 @click.command()
 @click.option("--target-rule",
-              type=click.STRING,
-              required=False,
-              help="The target rule of the pipeline to execute")
+              type=click.STRING, required=False,
+              help="The target rule of the pipeline to execute (required without a user configuration)")
 @click.option("--user-config-file",
-              type=click.Path(exists=True),
-              required=False,
+              type=click.Path(exists=True), required=False,
               help="The user configuration to customize the pipeline")
 @click.option("--repo-path",
-              type=click.Path(exists=True),
-              required=False,
-              default=".",
+              type=click.Path(exists=True), required=False, default=".",
               help="The path of the pipeline repository")
 @click.option("--snakemake-options",
-              type=click.STRING,
-              required=False,
+              type=click.STRING, required=False,
               help="String of options to pass to the snakemake command")
-def execute_pipeline(target_rule, user_config_file, repo_path, snakemake_options):
+@click.option("--service-token",
+              is_flag=True, default=False,
+              help="Flag to use a service token instead of a user token",
+              show_default=True)
+@click.option("--token-username",
+              type=click.STRING, required=False,
+              help="Username for token fetcher")
+@click.option("--token-password",
+              type=click.STRING, required=False,
+              help="Password for token fetcher")
+def execute_pipeline(target_rule, user_config_file, repo_path, snakemake_options,
+                     service_token, token_username, token_password):
     pipeline_command = "snakemake"
     if not user_config_file:
         if not target_rule:
@@ -37,6 +43,7 @@ def execute_pipeline(target_rule, user_config_file, repo_path, snakemake_options
             raise Exception("The --snakefile option can not be used together with --user-config-file")
 
         from blue_brain_token_fetch.token_fetcher_user import TokenFetcherUser
+        from blue_brain_token_fetch.token_fetcher_service import TokenFetcherService
         from pipeline_validator.pipeline_validator import pipeline_validator
         from customize_pipeline.customize_pipeline import get_merge_rule_name, get_var_path_map
 
@@ -44,7 +51,10 @@ def execute_pipeline(target_rule, user_config_file, repo_path, snakemake_options
             pipeline_config = yaml.safe_load(pipeline_config_file.read().strip())
         keycloak_config = pipeline_config["KEYCLOAK_CONFIG"]
         working_dir = pipeline_config["WORKING_DIR"]
-        token_fetcher = TokenFetcherUser(keycloak_config_file=keycloak_config)
+        if not service_token:
+            token_fetcher = TokenFetcherUser(token_username, token_password, keycloak_config_file=keycloak_config)
+        else:
+            token_fetcher = TokenFetcherService(token_username, token_password, keycloak_config_file=keycloak_config)
 
         with open(os.path.join(repo_path, "rules_config_dir_templates/push_dataset_config_template.yaml"), "r") as push_dataset_config_template:
             push_dataset_config = re.sub("{WORKING_DIR}", working_dir, push_dataset_config_template.read())
