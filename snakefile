@@ -320,7 +320,7 @@ if DISPLAY_HELP:
 
 ##>help : prints help comments for Snakefile
 rule help:
-    input: "snakefile"
+    input: os.path.join(REPO_PATH, "snakefile")
     output: help_filepath
     shell:
         """

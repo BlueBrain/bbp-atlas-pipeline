@@ -20,6 +20,7 @@ use rule * from default_pipeline
 WORKING_DIR = default_pipeline.WORKING_DIR
 LOG_DIR = default_pipeline.LOG_DIR
 FORGE_CONFIG = default_pipeline.FORGE_CONFIG
+REPO_PATH = default_pipeline.REPO_PATH
 NEXUS_ATLAS_ENV = default_pipeline.NEXUS_ATLAS_ENV
 NEXUS_ATLAS_ORG = default_pipeline.NEXUS_ATLAS_ORG
 NEXUS_ATLAS_PROJ = default_pipeline.NEXUS_ATLAS_PROJ
@@ -28,12 +29,18 @@ NEXUS_DESTINATION_ENV = default_pipeline.NEXUS_DESTINATION_ENV
 NEXUS_DESTINATION_ORG = default_pipeline.NEXUS_DESTINATION_ORG
 NEXUS_DESTINATION_PROJ = default_pipeline.NEXUS_DESTINATION_PROJ
 IS_PROD_ENV = default_pipeline.IS_PROD_ENV
+CELL_COMPOSITION_NAME = default_pipeline.CELL_COMPOSITION_NAME
+CELL_COMPOSITION_SUMMARY_NAME = default_pipeline.CELL_COMPOSITION_SUMMARY_NAME
+CELL_COMPOSITION_VOLUME_NAME = default_pipeline.CELL_COMPOSITION_VOLUME_NAME
+
 nexus_dryrun = default_pipeline.nexus_dryrun
 atlas_release_id = default_pipeline.atlas_release_id
+atlas_release_rev = default_pipeline.atlas_release_rev
+cell_composition_id = default_pipeline.cell_composition_id
 brain_region_id = default_pipeline.brain_region_id
 root_region_name = default_pipeline.root_region_name
 
-with open("customize_pipeline/available_vars.yaml", "r") as vars_file:
+with open(os.path.join(REPO_PATH, "customize_pipeline/available_vars.yaml"), "r") as vars_file:
     AVAILABLE_VARS = yaml.safe_load(vars_file.read().strip())
 var_path_map = get_var_path_map(AVAILABLE_VARS["input"], PUSH_DATASET_CONFIG)
 

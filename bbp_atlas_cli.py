@@ -9,8 +9,8 @@ import re
 @click.option("--target-rule",
               type=click.STRING, required=False,
               help="The target rule of the pipeline to execute (required without a user configuration)")
-@click.option("--user-config-file",
-              type=click.Path(), required=False,
+@click.option("--user-config-path",
+              type=click.Path(exists=True), required=False,
               help="The user configuration to customize the pipeline")
 @click.option("--repo-path",
               type=click.Path(exists=True), required=False, default=".",
@@ -28,19 +28,16 @@ import re
 @click.option("--token-password",
               type=click.STRING, required=False,
               help="Password for token fetcher")
-def execute_pipeline(target_rule, user_config_file, repo_path, snakemake_options,
+def execute_pipeline(target_rule, user_config_path, repo_path, snakemake_options,
                      service_token, token_username, token_password):
     pipeline_command = "snakemake"
-    if not user_config_file:
+    options_separator = "  "
+    if not user_config_path:
         if not target_rule:
             raise Exception("A target rule is required if no user configuration is provided")
     else:
-        user_config_path = os.path.join(repo_path, user_config_file)
-        if not os.path.isfile(user_config_path):
-            raise FileNotFoundError(f"--user-config-file {user_config_path} not found.")
-
         if target_rule:
-            raise Exception(f"When a user configuration is provided (--user-config-file {user_config_file}),"
+            raise Exception(f"When a user configuration is provided (--user-config-path {user_config_path}),"
                             " the target rule must be specified in the user configuration"
                             " file (first key) and not via the '--target-rule' argument.")
         if "--snakefile " in snakemake_options:
@@ -69,7 +66,7 @@ def execute_pipeline(target_rule, user_config_file, repo_path, snakemake_options
         var_path_map = get_var_path_map(available_vars[input_group], push_dataset_config_dict)
         whitelisted_vars = [f"{input_group}.{var}" for var in var_path_map.keys()]
 
-        pipeline_validator(user_config_file, token_fetcher.get_access_token(), whitelisted_vars)
+        pipeline_validator(user_config_path, token_fetcher.get_access_token(), whitelisted_vars)
 
         user_config_json = json.load(open(user_config_path))
         target_rule = user_config_json["target_rule"]
@@ -86,16 +83,18 @@ def execute_pipeline(target_rule, user_config_file, repo_path, snakemake_options
             snakemake_options += f" --prioritize {' '.join(priority_rules)}"
 
         user_config_option = f"USER_CONFIG={user_config_path}"
-        full_user_config_option = f"--config {user_config_option}"
-        if "--config" in snakemake_options:
-            snakemake_options = snakemake_options.replace("--config", full_user_config_option)
+        repo_path_option = f"REPO_PATH={repo_path}"
+        snakemake_config_flag = "--config "
+        full_config_option = f"{snakemake_config_flag} {user_config_option} {repo_path_option}"
+        if snakemake_config_flag in snakemake_options:
+            snakemake_options = snakemake_options.replace(snakemake_config_flag, full_config_option + options_separator)
         else:
-            snakemake_options = "  ".join([full_user_config_option, snakemake_options])
+            snakemake_options = options_separator.join([full_config_option, snakemake_options])
 
     full_snakemake_options = " --printshellcmds"
     if snakemake_options:
         full_snakemake_options = " ".join([full_snakemake_options, snakemake_options])
 
-    pipeline_command += " ".join([full_snakemake_options, target_rule])
+    pipeline_command += options_separator.join([full_snakemake_options, target_rule])
     print("\nExecuting command:\n", pipeline_command)
     os.system(pipeline_command)

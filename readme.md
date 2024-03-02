@@ -202,7 +202,7 @@ volumetric files: `[PH]y.nrrd` and `[PH]layer_n.nrrd` where n = 1, ..., 6.
 Once the configuration file is ready, the customized pipeline can be run with the 
 following command:
 ```
-bbp-atlas  --user-config-file customize_pipeline/user_config.json  --snakemake-options '<options>'
+bbp-atlas  --user-config-path customize_pipeline/user_config.json  --snakemake-options '<options>'
 ```
 _Note_: the Snakemake option `--use-singularity` must be provided for the configuration parameter `container` to be considered.
 
@@ -215,7 +215,7 @@ values of that region from the region-specific file(s) (step 2).
 
 #### Integration
 In case a user wants to request the integration of the customized version of a dataset:
-1. Open a Merge Request (MR) in this repository including the updated `user-config-file`
+1. Open a Merge Request (MR) in this repository including the updated `user_config.json`
 and any additional input [metadata](#metadata) required.
 2. The MR is then reviewed and, if approved, a new Atlas pipeline dev image is produced accordingly.
 3. The new pipeline is run and the new datasets are registered in Nexus staging for wider tests.
