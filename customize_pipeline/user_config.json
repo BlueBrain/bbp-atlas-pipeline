@@ -1,5 +1,5 @@
 {
-  "target_rule": "push_atlas_release",
+  "target_rule": "push_atlas_datasets",
   "rules":[
     {
       "rule": "direction_vectors_placeholder_ccfv3",
