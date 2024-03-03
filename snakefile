@@ -1813,25 +1813,28 @@ rule push_atlas_release:
     log:
         f"{LOG_DIR}/push_atlas_release.log"
     shell:
-        default_push + """ \
-        {params.app[1]} \
-            --hierarchy-path {input.hierarchy} \
-            --hierarchy-ld-path {input.hierarchy_jsonld} \
-            --annotation-path {input.annotation} \
-            --hemisphere-path {input.hemisphere} \
-            --placement-hints-path {input.placement_hints} \
-            --placement-hints-metadata {input.placement_hints_metadata} \
-            --direction-vectors-path {input.direction_vectors} \
-            --cell-orientations-path {input.cell_orientations} \
-            --atlas-release-id {atlas_release_id} \
-            --species {params.species} \
-            --brain-region {brain_region_id} \
-            --reference-system-id {params.reference_system} \
-            --brain-template-id {params.brain_template} \
-            --resource-tag '{params.resource_tag}' \
-            --dryrun {nexus_dryrun} \
-            2>&1 | tee {log}
         """
+        echo "Skipping push_atlas_release"
+        """
+#        default_push + """ \
+#        {params.app[1]} \
+#            --hierarchy-path {input.hierarchy} \
+#            --hierarchy-ld-path {input.hierarchy_jsonld} \
+#            --annotation-path {input.annotation} \
+#            --hemisphere-path {input.hemisphere} \
+#            --placement-hints-path {input.placement_hints} \
+#            --placement-hints-metadata {input.placement_hints_metadata} \
+#            --direction-vectors-path {input.direction_vectors} \
+#            --cell-orientations-path {input.cell_orientations} \
+#            --atlas-release-id {atlas_release_id} \
+#            --species {params.species} \
+#            --brain-region {brain_region_id} \
+#            --reference-system-id {params.reference_system} \
+#            --brain-template-id {params.brain_template} \
+#            --resource-tag '{params.resource_tag}' \
+#            --dryrun {nexus_dryrun} \
+#            2>&1 | tee {log}
+#        """
 
 ##>push_meshes : rule to push into Nexus brain regions meshes
 rule push_meshes:

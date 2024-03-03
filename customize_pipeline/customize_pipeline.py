@@ -53,10 +53,10 @@ def merge_nrrd_files(region_map: RegionMap, annotation: np.ndarray,
         if default_rule_file:  # TODO account for list of default_rule_files
             print(f"A default output filepath is provided: {default_rule_file}, "
                   "only such a file will be merged from each region-specific output dir.")
-            rglob_str = os.path.basename(default_rule_file)
+            glob_str = os.path.basename(default_rule_file)
         else:
-            rglob_str = "*" + extension
-        default_output_files.extend([str(path) for path in Path(default_rule_output).glob(rglob_str)])
+            glob_str = "*" + extension
+        default_output_files.extend([str(path) for path in Path(default_rule_output).glob(glob_str)])
     elif default_rule_output.endswith(extension):
         if os.path.isfile(default_rule_output):
             default_output_files = [default_rule_output]

@@ -30,7 +30,6 @@ import re
               help="Password for token fetcher")
 def execute_pipeline(target_rule, user_config_path, repo_path, snakemake_options,
                      service_token, token_username, token_password):
-    pipeline_command = "snakemake"
     options_separator = "  "
     if not user_config_path:
         if not target_rule:
@@ -92,10 +91,10 @@ def execute_pipeline(target_rule, user_config_path, repo_path, snakemake_options
         else:
             snakemake_options = options_separator.join([full_config_option, snakemake_options])
 
-    full_snakemake_options = " --printshellcmds"
+    full_snakemake_options = "--printshellcmds"
     if snakemake_options:
         full_snakemake_options = options_separator.join([snakemake_options, full_snakemake_options])
 
-    pipeline_command += options_separator.join([full_snakemake_options, target_rule])
+    pipeline_command = options_separator.join(["snakemake", full_snakemake_options, target_rule])
     print("\nExecuting command:\n", pipeline_command)
     os.system(pipeline_command)
