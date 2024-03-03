@@ -75,6 +75,7 @@ for user_rule in user_rules:
         rule:
             name: region_rule_name
             input:
+                default_output,  # not a real dependency but if default_rule gets executed after this region_rule, it may recreate default_output_dir and hence delete region_rule.output
                 **region_rule_vars,
             output:
                 directory(region_customization['output_dir'].format(WORKING_DIR=WORKING_DIR))
