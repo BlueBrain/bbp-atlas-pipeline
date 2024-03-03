@@ -9,19 +9,19 @@
             "brainRegion": "http://api.brain-map.org/api/v2/data/Structure/315",
             "container": "docker://bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:dev",
             "CLI": {
-              "command": "mkdir -p direction_vectors/isocortex  &&  atlas-direction-vectors direction-vectors isocortex  --algorithm shading-blur-gradient  --output-path direction_vectors/isocortex/direction_vectors_ccfv3.nrrd",
+              "command": "mkdir -p {WORKING_DIR}/direction_vectors/isocortex  &&  atlas-direction-vectors direction-vectors isocortex  --algorithm shading-blur-gradient  --output-path {WORKING_DIR}/direction_vectors/isocortex/direction_vectors_ccfv3.nrrd",
               "args": "--hierarchy-path {input.hierarchy}  --annotation-path {input.annotation_ccfv3}"
             },
-            "output_dir": "direction_vectors/isocortex/"
+            "output_dir": "{WORKING_DIR}/direction_vectors/isocortex/"
           },
           {
             "brainRegion": "http://api.brain-map.org/api/v2/data/Structure/549",
             "container": "docker://bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:dev",
             "CLI": {
-              "command": "mkdir -p direction_vectors/thalamus  &&  atlas-direction-vectors direction-vectors thalamus  --output-path direction_vectors/thalamus/direction_vectors_ccfv3.nrrd",
+              "command": "mkdir -p {WORKING_DIR}/direction_vectors/thalamus  &&  atlas-direction-vectors direction-vectors thalamus  --output-path {WORKING_DIR}/direction_vectors/thalamus/direction_vectors_ccfv3.nrrd",
               "args": "--hierarchy-path {input.hierarchy}  --annotation-path {input.annotation_ccfv3}"
             },
-            "output_dir": "direction_vectors/thalamus/"
+            "output_dir": "{WORKING_DIR}/direction_vectors/thalamus/"
           }
         ]
     }

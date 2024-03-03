@@ -77,12 +77,11 @@ for user_rule in user_rules:
             input:
                 **region_rule_vars,
             output:
-                directory(region_customization['output_dir'])
-                #directory(os.path.join(WORKING_DIR, region_customization['output_dir']))
+                directory(region_customization['output_dir'].format(WORKING_DIR=WORKING_DIR))
             params:
                 # Need to split the CLI because snakemake evaluates lambdas after the for loop and so the region_rule
                 # variable in the lambda points always to the last region in the user_config
-                cmd = region_rule_cli["command"],
+                cmd = region_rule_cli["command"].format(WORKING_DIR=WORKING_DIR),
                 args = lambda wildcards, input: region_rule_cli["args"].format(input = input)
             log:
                 f"{LOG_DIR}/{region_rule_name}.log"
