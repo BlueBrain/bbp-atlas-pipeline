@@ -80,6 +80,7 @@ def execute_pipeline(target_rule, user_config_path, repo_path, snakemake_options
 
         snakemake_options += f" --snakefile {repo_path}/customize_pipeline/custom_snakefile"
         if priority_rules:
+            # this should not be the last option otherwise target_rule gets prioritized too
             snakemake_options += f" --prioritize {' '.join(priority_rules)}"
 
         user_config_option = f"USER_CONFIG={user_config_path}"
@@ -93,7 +94,7 @@ def execute_pipeline(target_rule, user_config_path, repo_path, snakemake_options
 
     full_snakemake_options = " --printshellcmds"
     if snakemake_options:
-        full_snakemake_options = " ".join([full_snakemake_options, snakemake_options])
+        full_snakemake_options = options_separator.join([snakemake_options, full_snakemake_options])
 
     pipeline_command += options_separator.join([full_snakemake_options, target_rule])
     print("\nExecuting command:\n", pipeline_command)
