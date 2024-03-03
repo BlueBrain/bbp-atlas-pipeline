@@ -56,6 +56,7 @@ for user_rule in user_rules:
 
     default_output = getattr(default_rule, "output")
     default_output_dir = getattr(default_output, "dir", default_output)
+    default_output_file = getattr(default_output, "file", None)
     merged_output = f"{default_output_dir}_merged"
 
     custom_regions_rules = []
@@ -63,6 +64,7 @@ for user_rule in user_rules:
         region_id = get_region_id(region_customization["brainRegion"])
         region_rule_name = f"{rule_name}_region{region_id}"
         region_rule_cli = region_customization["CLI"]
+        region_customization['output_dir'] = region_customization['output_dir'].format(WORKING_DIR=WORKING_DIR)
 
         args_vars = re.findall("{(.*?)}", region_rule_cli["args"])
         args_vars = [args_var.split(".")[1] for args_var in args_vars]
@@ -78,7 +80,7 @@ for user_rule in user_rules:
                 default_output,  # not a real dependency but if default_rule gets executed after this region_rule, it may recreate default_output_dir and hence delete region_rule.output
                 **region_rule_vars,
             output:
-                directory(region_customization['output_dir'].format(WORKING_DIR=WORKING_DIR))
+                directory(region_customization['output_dir'])
             params:
                 # Need to split the CLI because snakemake evaluates lambdas after the for loop and so the region_rule
                 # variable in the lambda points always to the last region in the user_config
@@ -106,6 +108,7 @@ for user_rule in user_rules:
             hierarchy = merge_rule_vars["hierarchy"],
             annotation = merge_rule_vars["annotation_ccfv3"],
             default_output_dir = default_output_dir,
+            default_output_file = default_output_file
         output:
             dir = directory(merged_output),
             flag = touch(merge_rule_flag)

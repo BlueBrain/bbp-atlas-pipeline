@@ -7,8 +7,8 @@ import numpy as np
 from voxcell import RegionMap, VoxelData
 
 
-def main(hierarchy, annotation_volume, user_rule, default_rule_output, merged_output_dir,
-         metadata_path=None):
+def main(hierarchy, annotation_volume, user_rule, default_rule_output,
+         merged_output_dir, default_rule_file=None, metadata_path=None):
     region_map = RegionMap.load_json(hierarchy)
     annotation = VoxelData.load_nrrd(annotation_volume)
 
@@ -22,12 +22,13 @@ def main(hierarchy, annotation_volume, user_rule, default_rule_output, merged_ou
 
     print(f"Merging outputs of rule {rule_name} from {len(customized_regions)} regions")
     merged_volumes = merge_nrrd_files(region_map, annotation.raw, region_volume_map,
-        default_rule_output, merged_output_dir, metadata_path)
+        default_rule_output, merged_output_dir, default_rule_file, metadata_path)
     print(f"{len(merged_volumes)} files have been merged in {merged_output_dir}: {merged_volumes}")
 
 
-def merge_nrrd_files(region_map: RegionMap, annotation: np.ndarray, region_volume_map: dict,
-    default_rule_output: str, merged_output_dir: str, metadata_path=None) -> list:
+def merge_nrrd_files(region_map: RegionMap, annotation: np.ndarray,
+    region_volume_map: dict, default_rule_output: str, merged_output_dir: str,
+    default_rule_file=None, metadata_path=None) -> list:
     """
     Merge nrrd volumes for various brain regions.
 
@@ -49,10 +50,16 @@ def merge_nrrd_files(region_map: RegionMap, annotation: np.ndarray, region_volum
     if not os.path.exists(default_rule_output):
         raise Exception("The output of the default rule does not exist at", default_rule_output)
     if os.path.isdir(default_rule_output):
-        default_output_files.extend([str(path) for path in Path(default_rule_output).rglob("*" + extension)])
+        if default_rule_file:  # TODO account for list of default_rule_files
+            print(f"A default output filepath is provided: {default_rule_file}, "
+                  "only such a file will be merged from each region-specific output dir.")
+            rglob_str = os.path.basename(default_rule_file)
+        else:
+            rglob_str = "*" + extension
+        default_output_files.extend([str(path) for path in Path(default_rule_output).glob(rglob_str)])
     elif default_rule_output.endswith(extension):
         if os.path.isfile(default_rule_output):
-            default_output_files.append(default_rule_output)
+            default_output_files = [default_rule_output]
 
     if metadata_path:
         metadata_file = open(metadata_path, "r+")
