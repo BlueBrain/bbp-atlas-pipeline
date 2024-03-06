@@ -1,0 +1,6 @@
+This file divides the thalamic inhibitory cell densities into proportions between all thalamic inhibitory ME-types for each individual thalamic region that is present in the Atlas annotation. Each row of assignments must sum to 1.
+
+Assigments are based on the proportions found in in-vitro recordings conducted for the following reference:
+
+Iavarone, Elisabetta, Jane Simko, Ying Shi, Marine Bertschy, María García-Amado, Polina Litvak, Anna-Kristin Kaufmann, et al. 2023. “Thalamic Control of Sensory Processing and Spindles in a Biophysical Somatosensory Thalamoreticular Circuit Model of Wakefulness and Sleep.” Cell Reports 42 (3): 112200. https://doi.org/10.1016/j.celrep.2023.112200.
+

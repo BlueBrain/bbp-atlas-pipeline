@@ -577,6 +577,19 @@ rule fetch_probability_map_L6:
     shell:
         default_fetch
 
+##>fetch_probability_map_TH_INH : fetch the probability mapping for inhibitory cells of thalamus region
+rule fetch_probability_map_TH_INH:
+    output:
+        f"{MTYPES_PROBABILITY_MAP_CORRECTEDNISSL_LINPROG_CONFIG_FILE['TH_INH_probabilityMapPath']}"
+    params:
+        nexus_id=NEXUS_IDS["metadata"]["probability_map_TH_INH"],
+        app=APPS["bba-data-fetch"],
+        token = myTokenFetcher.get_access_token(),
+    log:
+        f"{LOG_DIR}/fetch_probability_map_TH_INH.log"
+    shell:
+        default_fetch
+
 ##>combine_v2_annotations : Generate and save the combined annotation file
 rule combine_v2_annotations:
     input:
@@ -1539,6 +1552,7 @@ rule create_mtypes_densities_from_probability_map:
         L4_prob_map = rules.fetch_probability_map_L4.output,
         L5_prob_map = rules.fetch_probability_map_L5.output,
         L6_prob_map = rules.fetch_probability_map_L6.output,
+        TH_INH_prob_map = rules.fetch_probability_map_TH_INH.output,
         lamp5 = rules.compute_lamp5_density.output
     output:
         directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['mtypes_densities_probability_map']}")
@@ -1555,6 +1569,7 @@ rule create_mtypes_densities_from_probability_map:
             --probability-map {input.L4_prob_map} \
             --probability-map {input.L5_prob_map} \
             --probability-map {input.L6_prob_map} \
+            --probability-map {input.TH_INH_prob_map} \
             --marker gad67 """ + marker_density_map["gad67"] + """ \
             --marker pv """ + marker_density_map["pv"] + """ \
             --marker sst """ + marker_density_map["sst"] + """ \
