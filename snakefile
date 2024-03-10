@@ -41,7 +41,7 @@ RULES_CONFIG_DIR_TEMPLATES = os.path.join(REPO_PATH, config["RULES_CONFIG_DIR_TE
 RESOLUTION = str(config["RESOLUTION"])
 DISPLAY_HELP = config["DISPLAY_HELP"]
 RESOURCE_TAG = config["RESOURCE_TAG"]
-if RESOURCE_TAG == "None":
+if not RESOURCE_TAG:
     RESOURCE_TAG = f"Atlas pipeline ({datetime.today().strftime('%Y-%m-%dT%H:%M:%S')})"
 NEXUS_REGISTRATION = config["NEXUS_REGISTRATION"]
 NEW_ATLAS = config["NEW_ATLAS"]
@@ -1635,8 +1635,8 @@ default_transplant = """{params.app} \
                         2>&1 | tee {log}
                      """
 
-##>transplant_glia_cell_densities_correctednissl : Transplant neuron density nrrd files
-rule transplant_glia_cell_densities_correctednissl:
+##>transplant_neuron_glia_cell_densities_correctednissl : Transplant neuron and glia density nrrd files
+rule transplant_neuron_glia_cell_densities_correctednissl:
     input:
         hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
         src_annotation = annotation_v2,
@@ -1647,7 +1647,7 @@ rule transplant_glia_cell_densities_correctednissl:
     params:
         app=APPS["celltransplant"]
     log:
-        f"{LOG_DIR}/transplant_glia_cell_densities_correctednissl.log"
+        f"{LOG_DIR}/transplant_neuron_glia_cell_densities_correctednissl.log"
     shell:
         default_transplant
 
@@ -1984,10 +1984,10 @@ rule generate_annotation_pipeline_v3_datasets:
 ## ============================= CELL DENSITY PIPELINE USER RULES ============================
 ## =========================================================================================
 
-##>push_glia_densities : rule to push into Nexus Glia densities
-rule push_glia_densities:
+##>push_neuron_glia_densities : rule to push into Nexus neuron and glia densities
+rule push_neuron_glia_densities:
     input:
-        densities_dir = rules.transplant_glia_cell_densities_correctednissl.output,
+        densities_dir = rules.transplant_neuron_glia_cell_densities_correctednissl.output,
         hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
     params:
         app=APPS["bba-data-push push-volumetric"].split(),
@@ -1996,9 +1996,9 @@ rule push_glia_densities:
         reference_system=NEXUS_IDS["reference_system"],
         resource_tag = RESOURCE_TAG
     output:
-        touch(f"{WORKING_DIR}/pushed_glia_densities.log")
+        touch(f"{WORKING_DIR}/pushed_neuron_glia_densities.log")
     log:
-        f"{LOG_DIR}/push_glia_densities.log"
+        f"{LOG_DIR}/push_neuron_glia_densities.log"
     shell:
         default_push + """ \
         {params.app[1]} \
@@ -2015,8 +2015,8 @@ rule push_glia_densities:
             2>&1 | tee {log}
         """
 
-##>push_neuron_densities : rule to push into Nexus Neuron densities
-rule push_neuron_densities:
+##>push_inhibitory_neuron_densities : rule to push into Nexus inhibitory neuron densities
+rule push_inhibitory_neuron_densities:
     input:
         inhibitory_densities = rules.transplant_inhibitory_neuron_densities_linprog_correctednissl.output,
         hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
@@ -2027,9 +2027,9 @@ rule push_neuron_densities:
         reference_system=NEXUS_IDS["reference_system"],
         resource_tag = RESOURCE_TAG
     output:
-        touch(f"{WORKING_DIR}/pushed_neuron_densities.log")
+        touch(f"{WORKING_DIR}/pushed_inhibitory_neuron_densities.log")
     log:
-        f"{LOG_DIR}/push_neuron_densities.log"
+        f"{LOG_DIR}/push_inhibitory_neuron_densities.log"
     shell:
         default_push + """ \
         {params.app[1]} \
@@ -2084,8 +2084,8 @@ rule push_metype_pipeline_datasets:
 rule push_volumetric_datasets:
     input:
         rules.push_masks.output,
-        rules.push_glia_densities.output,
-        rules.push_neuron_densities.output,
+        rules.push_neuron_glia_densities.output,
+        rules.push_inhibitory_neuron_densities.output,
         rules.push_metype_pipeline_datasets.output,
     output:
         touch(f"{WORKING_DIR}/pushed_volumetric_datasets.log")

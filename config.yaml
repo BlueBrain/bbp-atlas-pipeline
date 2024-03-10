@@ -11,7 +11,7 @@ NEW_ATLAS: False
 RESOLUTION: "25"
 EXPORT_MESHES: True
 NEXUS_REGISTRATION: False
-RESOURCE_TAG: "leaves-only_atlas"  # put None to generate an automatic tag corresponding to the timestamp
+RESOURCE_TAG: null  # if null, a tag corresponding to the timestamp will be generated
 DISPLAY_HELP: False
 
 NEXUS_PROD_ENV: "https://bbp.epfl.ch/nexus/v1"

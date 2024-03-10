@@ -70,7 +70,12 @@ unit_test:
 
 update_dags:
   stage: update-dag
-  when: manual
+  rules:
+    - changes:
+        paths:
+          - snakefile
+        #compare_to: 'refs/heads/develop'
+      when: manual
   before_script:
     - apt update
     - apt-get -y install graphviz
