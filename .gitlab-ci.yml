@@ -92,6 +92,7 @@ update_dags:
     - git add $DAG_DIR/dag_push_atlas*
     - git diff-index --quiet HEAD  ||  git commit -m "Update DAGs"
     - git push -o ci.skip gitlab $CI_COMMIT_BRANCH
+  allow_failure: true
 
 
 # Update Nexus Resources
