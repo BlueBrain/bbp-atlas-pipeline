@@ -50,11 +50,11 @@ RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "blue-brain-
 # module load py-data-integrity-check
 RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "bba-data-integrity-check==0.2.0"
 
-# cwl-registry depends on blue_brain_nexus_push so it must be installed first to not overwrite the blue_brain_nexus_push version
+# cwl-registry depends on blue_brain_nexus_push so it must be installed first to not overwrite the final blue_brain_nexus_push version
 RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ cwl-registry==0.4.14
 
 # module load py-bba-data-push
-RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "bba-data-push==2.3.1"
+RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_nexus_push.git@develop
 
 RUN pip install git+https://bbpgitlab.epfl.ch/dke/users/jonathanlurie/atlas_cell_transplant.git@v0.3.0
 
