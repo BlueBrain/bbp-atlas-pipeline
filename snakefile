@@ -1632,6 +1632,7 @@ default_transplant = """{params.app} \
                         --dst-annot-volume {input.dst_annotation} \
                         --src-cell-volume {input.src_cell_volume} \
                         --dst-cell-volume {output} \
+                        --max-cores {workflow.cores} \
                         2>&1 | tee {log}
                      """
 

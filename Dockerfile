@@ -55,7 +55,7 @@ RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ cwl-registry
 # module load py-bba-data-push
 RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ git+https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_nexus_push.git@develop
 
-RUN pip install git+https://bbpgitlab.epfl.ch/dke/users/jonathanlurie/atlas_cell_transplant.git@v0.3.0
+RUN pip install git+https://bbpgitlab.epfl.ch/dke/users/jonathanlurie/atlas_cell_transplant.git@v0.3.1
 
 RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "pipeline-validator==0.3.1"
 
