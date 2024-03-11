@@ -380,6 +380,8 @@ It is possible to override the config variables at runtime using the snakemake a
 The BBAP is currently maintained by the BlueBrain DKE team: <bbp-ou-dke@groupes.epfl.ch>.
 If you face any issue using the BBAP, please send an e-mail to one of the contributors.
 
+The release notes are available [here](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/-/blob/develop/doc/release_notes.md).
+
 
 ## Appendix
 ### Placement hints data catalog json format
