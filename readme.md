@@ -180,7 +180,6 @@ It is possible to customize a pipeline rule that generates a (set of) volumetric
 the rest of the volume unchanged).
 The customization happens via the configuration file [`customize_pipeline/user_config.json`](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/-/blob/develop/customize_pipeline/user_config.json)
 with the following structure:
-- `target_rule`: name of the final rule to execute (replaces the `--target-rule` CLI argument);
 - `rule`: name of the rule to customize from the default pipeline;
 - `brainRegion`: ID of the brain region to customize;
 - `CLI`:
@@ -205,7 +204,7 @@ volumetric files: `[PH]y.nrrd` and `[PH]layer_n.nrrd` where n = 1, ..., 6.
 Once the [configuration file](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/-/blob/develop/customize_pipeline/user_config.json)
 is ready, the customized pipeline can be run with the following command:
 ```
-bbp-atlas  --user-config-path customize_pipeline/user_config.json  --snakemake-options '<options>'
+bbp-atlas  --target-rule <target_rule>  --user-config-path customize_pipeline/user_config.json  --snakemake-options '<options>'
 ```
 
 When a rule is customized as described above, the pipeline will run

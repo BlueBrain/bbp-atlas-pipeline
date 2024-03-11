@@ -45,9 +45,9 @@ with open(os.path.join(REPO_PATH, "customize_pipeline/available_vars.yaml"), "r"
 var_path_map = get_var_path_map(AVAILABLE_VARS["input"], PUSH_DATASET_CONFIG)
 
 user_config_path = config["USER_CONFIG"]
+target_rule = config["TARGET_RULE"]
 
 user_config = json.load(open(user_config_path))
-target_rule = user_config["target_rule"]
 user_rules = user_config["rules"]
 for user_rule in user_rules:
     rule_name = user_rule["rule"]

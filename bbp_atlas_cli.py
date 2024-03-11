@@ -7,8 +7,8 @@ import re
 
 @click.command()
 @click.option("--target-rule",
-              type=click.STRING, required=False,
-              help="The target rule of the pipeline to execute (required without a user configuration)")
+              type=click.STRING, required=True,
+              help="The target rule of the pipeline to execute")
 @click.option("--user-config-path",
               type=click.Path(exists=True), required=False,
               help="The user configuration to customize the pipeline")
@@ -31,16 +31,9 @@ import re
 def execute_pipeline(target_rule, user_config_path, repo_path, snakemake_options,
                      service_token, token_username, token_password):
     options_separator = "  "
-    if not user_config_path:
-        if not target_rule:
-            raise Exception("A target rule is required if no user configuration is provided")
-    else:
-        if target_rule:
-            raise Exception(f"When a user configuration is provided (--user-config-path {user_config_path}),"
-                            " the target rule must be specified in the user configuration"
-                            " file (first key) and not via the '--target-rule' argument.")
+    if user_config_path:
         if "--snakefile " in snakemake_options:
-            raise Exception("The --snakefile option can not be used together with --user-config-file")
+            raise Exception("The '--snakefile' option can not be used together with --user-config-path")
 
         from blue_brain_token_fetch.token_fetcher_user import TokenFetcherUser
         from blue_brain_token_fetch.token_fetcher_service import TokenFetcherService
@@ -68,7 +61,6 @@ def execute_pipeline(target_rule, user_config_path, repo_path, snakemake_options
         pipeline_validator(user_config_path, token_fetcher.get_access_token(), whitelisted_vars)
 
         user_config_json = json.load(open(user_config_path))
-        target_rule = user_config_json["target_rule"]
         priority_rules = []
         for user_rule_name in [user_rule["rule"] for user_rule in user_config_json["rules"]]:
             merge_rule_name = get_merge_rule_name(user_rule_name)
@@ -82,12 +74,14 @@ def execute_pipeline(target_rule, user_config_path, repo_path, snakemake_options
             # this should not be the last option otherwise target_rule gets prioritized too
             snakemake_options += f" --prioritize {' '.join(priority_rules)}"
 
-        user_config_option = f"USER_CONFIG={user_config_path}"
-        repo_path_option = f"REPO_PATH={repo_path}"
         snakemake_config_flag = "--config "
-        full_config_option = f"{snakemake_config_flag} {user_config_option} {repo_path_option}"
+        user_config_option = f"USER_CONFIG={user_config_path}"
+        target_config_option = f"TARGET_RULE={target_rule}"
+        repo_path_option = f"REPO_PATH={repo_path}"
+        full_config_option = f"{snakemake_config_flag} {user_config_option} {repo_path_option} {target_config_option}"
         if snakemake_config_flag in snakemake_options:
-            snakemake_options = snakemake_options.replace(snakemake_config_flag, full_config_option + options_separator)
+            snakemake_options = snakemake_options.replace(snakemake_config_flag,
+                full_config_option + options_separator)
         else:
             snakemake_options = options_separator.join([full_config_option, snakemake_options])
 
