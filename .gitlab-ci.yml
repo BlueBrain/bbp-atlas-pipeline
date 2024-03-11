@@ -113,6 +113,7 @@ nexus-synchronization:
     - git add $NEXUS_IDS_PATH $METADATA_DIR/$FILE_NEXUS_ID_MAP
     - git diff-index --quiet HEAD  ||  git commit -m "Update $NEXUS_IDS_PATH"
     - git push -o ci.skip gitlab $DEV_BRANCH
+  allow_failure: true
 
 # Build image for pipeline
 update-pipeline-image:

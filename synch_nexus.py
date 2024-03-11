@@ -49,7 +49,7 @@ def synch_nexus():
     file_nexus_map_keys = list(file_nexus_map.keys())
     updated_map = False
 
-    prob_maps = [str(path) for path in Path(metadata_dir).rglob("probability_map_*.csv")]
+    prob_maps = [str(path) for path in Path(metadata_dir).glob("probability_map_*.csv")]
     for prob_map_path in prob_maps:
         prob_map_doc_path = prob_map_path.replace(metadata_dir, os.path.join(metadata_dir, "docs")).replace(".csv", ".txt")
         if not os.path.isfile(prob_map_doc_path):
