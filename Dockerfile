@@ -42,7 +42,7 @@ RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "bba-data-fe
 RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "densities-validation==0.0.6"
 
 # leaves-only
-RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "cell-densities==0.1.0"
+RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "cell-densities==0.2.1"
 
 # module load py-bba-webexporter
 RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "blue-brain-atlas-web-exporter==2.2.0"
@@ -63,7 +63,7 @@ RUN git config --global --remove-section url."https://gitlab-ci-token:${CI_JOB_T
 
 RUN pip install "atlas-commons==0.1.5"
 
-RUN pip install "atlas-splitter==0.1.2"
+RUN pip install "atlas-splitter==0.1.4"
 
 RUN pip install "atlas-densities==0.2.2"
 
