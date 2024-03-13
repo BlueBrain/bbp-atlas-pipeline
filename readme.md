@@ -114,8 +114,12 @@ where
 - `<target_rule>` represents the target action to execute.
 - `<options>` represents the snakemake options.  
 A set of most common options is available [here](#useful-snakemake-options). 
-The option  `--cores <number_of_cores>` is mandatory for now, unless the `--dryrun` option is used,
+The option  `--cores <number_of_cores>` is mandatory unless the `--dryrun` option is used,
 and must be provided as last option.
+
+_Note_: If running multicore on a BB5 node, the step 
+`transplant_mtypes_densities_from_probability_map` may exceed the available memory and 
+cause a node failure. Therefore, it is recommended to use a maximum of 70 cores.
 
 A benchmark of the resources required by the different pipeline steps is available [here](#profiling).
 
