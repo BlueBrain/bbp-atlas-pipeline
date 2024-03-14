@@ -82,8 +82,8 @@ def synch_nexus():
             res = forge.retrieve(res_id_tag)
             if not res:
                 raise Exception(f"No Resource with id '{res_id_tag}' found in project '{bucket}' (Nexus env: '{nexus_env}')")
-            with open(prob_map_path) as prob_map_file:
-                if res.distribution.digest.value == hashlib.sha256(prob_map_file.read().encode('utf-8')).hexdigest():
+            with open(prob_map_path, "rb") as prob_map_file:
+                if res.distribution.digest.value == hashlib.sha256(prob_map_file.read()).hexdigest():
                     print(f"Hash of Resource distribution is identical to current file, nothing to update")
                     continue
             print(f"Hash of Resource distribution is different from hash of current file, updating the Resource")
