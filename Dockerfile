@@ -63,7 +63,7 @@ RUN git config --global --remove-section url."https://gitlab-ci-token:${CI_JOB_T
 
 RUN pip install "atlas-commons==0.1.5"
 
-RUN pip install "atlas-splitter==0.1.4"
+RUN pip install "atlas-splitter>=0.1.5"
 
 RUN pip install "atlas-densities==0.2.2"
 
