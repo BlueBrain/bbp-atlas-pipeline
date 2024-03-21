@@ -41,8 +41,6 @@ RULES_CONFIG_DIR_TEMPLATES = os.path.join(REPO_PATH, config["RULES_CONFIG_DIR_TE
 RESOLUTION = str(config["RESOLUTION"])
 DISPLAY_HELP = config["DISPLAY_HELP"]
 RESOURCE_TAG = config["RESOURCE_TAG"]
-if not RESOURCE_TAG:
-    RESOURCE_TAG = f"Atlas pipeline ({datetime.today().strftime('%Y-%m-%dT%H:%M:%S')})"
 NEXUS_REGISTRATION = config["NEXUS_REGISTRATION"]
 NEW_ATLAS = config["NEW_ATLAS"]
 EXPORT_MESHES = config["EXPORT_MESHES"]
@@ -1804,7 +1802,12 @@ rule check_annotation_pipeline_v3:
 brain_region_id = "http://api.brain-map.org/api/v2/data/Structure/997"
 
 atlas_release_res = forge.retrieve(atlas_release_id)
-atlas_release_rev = atlas_release_res._store_metadata._rev
+
+if not RESOURCE_TAG:
+    RESOURCE_TAG = f"Atlas pipeline ({datetime.today().strftime('%Y-%m-%dT%H:%M:%S')})"
+    atlas_release_rev = atlas_release_res._store_metadata._rev
+else:
+    atlas_release_rev = 0  # will use the one from the atlas_release_id at tag RESOURCE_TAG
 
 ##>push_atlas_release : rule to push into Nexus an atlas release
 rule push_atlas_release:
@@ -2121,7 +2124,8 @@ rule create_cellCompositionSummary_payload:
         forge_config = FORGE_CONFIG,
         nexus_env = NEXUS_DESTINATION_ENV,
         nexus_bucket = NEXUS_DESTINATION_BUCKET,
-        nexus_token = myTokenFetcher.get_access_token()
+        nexus_token = myTokenFetcher.get_access_token(),
+	cores = workflow.cores
     output:
         intermediate_density_distribution = f"{WORKING_DIR}/density_distribution_{env}.json",
         summary_statistics = f"{WORKING_DIR}/cellCompositionSummary_payload_{env}.json"

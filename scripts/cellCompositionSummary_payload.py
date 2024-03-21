@@ -19,7 +19,7 @@ with open(snakemake.log[0], "w") as logfile:
 
         logfile.write(f"Computing CellCompositionSummary payload for endpoint '{nexus_endpoint}'\n")
 
-        with multiprocessing.Pool(processes=snakemake.workflow.cores) as pool:
+        with multiprocessing.Pool(processes=snakemake.params.cores) as pool:
             summary_statistics = statistics.atlas_densities_composition_summary(density_distribution,
                 voxcell.RegionMap.load_json(snakemake.input.hierarchy),
                 voxcell.VoxelData.load_nrrd(snakemake.input.annotation),
