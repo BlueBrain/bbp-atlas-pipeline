@@ -14,6 +14,7 @@ stages:
   - convert_and_deployToBB5
   - generate_doc
   - deploy_doc
+  - run-pipeline
 
 variables:
   DOC_DIR: "doc"
@@ -22,6 +23,16 @@ variables:
   DEV_BRANCH: "develop"
   REPO_PUSH_TOKEN: $OAUTH2_TOKEN
   COMMIT_SHA: $CI_COMMIT_SHA
+  FINAL_PIPELINE_STEP: "push_atlas_datasets"
+  PROJ84_GPFS: "/gpfs/bbp.cscs.ch/data/project/proj84"
+  IMAGES_DIR: "$PROJ84_GPFS/atlas_singularity_images"
+  PIPELINE_RUNS: "$PROJ84_GPFS/atlas_pipeline_runs"
+  TIMESTAMP: "$CI_COMMIT_TIMESTAMP"
+  IMAGE_PATH: "$IMAGES_DIR/${CI_PROJECT_NAME}_${REGISTRY_IMAGE_TAG}-${TIMESTAMP}.sif"
+  IMAGE_LINK: "${CI_PROJECT_NAME}_${REGISTRY_IMAGE_TAG}.sif"
+  IMAGE_LINK_PATH: "${IMAGES_DIR}/${IMAGE_LINK}"
+  TARGET_RULE: "$FINAL_PIPELINE_STEP"  # Useful to change it in the job manual execution
+  SERVICE_TOKEN_SETTINGS: "SERVICE_TOKEN=True TOKEN_USERNAME=$SERVICE_TOKEN_USERNAME TOKEN_PASSWORD=$SERVICE_TOKEN_PASSWORD"
 
 
 .deploy_rules:
@@ -48,6 +59,11 @@ variables:
   - git config user.name "$COMMIT_SHA"
   - git config user.email "bbp-ou-dke@groupes.epfl.ch"
 
+.load_singularity_module:
+  - echo "Load the singularity module:"
+  - module load unstable singularityce
+
+
 unit_test:
   stage: unit-test
   extends: .unit-tests
@@ -63,8 +79,7 @@ unit_test:
     SRC_PROJECT: '$CI_PROJECT_PATH'
     TEST_FOLDER: 'tests'
     NEXUS_STAGING_TOKEN: '$NEXUS_STAGING_TOKEN'
-    SERVICE_TOKEN_USERNAME: '$SERVICE_TOKEN_USERNAME'
-    SERVICE_TOKEN_PASSWORD: '$SERVICE_TOKEN_PASSWORD'
+    SERVICE_TOKEN_SETTINGS: '$SERVICE_TOKEN_SETTINGS'
     KUBERNETES_MEMORY_LIMIT: 8Gi
     KUBERNETES_MEMORY_REQUEST: 8Gi
 
@@ -84,11 +99,12 @@ update_dags:
     - git checkout $CI_COMMIT_BRANCH
   script:
     - echo "Update DAG"
-    - snakemake  --config SERVICE_TOKEN=True TOKEN_USERNAME=$SERVICE_TOKEN_USERNAME TOKEN_PASSWORD=$SERVICE_TOKEN_PASSWORD  --dag  push_atlas_datasets > $DAG_DIR/dag_push_atlas.gv
+    - snakemake  --config SERVICE_TOKEN=True TOKEN_USERNAME=$SERVICE_TOKEN_USERNAME TOKEN_PASSWORD=$SERVICE_TOKEN_PASSWORD  --dag  $FINAL_PIPELINE_STEP > $DAG_DIR/dag_push_atlas.gv
     - dot -Tsvg $DAG_DIR/dag_push_atlas.gv > $DAG_DIR/dag_push_atlas.svg
     - echo "Update detailed DAG"
-    - snakemake  --config SERVICE_TOKEN=True TOKEN_USERNAME=$SERVICE_TOKEN_USERNAME TOKEN_PASSWORD=$SERVICE_TOKEN_PASSWORD  --filegraph  push_atlas_datasets > $DAG_DIR/dag_push_atlas_fg.gv
+    - snakemake  --config SERVICE_TOKEN=True TOKEN_USERNAME=$SERVICE_TOKEN_USERNAME TOKEN_PASSWORD=$SERVICE_TOKEN_PASSWORD  --filegraph  $FINAL_PIPELINE_STEP > $DAG_DIR/dag_push_atlas_fg.gv
     - dot -Tsvg $DAG_DIR/dag_push_atlas_fg.gv > $DAG_DIR/dag_push_atlas_fg.svg
+    - echo "Commit updated DAGs"
     - git add $DAG_DIR/dag_push_atlas*
     - git diff-index --quiet HEAD  ||  git commit -m "Update DAGs"
     - git push -o ci.skip gitlab $CI_COMMIT_BRANCH
@@ -183,5 +199,37 @@ convert_and_deploy_job:
     bb5_cpus_per_task: 2
     bb5_memory: 4G
     bb5_duration: "10:00"
+  before_script:
+    - !reference [.load_singularity_module]
   script:
     - bash convert_singularity_image.sh
+
+run_pipeline:
+  stage:
+    run-pipeline
+  when: manual
+  tags:
+    - bb5_map
+  before_script:
+    - !reference [.load_singularity_module]
+  script:
+    - cat <<EOF | singularity shell  --mount "type=bind,source=$PROJ84_GPFS,destination=$PROJ84_GPFS"  $IMAGE_LINK_PATH
+    - set -e
+    - export PYTHONPATH=$PIPELINE_REPO:$PYTHONPATH
+    - snakemake  --snakefile $CUSTOM_PIPELINE/custom_snakefile  --configfile $PIPELINE_REPO/config.yaml  --config TARGET_RULE=$TARGET_RULE USER_CONFIG=$CUSTOM_PIPELINE/user_config.json REPO_PATH=$PIPELINE_REPO $SERVICE_TOKEN_SETTINGS  --unlock   # in case a previous pipeline failed ("the remaining lock was likely caused by a kill signal or a power loss")
+    - bbp-atlas  --target-rule $TARGET_RULE  --user-config-path $CUSTOM_PIPELINE/user_config.json  --repo-path $PIPELINE_REPO  --service-token  --token-username $SERVICE_TOKEN_USERNAME  --token-password $SERVICE_TOKEN_PASSWORD  --snakemake-options '--configfile $PIPELINE_REPO/config.yaml  --config $SERVICE_TOKEN_SETTINGS WORKING_DIR=$PIPELINE_OUTPUT NEXUS_REGISTRATION=False EXPORT_MESHES=False  --cores $SNAKEMAKE_CORES'
+    - EOF
+  after_script:
+    if [ $CI_COMMIT_TAG != null ]; then
+      ln -s $PIPELINE_OUTPUT $PIPELINE_RUNS/$CI_COMMIT_TAG
+    fi
+  timeout: 8 hours
+  variables:
+    PIPELINE_REPO: /pipeline/$CI_PROJECT_NAME  # set in the Dockerfile
+    CUSTOM_PIPELINE: $PIPELINE_REPO/customize_pipeline
+    PIPELINE_OUTPUT: $PIPELINE_RUNS/$TIMESTAMP
+    SNAKEMAKE_CORES: 70
+    bb5_cpus_per_task: 70
+    bb5_memory: 0
+    bb5_duration: "8:00:00"
+    bb5_exclusive: full

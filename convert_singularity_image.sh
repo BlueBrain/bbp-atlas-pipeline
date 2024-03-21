@@ -13,23 +13,17 @@ hostname
 echo "TMPDIR, which should be on local NVME because we asked for a node with local storage:"
 echo $TMPDIR
 
-echo "Load the singularity module:"
-module load unstable
-module use /gpfs/bbp.cscs.ch/apps/hpc/singularity/modules/linux-rhel7-x86_64
-module load singularityce
-
 echo "Check if singularity is found:"
 singularity --version
 
 echo "We use a cache directory in ${TMPDIR} which is on local NVME"
-mkdir -p ${TMPDIR}/singularity-cachedir
-export SINGULARITY_CACHEDIR=${TMPDIR}/singularity-cachedir
+singularity_cachedir=${TMPDIR}/singularity-cachedir
+mkdir -p ${singularity_cachedir}
+export SINGULARITY_CACHEDIR=${singularity_cachedir}
 export SINGULARITY_DOCKER_USERNAME=${CI_REGISTRY_USER}
 export SINGULARITY_DOCKER_PASSWORD=${CI_JOB_TOKEN}
 echo "Pulling the image from the GitLab registry:"
-image="${CI_PROJECT_NAME}_${REGISTRY_IMAGE_TAG}"
-imagesif="$image.sif"
-tmpimage="${TMPDIR}/$imagesif"
+tmpimage="${TMPDIR}/${IMAGE_LINK}"
 singularity pull --no-https $tmpimage docker://$CI_REGISTRY_IMAGE:$REGISTRY_IMAGE_TAG
 
 echo "At this stage, we have the singularity image at $tmpimage"
@@ -39,14 +33,10 @@ ls -la $tmpimage
 #singularity exec --containall ${TMPDIR}/blue_brain_atlas_pipeline.sif 2048 -h
 
 echo "Deploying the image to proj84"
-export GPFSDIR=/gpfs/bbp.cscs.ch/data/project/proj84/atlas_singularity_images
-export NAME_WITH_TIMESTAMP=$image-$(date +%Y-%m-%dT%H:%M:%S).sif
-mkdir -p ${GPFSDIR}
-mv $tmpimage ${GPFSDIR}/${NAME_WITH_TIMESTAMP}
-imagepath="${GPFSDIR}/$imagesif"
-# rm the previous link
-rm -f $imagepath
-ln -s ${GPFSDIR}/${NAME_WITH_TIMESTAMP} $imagepath
+mkdir -p ${IMAGES_DIR}
+mv $tmpimage $IMAGE_PATH
+# remove the previous link
+rm -f ${IMAGE_LINK_PATH}
+ln -s $IMAGE_PATH $IMAGE_LINK_PATH
 
-echo "Updated $imagepath which is actually a symbolic link to ${GPFSDIR}/${NAME_WITH_TIMESTAMP}"
-
+echo "Updated ${IMAGE_LINK_PATH} which is actually a symbolic link to ${IMAGE_PATH}"

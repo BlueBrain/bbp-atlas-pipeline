@@ -1,7 +1,6 @@
 import os
 
-token_username = os.environ["SERVICE_TOKEN_USERNAME"]
-token_password = os.environ["SERVICE_TOKEN_PASSWORD"]
+service_token_settings = os.environ["SERVICE_TOKEN_SETTINGS"]
 
 
 def test_cli():
@@ -11,7 +10,7 @@ def test_cli():
     for rule, total in rule_total.items():
         cli_command = f"bbp-atlas --target-rule {rule} " \
             f"--snakemake-options '--config WORKING_DIR={working_dir} " \
-            f"SERVICE_TOKEN=True TOKEN_USERNAME={token_username} TOKEN_PASSWORD={token_password}  -c1  --dryrun'"
+            f"{service_token_settings}  -c1  --dryrun'"
         result = os.popen(cli_command).read()
 
         if "Exception" in result:
