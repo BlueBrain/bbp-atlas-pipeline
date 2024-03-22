@@ -13,7 +13,7 @@ def create_payload(forge, atlas_release_id, output_file, n_layer_densities, endp
             _project ?_project;
             """
 
-    # Density resources annotated with Mtypes without layers are not released
+    # Density Resources annotated with an Mtype without layer are not released in the CellCompositionVolume
     query_layer = """
         SELECT DISTINCT ?s
         WHERE {""" + base_query + """
