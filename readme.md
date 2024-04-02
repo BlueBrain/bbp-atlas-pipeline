@@ -155,8 +155,8 @@ will generate (locally, without registering in Nexus) the following CellComposit
   containing the values of the ME-type densities in the cellCompositionVolume,
   grouped by regions
 
-**NOTE**  
-Currently, the selected ME-type densities that enter the [CellCompositionVolume](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/-/blob/develop/cellCompVolume_payload.py?ref_type=heads#L16)
+**NOTE for versions < v1.0.0**  
+The selected ME-type densities that enter the [CellCompositionVolume](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/-/blob/develop/cellCompVolume_payload.py?ref_type=heads#L16)
 are those having a `layer` in their Nexus Resource property `brainLocation`, plus the two   
 `Generic{Inhibitory,Excitatory}NeuronMType`-`Generic{Inhibitory,Excitatory}NeuronEType`.
 
@@ -349,6 +349,7 @@ respectively **1 h** (with an RSS peak of 10 GB) and **4 h** (with an RSS peak o
 | create_mtypes_densities_from_probability_map                |          31310.7357 |                 8:41:50 |                                                        31178.52 |                                                     32289.28 |                                                      31150.59 |                                                            31163.56 |       0.00 |        0.00 |                99.69 |     31209.90 |
 | create_mtypes_densities_from_probability_map (`--cores 70`) |           6276.3961 |                 1:44:36 |                                                       394077.36 |                                                   2285360.80 |                                                      63690.27 |                                                            82778.46 |       1.04 |       	0.00 |             	5992.08 |    376431.41 |
 | excitatory_split                                            |            222.6994 |                 0:03:42 |                                                         3437.98 |                                                      3989.99 |                                                       3410.12 |                                                             3423.07 |       0.00 |        0.00 |                87.40 |       195.18 |
+| create_cellCompositionVolume_payload                        |            414.9835 |                 0:06:54 |                                                               0 |                                                            0 |                                                             0 |                                                                   0 |       0.00 |        0.00 |                 0.25 |            0 |
 
 
 

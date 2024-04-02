@@ -3,7 +3,8 @@ import json
 hasPart_key = "hasPart"
 
 
-def create_payload(forge, atlas_release_id, output_file, n_layer_densities, endpoint, bucket, tag=None):
+def create_payload(forge, atlas_release_id, output_file, n_densities_expected,
+                   endpoint, bucket, tag=None):
     base_query = f"""
             ?s a METypeDensity ;
             atlasRelease <{atlas_release_id}>;
@@ -13,29 +14,29 @@ def create_payload(forge, atlas_release_id, output_file, n_layer_densities, endp
             _project ?_project;
             """
 
-    # Density Resources annotated with an Mtype without layer are not released in the CellCompositionVolume
-    query_layer = """
+    # Density Resources without annotation are not released in the CellCompositionVolume
+    query_annotation = """
         SELECT DISTINCT ?s
         WHERE {""" + base_query + """
-            annotation / hasBody / label ?mtype_label ;
-            brainLocation / layer ?layer .
+            annotation / hasBody / label ?mtype_label .
             ?distribution name ?nrrd_file ;
             contentUrl ?contentUrl .
             Filter (?_deprecated = 'false'^^xsd:boolean)
             Filter (?_project = <"""+endpoint+"""/projects/"""+bucket+""">)
         }"""
-    all_resources_with_layer = forge.sparql(query_layer, limit=3500, debug=False)
-    print(f"{len(all_resources_with_layer)} ME-type densities with layer found in total, filtering those with tag '{tag}'")
+    all_resources_with_ann = forge.sparql(query_annotation, limit=3500, debug=False)
+    print(f"{len(all_resources_with_ann)} ME-type densities with annotation found in total, filtering those with tag '{tag}'")
+
     resources = []
-    for r in all_resources_with_layer:
+    for r in all_resources_with_ann:
         try:
-            resources.append(forge.retrieve(id = r.s, version=tag))
-        except Exception as e:
+            resources.append(forge.retrieve(id=r.s, version=tag))
+        except Exception:
             pass
     resources = [res for res in resources if res is not None]
-    n_res_with_layer = len(resources)
-    print(f"{n_res_with_layer} ME-type densities with layer found with tag '{tag}'")
-    assert n_res_with_layer == n_layer_densities
+    n_res_with_ann = len(resources)
+    print(f"{n_res_with_ann} ME-type densities with annotation found with tag '{tag}'")
+    assert n_res_with_ann == n_densities_expected
 
     # Get Generic{Excitatory,Inhibitory}Neuron
     for excInh in ["Excitatory", "Inhibitory"]:
@@ -52,8 +53,8 @@ def create_payload(forge, atlas_release_id, output_file, n_layer_densities, endp
         generic_resources = []
         for r in all_generic_resources:
             try:
-                generic_resources.append(forge.retrieve(id = r.s, version=tag))
-            except Exception as e:
+                generic_resources.append(forge.retrieve(id=r.s, version=tag))
+            except Exception:
                 pass
         generic_resources = [res for res in generic_resources if res is not None]
         assert len(generic_resources) == 1
