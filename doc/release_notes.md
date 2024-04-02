@@ -3,6 +3,7 @@
 ## v1.0.0 [to be released]
 ### New features
 - Perform densities validation
+- Drop layer requirement for M-types in CellComposition
 ### Enhancements
 - Replace CCFv2-to-CCFv3 transplant with single CCFv3 augmented annotation and aligned Nissl-stained volume ([Jira](https://bbpteam.epfl.ch/project/issues/browse/MS-5))
   - Updated gene expression volumes
