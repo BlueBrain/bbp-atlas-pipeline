@@ -343,7 +343,9 @@ default_fetch = """{params.app} \
                     --out {output} --nexus-id {params.nexus_id} \
                     --verbose 2>&1 | tee {log}"""
 
+# -v for logging.INFO, -vv for logging.DEBUG
 default_push = """{params.app[0]} \
+                  -v \
                   --forge-config-file {FORGE_CONFIG} \
                   --nexus-env {NEXUS_DESTINATION_ENV} \
                   --nexus-org {NEXUS_DESTINATION_ORG} \
