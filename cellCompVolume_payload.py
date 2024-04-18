@@ -27,13 +27,7 @@ def create_payload(forge, atlas_release_id, output_file, n_densities_expected,
     all_resources_with_ann = forge.sparql(query_annotation, limit=3500, debug=False)
     print(f"{len(all_resources_with_ann)} ME-type densities with annotation found in total, filtering those with tag '{tag}'")
 
-    resources = []
-    for r in all_resources_with_ann:
-        try:
-            resources.append(forge.retrieve(id=r.s, version=tag))
-        except Exception:
-            pass
-    resources = [res for res in resources if res is not None]
+    resources = filter_by_tag(all_resources_with_ann, tag, forge)
     n_res_with_ann = len(resources)
     print(f"{n_res_with_ann} ME-type densities with annotation found with tag '{tag}'")
     assert n_res_with_ann == n_densities_expected
@@ -50,13 +44,7 @@ def create_payload(forge, atlas_release_id, output_file, n_densities_expected,
             Filter (?_deprecated = 'false'^^xsd:boolean)
             }}"""
         all_generic_resources = forge.sparql(query_gen, limit=1000, debug=False)
-        generic_resources = []
-        for r in all_generic_resources:
-            try:
-                generic_resources.append(forge.retrieve(id=r.s, version=tag))
-            except Exception:
-                pass
-        generic_resources = [res for res in generic_resources if res is not None]
+        generic_resources = filter_by_tag(all_generic_resources, tag, forge)
         assert len(generic_resources) == 1
         resources.extend(generic_resources)
 
@@ -92,3 +80,18 @@ def create_payload(forge, atlas_release_id, output_file, n_densities_expected,
         json.dump(grouped_by_metype, f)
 
     return grouped_by_metype
+
+
+def filter_by_tag(all_resources, tag, forge):
+    if not tag:
+        return all_resources
+
+    tagged_resources = []
+    for r in all_resources:
+        try:
+            res = forge.retrieve(id=r.s, version=tag)
+        except Exception:
+            pass
+        if res is not None:
+            tagged_resources.append(res)
+    return tagged_resources
