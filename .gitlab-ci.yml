@@ -15,6 +15,7 @@ stages:
   - generate_doc
   - deploy_doc
   - run-pipeline
+  - post_nexus_registration
 
 variables:
   DOC_DIR: "doc"
@@ -42,11 +43,13 @@ variables:
       variables:
         CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE
         REGISTRY_IMAGE_TAG: $CI_COMMIT_TAG
+        IS_PROD_ENV: 1
     - if: $CI_COMMIT_BRANCH == $DEV_BRANCH
       when: on_success
       variables:
         CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE
         REGISTRY_IMAGE_TAG: dev
+        IS_PROD_ENV: 0
 
 .add_staging_SSL:
   script:
@@ -231,3 +234,18 @@ run_pipeline:
     bb5_memory: 0
     bb5_duration: "8:00:00"
     bb5_exclusive: full
+
+validate_atlas_release:
+  stage: post_nexus_registration
+  rules:
+    - !reference [.deploy_rules, rules]
+    - when: manual
+  before_script:
+    - pip install "nexusforge>=0.8.1"
+    - pip install -i https://bbpteam.epfl.ch/repository/devpi/simple "bba-data-push>=3.0.1"
+  script:
+    python $TEST_FOLDER/validate_atlas_release.py
+  variables:
+    TEST_FOLDER: 'tests'
+    NEXUS_STAGING_TOKEN: '$NEXUS_STAGING_TOKEN'
+    RESOURCE_TAG: '$RESOURCE_TAG'
