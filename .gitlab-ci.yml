@@ -16,6 +16,7 @@ stages:
   - deploy_doc
   - run-pipeline
   - post_nexus_registration
+  - update_BMO
 
 variables:
   DOC_DIR: "doc"
@@ -247,5 +248,23 @@ validate_atlas_release:
     python $TEST_FOLDER/validate_atlas_release.py
   variables:
     TEST_FOLDER: 'tests'
+    NEXUS_STAGING_TOKEN: '$NEXUS_STAGING_TOKEN'
+    RESOURCE_TAG: '$RESOURCE_TAG'
+
+create_BMO_MR:
+  stage: update_BMO
+  rules:
+    - if: $RESOURCE_TAG
+    - when: manual
+  needs:
+    - job: validate_atlas_release
+      optional: true
+  before_script:
+    - pip install python-gitlab
+    - pip install "nexusforge>=0.8.1"
+  script:
+    - python create_BMO_MR.py
+  variables:
+    ATLAS_PARCELLATION_ONTOLOGY_ID_STAGING: "https://bbp.epfl.ch/neurosciencegraph/data/ontologies/34388d3b-0b88-4deb-9686-6fcd9ef8990e"
     NEXUS_STAGING_TOKEN: '$NEXUS_STAGING_TOKEN'
     RESOURCE_TAG: '$RESOURCE_TAG'

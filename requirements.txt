@@ -10,3 +10,4 @@ voxcell
 click
 cwl-registry==0.4.14
 pipeline-validator==0.3.1
+python-gitlab
