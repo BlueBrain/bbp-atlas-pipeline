@@ -242,6 +242,7 @@ validate_atlas_release:
   rules:
     - !reference [.deploy_rules, rules]
     - when: manual
+      allow_failure: true
   before_script:
     - pip install "nexusforge>=0.8.1"
     - pip install -i https://bbpteam.epfl.ch/repository/devpi/simple "bba-data-push>=3.0.1"
@@ -256,6 +257,7 @@ create_BMO_MR:
   rules:
     - if: $RESOURCE_TAG
     - when: manual
+      allow_failure: true
   needs:
     - job: validate_atlas_release
       optional: true

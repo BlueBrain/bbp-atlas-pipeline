@@ -29,7 +29,8 @@ if ci_var_value == resource_rev:
 
 print(f"Updating {ci_var_name} from {ci_var_value} to {resource_rev}")
 new_branch = "update_atlas_parcellation_ontology"
-project.branches.create({'branch': new_branch, 'ref': target_branch})
+if new_branch not in project.branches.list():
+    project.branches.create({'branch': new_branch, 'ref': target_branch})
 raw_content = gl_ci.decode()
 gl_ci.content = raw_content.decode().replace(f"{ci_var_name}: {ci_var_value}", f"{ci_var_name}: {resource_rev}")
 gl_ci.save(branch=new_branch, commit_message=f'Update {ci_var_name} to {resource_rev}')
