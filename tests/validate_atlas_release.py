@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 forge_config = "forge-config.yml"
-nexus_token = os.environ["NEXUS_STAGING_TOKEN"]
+nexus_token = os.environ["NEXUS_TOKEN"]
 is_prod_env = os.environ.get("IS_PROD_ENV", False)
 nexus_tag = os.environ["RESOURCE_TAG"]
 if not nexus_tag:
