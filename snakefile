@@ -441,6 +441,22 @@ rule fetch_barrel_positions:
     shell:
         default_fetch
 
+##>fetch_regions_layers_map : fetch the mapping between brain regions and layers
+rule fetch_regions_layers_map:
+    output:
+        f"{WORKING_DIR}/regions_layers_map.json"
+    params:
+        nexus_id=NEXUS_IDS["metadata"]["regions_layers_map"],
+        app=APPS["bba-data-fetch"],
+        token = myTokenFetcher.get_access_token()
+    log:
+        f"{LOG_DIR}/fetch_regions_layers_map.log"
+    shell:
+        default_fetch
+
+
+## atlas-densities fetchings
+
 ##>fetch_regions_config : fetch configuration of regions groups
 rule fetch_regions_config:
     output:
@@ -1708,7 +1724,8 @@ rule transplant_mtypes_densities_from_probability_map:
 rule export_brain_region:
     input:
         hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
-        annotation = annotation_v3
+        annotation = annotation_v3,
+        region_layer_map = rules.fetch_regions_layers_map.output
     output:
         mesh_dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['MeshFile']['brain_region_meshes']}"),
         mask_dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['brain_region_mask']}"),
@@ -1721,7 +1738,7 @@ rule export_brain_region:
     log:
         f"{LOG_DIR}/export_brain_region.log"
     script:
-        "scripts/create_meshes.py"
+        "scripts/export_brain_regions_meshes.py"
 
 hierarchy_mba = rules.export_brain_region.output.hierarchy_volume
 hierarchy_jsonld = rules.export_brain_region.output.hierarchy_jsonld
@@ -1820,7 +1837,8 @@ rule push_atlas_release:
         hemisphere = rules.create_hemispheres_ccfv3.output,
         placement_hints = rules.placement_hints.output.dir,
         placement_hints_metadata = rules.placement_hints.output.metadata,
-        direction_vectors =  direction_vectors,
+        layers_regions_map = os.path.join("metadata", "PH_layers_regions_map.json"),
+        direction_vectors = direction_vectors,
         cell_orientations = rules.orientation_field.output,
     params:
         app=APPS["bba-data-push push-atlasrelease"].split(),
@@ -1842,6 +1860,7 @@ rule push_atlas_release:
             --hemisphere-path {input.hemisphere} \
             --placement-hints-path {input.placement_hints} \
             --placement-hints-metadata {input.placement_hints_metadata} \
+            --layers-regions-map {input.layers_regions_map} \
             --direction-vectors-path {input.direction_vectors} \
             --cell-orientations-path {input.cell_orientations} \
             --atlas-release-id {atlas_release_id} \

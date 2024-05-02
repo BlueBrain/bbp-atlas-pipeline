@@ -9,6 +9,7 @@ else:
 shell_command = f"""{snakemake.params.app}  \
     --hierarchy {snakemake.input.hierarchy}  \
     --parcellation-volume {snakemake.input.annotation}  \
+    --region-layer-map {snakemake.input.region_layer_map}  \
     {mesh_dir_option}  \
     --out-mask-dir {snakemake.output.mask_dir}  \
     --out-metadata {snakemake.output.json_metadata_parcellations}  \
