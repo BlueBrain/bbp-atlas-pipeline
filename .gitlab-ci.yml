@@ -100,8 +100,8 @@ update_dags:
     - apt-get -y install graphviz
     - pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ .[dev]
     - !reference [.git_setup]
-    - git checkout $CI_COMMIT_BRANCH
   script:
+    - git status
     - echo "Update DAG"
     - snakemake  --config SERVICE_TOKEN=True TOKEN_USERNAME=$SERVICE_TOKEN_USERNAME TOKEN_PASSWORD=$SERVICE_TOKEN_PASSWORD  --dag  $FINAL_PIPELINE_STEP > $DAG_DIR/dag_push_atlas.gv
     - dot -Tsvg $DAG_DIR/dag_push_atlas.gv > $DAG_DIR/dag_push_atlas.svg
@@ -111,7 +111,8 @@ update_dags:
     - echo "Commit updated DAGs"
     - git add $DAG_DIR/dag_push_atlas*
     - git diff-index --quiet HEAD  ||  git commit -m "Update DAGs"
-    - git push -o ci.skip gitlab $CI_COMMIT_BRANCH
+    - git status
+    - git push -o ci.skip gitlab HEAD:$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
   allow_failure: true
 
 

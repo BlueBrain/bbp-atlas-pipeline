@@ -903,8 +903,8 @@ rule fetch_isocortex_23_metadata:
 ## =============================== ANNOTATION PIPELINE PART 1.1 ============================
 ## =========================================================================================
 
-##>direction_vectors_placeholder_ccfv3 : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons.
-rule direction_vectors_placeholder_ccfv3:
+##>direction_vectors_default_ccfv3 : Compute a volume with 3 elements per voxel that are the direction in Euler angles (x, y, z) of the neurons.
+rule direction_vectors_default_ccfv3:
     input:
         hierarchy= orig_hierarchy,
         annotation= orig_annotation_v3
@@ -914,7 +914,7 @@ rule direction_vectors_placeholder_ccfv3:
     params:
         app=APPS["atlas-direction-vectors direction-vectors from-center"]
     log:
-        f"{LOG_DIR}/direction_vectors_placeholder_ccfv3.log"
+        f"{LOG_DIR}/direction_vectors_default_ccfv3.log"
     shell:
         """{params.app} \
             --hierarchy-path {input.hierarchy} \
@@ -963,7 +963,7 @@ rule direction_vectors_isocortex_ccfv3:
             2>&1 | tee {log}
         """
 
-direction_vectors = rules.direction_vectors_placeholder_ccfv3.output.file
+direction_vectors = rules.direction_vectors_default_ccfv3.output.file
 
 ##>interpolate_direction_vectors_isocortex_ccfv2 : Interpolate the [NaN, NaN, NaN] direction vectors by non-[NaN, NaN, NaN] ones.
 rule interpolate_direction_vectors_isocortex_ccfv2:
@@ -2155,8 +2155,8 @@ rule create_cellCompositionSummary_payload:
     script:
         "scripts/cellCompositionSummary_payload.py"
 
-##>push_cellcomposition : Final rule to generate and push into Nexus the CellComposition along with its dependencies (Volume and Summary)
-rule push_cellcomposition:
+##>push_cellComposition : Final rule to generate and push into Nexus the CellComposition along with its dependencies (Volume and Summary)
+rule push_cellComposition:
     input:
         hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
         volume_path = rules.create_cellCompositionVolume_payload.output.payload,
@@ -2168,9 +2168,9 @@ rule push_cellcomposition:
         species=NEXUS_IDS["species"],
         reference_system=NEXUS_IDS["reference_system"],
     output:
-        touch(f"{WORKING_DIR}/pushed_cellcomposition.log")
+        touch(f"{WORKING_DIR}/pushed_cellComposition.log")
     log:
-        f"{LOG_DIR}/push_cellcomposition.log"
+        f"{LOG_DIR}/push_cellComposition.log"
     shell:
         default_push.replace("{NEXUS_DESTINATION_PROJ}", "atlasdatasetrelease") + """ \
         {params.app[1]} \
@@ -2196,7 +2196,7 @@ rule push_atlas_datasets:
         rules.push_atlas_release.output,
         rules.push_meshes.output,
         rules.push_volumetric_datasets.output,
-        rules.push_cellcomposition.output
+        rules.push_cellComposition.output
     output:
         touch(f"{WORKING_DIR}/pushed_atlas_datasets.log")
     log:

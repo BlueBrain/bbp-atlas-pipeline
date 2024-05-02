@@ -1,7 +1,7 @@
 {
   "rules": [
     {
-      "rule": "direction_vectors_placeholder_ccfv3",
+      "rule": "direction_vectors_default_ccfv3",
       "execute": [
         {
           "brainRegion": "http://api.brain-map.org/api/v2/data/Structure/315",
