@@ -1837,7 +1837,7 @@ rule push_atlas_release:
         hemisphere = rules.create_hemispheres_ccfv3.output,
         placement_hints = rules.placement_hints.output.dir,
         placement_hints_metadata = rules.placement_hints.output.metadata,
-        layers_regions_map = os.path.join("metadata", "PH_layers_regions_map.json"),
+        layers_regions_map = os.path.join(REPO_PATH, "metadata", "PH_layers_regions_map.json"),
         direction_vectors = direction_vectors,
         cell_orientations = rules.orientation_field.output,
     params:

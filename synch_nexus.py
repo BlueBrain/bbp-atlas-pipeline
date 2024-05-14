@@ -5,7 +5,7 @@ import hashlib
 from kgforge.core import KnowledgeGraphForge
 from kgforge.core import Resource
 
-nexus_token = os.environ["NEXUS_TOKEN"]
+nexus_token = os.environ["NEXUS_STAGING_TOKEN"]
 nexus_ids_path = os.environ["NEXUS_IDS_PATH"]
 metadata_dir = os.environ["METADATA_DIR"]
 file_nexus_id_map = os.environ["FILE_NEXUS_ID_MAP"]

@@ -122,6 +122,7 @@ nexus-synchronization:
   rules:
     - if: $CI_COMMIT_BRANCH == $DEV_BRANCH
   variables:
+    NEXUS_STAGING_TOKEN: '$NEXUS_STAGING_TOKEN'
     NEXUS_IDS_PATH: "nexus_ids.json"
     METADATA_DIR: "metadata"
     FILE_NEXUS_ID_MAP: "file_nexus_map.json"
@@ -133,7 +134,7 @@ nexus-synchronization:
     - python synch_nexus.py
     - git add $NEXUS_IDS_PATH $METADATA_DIR/$FILE_NEXUS_ID_MAP
     - git diff-index --quiet HEAD  ||  git commit -m "Update $NEXUS_IDS_PATH"
-    - git push -o ci.skip gitlab $DEV_BRANCH
+    - git push gitlab $DEV_BRANCH
   allow_failure: true
 
 # Build image for pipeline
@@ -188,7 +189,7 @@ deploy-documentation-in-registry:
     KANIKO_EXTRA_ARGS: "--build-arg CI_PROJECT_DIR=$CI_PROJECT_DIR  --build-arg DOC_DIR=$DOC_DIR  --build-arg DOC_PATH=$DOC"
 
 # Convert Docker to Singularity image and deploy in BB5
-convert_and_deploy_job:
+convert_and_deploy:
   stage:
     convert_and_deployToBB5
   rules:
