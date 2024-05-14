@@ -87,11 +87,12 @@ def filter_by_tag(all_resources, tag, forge):
         return all_resources
 
     tagged_resources = []
-    for r in all_resources:
+    for count, res in enumerate(all_resources):
+        print(f"Retrieving Resource {count} of {len(all_resources)}")
         try:
-            res = forge.retrieve(id=r.s, version=tag)
+            retrieved_res = forge.retrieve(id=res.s, version=tag)
+            if retrieved_res is not None:
+                tagged_resources.append(retrieved_res)
         except Exception:
             pass
-        if res is not None:
-            tagged_resources.append(res)
     return tagged_resources

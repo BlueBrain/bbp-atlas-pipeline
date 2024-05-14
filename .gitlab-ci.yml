@@ -112,7 +112,7 @@ update_dags:
     - git add $DAG_DIR/dag_push_atlas*
     - git diff-index --quiet HEAD  ||  git commit -m "Update DAGs"
     - git status
-    - git push -o ci.skip gitlab HEAD:$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
+    - git push gitlab HEAD:$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
   allow_failure: true
 
 

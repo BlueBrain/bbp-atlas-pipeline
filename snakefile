@@ -1151,9 +1151,9 @@ rule validate_annotation_v3:
         """
 
 # Blue Brain default version (Allen_v3 + layer_2/3_split + leaves_only + barrel_split)
-#hierarchy_v2 = rules.split_barrel_ccfv2_l23split.output.hierarchy
+hierarchy_v2 = rules.split_barrel_ccfv2_l23split.output.hierarchy
 annotation_v2 = rules.validate_annotation_v2.output
-#hierarchy_v3 = rules.split_barrel_ccfv3_l23split.output.hierarchy
+hierarchy_v3 = rules.split_barrel_ccfv3_l23split.output.hierarchy
 annotation_v3 = rules.validate_annotation_v3.output
 
 
@@ -1177,8 +1177,8 @@ rule combine_markers:
         gfap = rules.fetch_gene_gfap.output,
         s100b = rules.fetch_gene_s100b.output,
         tmem119 = rules.fetch_gene_tmem119.output,
-        hierarchy = rules.split_barrel_ccfv2_l23split.output.hierarchy,
-        annotation = annotation_v2
+        hierarchy = hierarchy_v3,
+        annotation = annotation_v3
     output:
         oligodendrocyte_volume = f"{COMBINE_MARKERS_CONFIG_FILE['outputCellTypeVolumePath']['oligodendrocyte']}",
         astrocyte_volume = f"{COMBINE_MARKERS_CONFIG_FILE['outputCellTypeVolumePath']['astrocyte']}",
@@ -1201,8 +1201,8 @@ rule combine_markers:
 ##>cell_density_correctednissl : Compute the overall mouse brain cell density
 rule cell_density_correctednissl:
     input:
-        hierarchy = rules.split_barrel_ccfv2_l23split.output.hierarchy,
-        annotation = annotation_v2,
+        hierarchy = hierarchy_v3,
+        annotation = annotation_v3,
         nissl_volume = rules.fetch_corrected_nissl_stained_volume.output,
         regions_config = rules.fetch_regions_config.output
     output:
@@ -1224,7 +1224,7 @@ rule cell_density_correctednissl:
 ##>validate_cell_density : validate overall cell density
 rule validate_cell_density:
     input:
-        annotation = annotation_v2,
+        annotation = annotation_v3,
         density = rules.cell_density_correctednissl.output
     output:
         rules.cell_density_correctednissl.output[0].replace(nrrd_ext, "_validated"+nrrd_ext)
@@ -1245,8 +1245,8 @@ overall_cell_density = rules.validate_cell_density.output
 ##>glia_cell_densities_correctednissl : Compute and save the glia cell densities
 rule glia_cell_densities_correctednissl:
     input:
-        hierarchy = rules.split_barrel_ccfv2_l23split.output.hierarchy,
-        annotation = annotation_v2,
+        hierarchy = hierarchy_v3,
+        annotation = annotation_v3,
         overall_cell_density = overall_cell_density,
         glia_density = rules.combine_markers.output.glia_volume,
         astro_density = rules.combine_markers.output.astrocyte_volume,
@@ -1288,7 +1288,7 @@ validated_cell_densities = "".join([rules.glia_cell_densities_correctednissl.out
 # one output
 rule validate_neuron_glia_cell_densities:
     input:
-        annotation = annotation_v2,
+        annotation = annotation_v3,
         densities_dir = ancient(rules.glia_cell_densities_correctednissl.output.cell_densities)
     output:
         cell_densities = directory(validated_cell_densities),
@@ -1311,8 +1311,8 @@ neuron_density = rules.validate_neuron_glia_cell_densities.output.neuron_density
 ##>inhibitory_excitatory_neuron_densities_correctednissl : Compute the inhibitory and excitatory neuron densities
 rule inhibitory_excitatory_neuron_densities_correctednissl:
     input:
-        hierarchy = rules.split_barrel_ccfv2_l23split.output.hierarchy,
-        annotation = annotation_v2,
+        hierarchy = hierarchy_v3,
+        annotation = annotation_v3,
         gad1_volume = rules.fetch_gene_gad.output,
         nrn1_volume = rules.fetch_gene_nrn1.output,
         neuron_density = neuron_density,
@@ -1363,7 +1363,7 @@ rule orientation_field:
 rule placement_hints:
     input:
         annotation = annotation_v3,
-        hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
+        hierarchy = hierarchy_v3,
         direction_vectors = direction_vectors
     output:
         dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['placement_hints']}"),
@@ -1387,8 +1387,8 @@ rule placement_hints:
 ##>average_densities_correctednissl : Compute cell densities based on measurements and AIBS region volumes.
 rule average_densities_correctednissl:
     input:
-        hierarchy = rules.split_barrel_ccfv2_l23split.output.hierarchy,
-        annotation = annotation_v2,
+        hierarchy = hierarchy_v3,
+        annotation = annotation_v3,
         overall_cell_density = overall_cell_density,
         neuron_density = neuron_density,
         measurements_csv = rules.fetch_measurements.output,
@@ -1414,8 +1414,8 @@ rule fit_average_densities_correctednissl:
         rules.fetch_genes_correctednissl.output,
         rules.fetch_realigned_slices.output,
         rules.fetch_std_cells.output,
-        hierarchy = rules.split_barrel_ccfv2_l23split.output.hierarchy,
-        annotation = annotation_v2,
+        hierarchy = hierarchy_v3,
+        annotation = annotation_v3,
         neuron_density = neuron_density,
         average_densities = rules.average_densities_correctednissl.output,
         gene_config = f"{AVERAGE_DENSITIES_CORRECTEDNISSL_CONFIG_FILE}",
@@ -1445,8 +1445,8 @@ rule fit_average_densities_correctednissl:
 ##>inhibitory_neuron_densities_linprog_correctednissl : Create inhibitory neuron densities for the cell types in the csv file containing the fitted densities. Use default algorithm 'lingprog'.
 rule inhibitory_neuron_densities_linprog_correctednissl:
     input:
-        hierarchy = rules.split_barrel_ccfv2_l23split.output.hierarchy,
-        annotation = annotation_v2,
+        hierarchy = hierarchy_v3,
+        annotation = annotation_v3,
         neuron_density = neuron_density,
         average_densities = rules.fit_average_densities_correctednissl.output.fitted_densities,
     output:
@@ -1469,9 +1469,9 @@ rule inhibitory_neuron_densities_linprog_correctednissl:
 ##>validate_inhibitory_densities : validate inhibitory densities
 rule validate_inhibitory_densities:
     input:
-        annotation = annotation_v2,
+        annotation = annotation_v3,
         density = ancient(rules.inhibitory_neuron_densities_linprog_correctednissl.output),
-        hierarchy = rules.split_barrel_ccfv2_l23split.output.hierarchy,
+        hierarchy = hierarchy_v3,
         overall_cell_density = overall_cell_density,
         neuron_glia_densities = ancient(neuron_glia_densities)
     output:
@@ -1522,8 +1522,8 @@ rule compute_lamp5_density:
 rule excitatory_split:
     input:
         inhibitory_densities_dir,
-        hierarchy = rules.split_barrel_ccfv2_l23split.output.hierarchy,
-        annotation = annotation_v2,
+        hierarchy = hierarchy_v3,
+        annotation = annotation_v3,
         neuron_density = neuron_density,
         mapping_cortex_all_to_exc_mtypes = rules.fetch_mapping_cortex_all_to_exc_mtypes.output
     output:
@@ -1546,7 +1546,7 @@ rule excitatory_split:
 ##>validate_excitatory_ME_densities : validate excitatory ME densities
 rule validate_excitatory_ME_densities:
     input:
-        annotation = annotation_v2,
+        annotation = annotation_v3,
         density = rules.excitatory_split.output
     log:
         f"{LOG_DIR}/validate_excitatory_ME_densities.log"
@@ -1561,8 +1561,8 @@ rule validate_excitatory_ME_densities:
 rule create_mtypes_densities_from_probability_map:
     input:
         inhibitory_densities_dir,
-        hierarchy = rules.split_barrel_ccfv2_l23split.output.hierarchy,
-        annotation = annotation_v2,
+        hierarchy = hierarchy_v3,
+        annotation = annotation_v3,
         L1_prob_map = rules.fetch_probability_map_L1.output,
         L23_prob_map = rules.fetch_probability_map_L23.output,
         L4_prob_map = rules.fetch_probability_map_L4.output,
@@ -1600,7 +1600,7 @@ rule create_mtypes_densities_from_probability_map:
 ##>validate_inhibitory_ME_densities : validate inhibitory ME densities
 rule validate_inhibitory_ME_densities:
     input:
-        annotation = annotation_v2,
+        annotation = annotation_v3,
         density = rules.create_mtypes_densities_from_probability_map.output
     log:
         f"{LOG_DIR}/validate_inhibitory_ME_densities.log"
@@ -1614,7 +1614,7 @@ rule validate_inhibitory_ME_densities:
 ##>validate_all_ME_densities : validate all ME densities
 rule validate_all_ME_densities:
     input:
-        annotation = annotation_v2,
+        annotation = annotation_v3,
         densities_inh = rules.create_mtypes_densities_from_probability_map.output,
         densities_exc = rules.excitatory_split.output
     output:
@@ -1655,7 +1655,7 @@ default_transplant = """{params.app} \
 ##>transplant_neuron_glia_cell_densities_correctednissl : Transplant neuron and glia density nrrd files
 rule transplant_neuron_glia_cell_densities_correctednissl:
     input:
-        hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
+        hierarchy = hierarchy_v3,
         src_annotation = annotation_v2,
         dst_annotation = annotation_v3,
         src_cell_volume = neuron_glia_densities
@@ -1671,7 +1671,7 @@ rule transplant_neuron_glia_cell_densities_correctednissl:
 ##>transplant_inhibitory_neuron_densities_linprog_correctednissl : Transplant inhibitory neuron density nrrd files
 rule transplant_inhibitory_neuron_densities_linprog_correctednissl:
     input:
-        hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
+        hierarchy = hierarchy_v3,
         src_annotation = annotation_v2,
         dst_annotation = annotation_v3,
         src_cell_volume = inhibitory_densities_dir
@@ -1687,7 +1687,7 @@ rule transplant_inhibitory_neuron_densities_linprog_correctednissl:
 ##>transplant_excitatory_split : Transplant excitatory-split neuron density nrrd files
 rule transplant_excitatory_split:
     input:
-        hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
+        hierarchy = hierarchy_v3,
         src_annotation = annotation_v2,
         dst_annotation = annotation_v3,
         src_cell_volume = excitatory_ME_densities_dir
@@ -1703,7 +1703,7 @@ rule transplant_excitatory_split:
 ##>transplant_mtypes_densities_from_probability_map : Transplant neuron density nrrd files for the mtypes listed in the probability mapping csv file.
 rule transplant_mtypes_densities_from_probability_map:
     input:
-        hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
+        hierarchy = hierarchy_v3,
         src_annotation = annotation_v2,
         dst_annotation = annotation_v3,
         src_cell_volume = inhibitory_ME_densities_dir
@@ -1723,7 +1723,7 @@ rule transplant_mtypes_densities_from_probability_map:
 ##>export_brain_region : export a mesh, a volumetric mask and a region summary json file for every brain region available in the brain parcellation volume. Create a hierarchy JSONLD file from the input hierarchy JSON file as well. Note: not only the leaf regions are exported but also the above regions that are combinaisons of leaves
 rule export_brain_region:
     input:
-        hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
+        hierarchy = hierarchy_v3,
         annotation = annotation_v3,
         region_layer_map = rules.fetch_regions_layers_map.output
     output:
@@ -1938,7 +1938,7 @@ rule push_masks:
 rule push_direction_vectors:
     input:
         direction_vectors = direction_vectors,
-        hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
+        hierarchy = hierarchy_v3,
     params:
         app=APPS["bba-data-push push-volumetric"].split(),
         token = myTokenFetcher.get_access_token(),
@@ -1969,7 +1969,7 @@ rule push_direction_vectors:
 rule push_orientation_field:
     input:
         orientation_field = rules.orientation_field.output,
-        hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
+        hierarchy = hierarchy_v3,
     params:
         app=APPS["bba-data-push push-volumetric"].split(),
         token = myTokenFetcher.get_access_token(),
@@ -2009,8 +2009,8 @@ rule generate_annotation_pipeline_v3_datasets:
 ##>push_neuron_glia_densities : rule to push into Nexus neuron and glia densities
 rule push_neuron_glia_densities:
     input:
-        densities_dir = rules.transplant_neuron_glia_cell_densities_correctednissl.output,
-        hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
+        densities_dir = neuron_glia_densities,
+        hierarchy = hierarchy_v3,
     params:
         app=APPS["bba-data-push push-volumetric"].split(),
         token = myTokenFetcher.get_access_token(),
@@ -2040,8 +2040,8 @@ rule push_neuron_glia_densities:
 ##>push_inhibitory_neuron_densities : rule to push into Nexus inhibitory neuron densities
 rule push_inhibitory_neuron_densities:
     input:
-        inhibitory_densities = rules.transplant_inhibitory_neuron_densities_linprog_correctednissl.output,
-        hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
+        inhibitory_densities = inhibitory_densities_dir,
+        hierarchy = hierarchy_v3,
     params:
         app=APPS["bba-data-push push-volumetric"].split(),
         token = myTokenFetcher.get_access_token(),
@@ -2071,9 +2071,9 @@ rule push_inhibitory_neuron_densities:
 ##>push_metype_pipeline_datasets : rule to push into Nexus ME-type densities
 rule push_metype_pipeline_datasets:
     input:
-        excitatory_split_transplanted = rules.transplant_excitatory_split.output,
-        densities_from_probability_map_transplanted = rules.transplant_mtypes_densities_from_probability_map.output,
-        hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
+        excitatory_split_transplanted = excitatory_ME_densities_dir,
+        densities_from_probability_map_transplanted = inhibitory_ME_densities_dir,
+        hierarchy = hierarchy_v3,
     params:
         app=APPS["bba-data-push push-volumetric"].split(),
         token = myTokenFetcher.get_access_token(),
@@ -2138,7 +2138,7 @@ rule create_cellCompositionVolume_payload:
 ##>create_cellCompositionSummary_payload :
 rule create_cellCompositionSummary_payload:
     input:
-        hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
+        hierarchy = hierarchy_v3,
         annotation = annotation_v3,
         cellCompositionVolume = rules.create_cellCompositionVolume_payload.output.payload
     params:
@@ -2158,7 +2158,7 @@ rule create_cellCompositionSummary_payload:
 ##>push_cellComposition : Final rule to generate and push into Nexus the CellComposition along with its dependencies (Volume and Summary)
 rule push_cellComposition:
     input:
-        hierarchy = rules.split_barrel_ccfv3_l23split.output.hierarchy,
+        hierarchy = hierarchy_v3,
         volume_path = rules.create_cellCompositionVolume_payload.output.payload,
         summary_path = rules.create_cellCompositionSummary_payload.output.summary_statistics,
     params:
