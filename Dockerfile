@@ -50,10 +50,10 @@ RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "blue-brain-
 # module load py-data-integrity-check
 RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "bba-data-integrity-check>=0.2.0"
 
-RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "cwl-registry>=1.2.0"
+RUN pip install blue-cwl
 
 # module load py-bba-data-push
-RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "bba-data-push>=4.0.0"
+RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "bba-data-push>=4.0.1"
 
 RUN pip install git+https://bbpgitlab.epfl.ch/dke/users/jonathanlurie/atlas_cell_transplant.git@v0.3.1
 

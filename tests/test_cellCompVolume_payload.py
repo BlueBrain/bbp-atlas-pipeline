@@ -4,7 +4,7 @@ import logging
 from kgforge.core import KnowledgeGraphForge
 from cellCompVolume_payload import create_payload
 
-from cwl_registry.validation import validate_schema
+from blue_cwl.validation import validate_schema
 
 logging.basicConfig(level=logging.INFO)
 L = logging.getLogger(__name__)

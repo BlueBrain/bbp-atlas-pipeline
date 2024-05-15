@@ -8,6 +8,6 @@ myst-parser
 numpy
 voxcell
 click
-cwl-registry==0.4.14
+blue-cwl
 pipeline-validator==0.3.1
 python-gitlab

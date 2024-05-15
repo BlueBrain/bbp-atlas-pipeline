@@ -22,7 +22,7 @@ setup(
         "pulp==2.7.0",  # snakemake 7.32.3 breaks with pulp==2.8.0
         "snakemake==7.32.3",
         "blue-brain-token-fetch==1.0.0",
-        "cwl-registry>=1.2.0",
+        "blue-cwl",
         "python-gitlab"
     ],
     extras_require={

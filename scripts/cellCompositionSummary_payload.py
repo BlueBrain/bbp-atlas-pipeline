@@ -1,6 +1,6 @@
 import json
 from kgforge.core import KnowledgeGraphForge
-from cwl_registry import staging, statistics
+from blue_cwl import staging, statistics
 import multiprocessing
 import voxcell
 
