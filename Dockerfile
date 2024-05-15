@@ -53,7 +53,7 @@ RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "bba-data-in
 RUN pip install blue-cwl
 
 # module load py-bba-data-push
-RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "bba-data-push>=4.0.1"
+RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "bba-data-push>=4.1.0"
 
 RUN pip install git+https://bbpgitlab.epfl.ch/dke/users/jonathanlurie/atlas_cell_transplant.git@v0.3.1
 
@@ -63,11 +63,12 @@ RUN git config --global --remove-section url."https://gitlab-ci-token:${CI_JOB_T
 
 RUN pip install "atlas-commons>=0.1.5"
 
+RUN pip install "atlas-direction-vectors"
+
 RUN pip install "atlas-splitter>=0.1.5"
 
-RUN pip install "atlas-densities>=0.2.4"
+RUN pip install "atlas-placement-hints"
 
-# module load py-atlas-building-tools
-RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "atlas-building-tools>=0.1.10"
+RUN pip install "atlas-densities>=0.2.5"
 
 RUN pip install "snakemake==7.32.3"
