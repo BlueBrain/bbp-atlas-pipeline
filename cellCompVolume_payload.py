@@ -28,9 +28,10 @@ def create_payload(forge, atlas_release_id, output_file, n_densities_expected,
     print(f"{len(all_resources_with_ann)} ME-type densities with annotation found in total, filtering those with tag '{tag}'")
 
     resources = filter_by_tag(all_resources_with_ann, tag, forge)
-    n_res_with_ann = len(resources)
-    print(f"{n_res_with_ann} ME-type densities with annotation found with tag '{tag}'")
-    assert n_res_with_ann == n_densities_expected
+    n_res_with_tag = len(resources)
+    print(f"{n_res_with_tag} ME-type densities with annotation found with tag '{tag}'")
+    assert n_res_with_tag == n_densities_expected, (f"The number of ME-type densities "
+        f"found with tag '{tag}' ({n_res_with_tag}) does not match the expected number ({n_densities_expected})")
 
     # Get Generic{Excitatory,Inhibitory}Neuron
     for excInh in ["Excitatory", "Inhibitory"]:

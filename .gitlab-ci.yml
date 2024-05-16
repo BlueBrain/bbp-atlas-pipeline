@@ -225,7 +225,7 @@ run_pipeline:
     - bbp-atlas  --target-rule $TARGET_RULE  --user-config-path $CUSTOM_PIPELINE/user_config.json  --repo-path $PIPELINE_REPO  --service-token  --token-username $SERVICE_TOKEN_USERNAME  --token-password $SERVICE_TOKEN_PASSWORD  --snakemake-options '--configfile $PIPELINE_REPO/config.yaml  --config $SERVICE_TOKEN_SETTINGS WORKING_DIR=$PIPELINE_OUTPUT NEXUS_REGISTRATION=False EXPORT_MESHES=False  --cores $SNAKEMAKE_CORES'
     - EOF
   after_script:
-    if [ $CI_COMMIT_TAG != null ]; then
+    if [ ! -z "$CI_COMMIT_TAG" ]; then
       ln -s $PIPELINE_OUTPUT $PIPELINE_RUNS/$CI_COMMIT_TAG
     fi
   timeout: 8 hours

@@ -183,7 +183,7 @@ atlas_release_id = NEXUS_IDS["AtlasRelease"][env]
 cell_composition_id = NEXUS_IDS["CellComposition"][env]
 
 # Create the rules configuration files from the template configuration files and annotate the data paths they contains
-rules_config_dir = f"{WORKING_DIR}/rules_config_dir"
+rules_config_dir = os.path.join(WORKING_DIR, "rules_config_dir")
 
 if not os.path.exists(rules_config_dir):
     try:
@@ -197,15 +197,16 @@ files = os.listdir(RULES_CONFIG_DIR_TEMPLATES)
 pattern = "*_template.yaml"
 files_list = fnmatch.filter(files, pattern)
 for file in files_list:
-    try:
-        rule_config_file_template = open(f"{RULES_CONFIG_DIR_TEMPLATES}/{file}", "r")
-        rule_config_file_name = file.replace('_template', '')
-        rule_config_file = open(f"{rules_config_dir}/{rule_config_file_name}", "w+")
-        rule_config_file.write(re.sub("{WORKING_DIR}", WORKING_DIR, rule_config_file_template.read()))
-        rule_config_file_template.close()
-        rule_config_file.seek(0)
-    except FileExistsError:
-        pass
+    template_path = os.path.join(RULES_CONFIG_DIR_TEMPLATES, file)
+    rule_config_file_template = open(template_path, "r")
+    rule_config_file_name = file.replace('_template', '')
+    file_path = os.path.join(rules_config_dir, rule_config_file_name)
+    if os.path.isfile(file_path):
+        continue
+    rule_config_file = open(file_path, "w+")
+    rule_config_file.write(re.sub("{WORKING_DIR}", WORKING_DIR, rule_config_file_template.read()))
+    rule_config_file_template.close()
+    rule_config_file.seek(0)
 
 
 with open(f"{rules_config_dir}/combine_markers_config.yaml", "r") as file:
