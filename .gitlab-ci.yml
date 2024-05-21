@@ -36,23 +36,35 @@ variables:
   TARGET_RULE: "$FINAL_PIPELINE_STEP"  # Useful to change it in the job manual execution
   SERVICE_TOKEN_SETTINGS: "SERVICE_TOKEN=True TOKEN_USERNAME=$SERVICE_TOKEN_USERNAME TOKEN_PASSWORD=$SERVICE_TOKEN_PASSWORD"
 
+.tag_variables: &tag_vars
+  CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE
+  REGISTRY_IMAGE_TAG: $CI_COMMIT_TAG
+  IS_PROD_ENV: 1
+  NEXUS_TOKEN: '$NEXUS_PROD_TOKEN'
+
+.dev_varibales: &dev_vars
+  CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE
+  REGISTRY_IMAGE_TAG: dev
+  IS_PROD_ENV: ""  # 0 would be parsed as a string: "0"
+  NEXUS_TOKEN: '$NEXUS_STAGING_TOKEN'
 
 .deploy_rules:
   rules:
     - if: $CI_COMMIT_TAG != null
       when: on_success
-      variables:
-        CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE
-        REGISTRY_IMAGE_TAG: $CI_COMMIT_TAG
-        IS_PROD_ENV: 1
-        NEXUS_TOKEN: '$NEXUS_PROD_TOKEN'
+      variables: *tag_vars
     - if: $CI_COMMIT_BRANCH == $DEV_BRANCH
       when: on_success
-      variables:
-        CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE
-        REGISTRY_IMAGE_TAG: dev
-        IS_PROD_ENV: ""  # 0 would be parsed as a string: "0"
-        NEXUS_TOKEN: '$NEXUS_STAGING_TOKEN'
+      variables: *dev_vars
+
+.deploy_rules_manual:
+  rules:
+    - if: $CI_COMMIT_TAG != null
+      when: manual
+      variables: *tag_vars
+    - if: $CI_COMMIT_BRANCH == $DEV_BRANCH
+      when: manual
+      variables: *dev_vars
 
 .add_staging_SSL:
   script:
@@ -140,9 +152,10 @@ nexus-synchronization:
 # Build image for pipeline
 update-pipeline-image:
   stage: deploy_image
-  extends: .build-image-using-kaniko
-  rules:
-    - !reference [.deploy_rules, rules]
+  extends:
+    - .build-image-using-kaniko
+    - .deploy_rules
+  allow_failure: true
   variables:
     BUILD_PATH: $CI_PROJECT_DIR
     KANIKO_EXTRA_ARGS: "--build-arg CI_JOB_TOKEN=$CI_JOB_TOKEN --build-arg BBP_CA_CERT='$BBP_CA_CERT'"
@@ -157,6 +170,7 @@ generate-documentation:
   rules:
       - if: $CI_COMMIT_TAG != null  || $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == $DEV_BRANCH || $CI_MERGE_REQUEST_IID || $CI_COMMIT_MESSAGE =~ /DRAFT$/
         when: on_success
+        allow_failure: true
   script: sphinx-build -T --keep-going -b html -c ./$DOC_DIR/source -D language=en ./$DOC_DIR/source $DOC_DIR/$DOC
   before_script:
     - pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ -r requirements_doc.txt
@@ -192,8 +206,9 @@ deploy-documentation-in-registry:
 convert_and_deploy:
   stage:
     convert_and_deployToBB5
-  rules:
-    - !reference [.deploy_rules, rules]
+  extends:
+    - .deploy_rules
+  allow_failure: true
   needs:
     - update-pipeline-image
   when: on_success
@@ -212,7 +227,8 @@ convert_and_deploy:
 run_pipeline:
   stage:
     run-pipeline
-  when: manual
+  extends:
+    - .deploy_rules_manual
   tags:
     - bb5_map
   before_script:
