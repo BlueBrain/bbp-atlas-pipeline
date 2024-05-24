@@ -46,6 +46,7 @@ NEW_ATLAS = config["NEW_ATLAS"]
 EXPORT_MESHES = config["EXPORT_MESHES"]
 PROVENANCE_METADATA_V2_PATH = f"{WORKING_DIR}/provenance_metadata_v2.json"
 PROVENANCE_METADATA_V3_PATH = f"{WORKING_DIR}/provenance_metadata_v3.json"
+METADATA_PATH = os.path.join(REPO_PATH, "metadata") if REPO_PATH != "." else "metadata"
 
 IS_PROD_ENV = config["IS_PROD_ENV"]
 if IS_PROD_ENV:
@@ -1362,6 +1363,7 @@ rule placement_hints:
     input:
         annotation = annotation_v3,
         hierarchy = hierarchy_v3,
+        region_filter = rules.fetch_isocortex_metadata.output,
         direction_vectors = direction_vectors
     output:
         dir = directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['placement_hints']}"),
@@ -1835,7 +1837,7 @@ rule push_atlas_release:
         hemisphere = rules.create_hemispheres_ccfv3.output,
         placement_hints = rules.placement_hints.output.dir,
         placement_hints_metadata = rules.placement_hints.output.metadata,
-        layers_regions_map = os.path.join(REPO_PATH, "metadata", "PH_layers_regions_map.json"),
+        layers_regions_map = os.path.join(METADATA_PATH, "PH_layers_regions_map.json"),
         direction_vectors = direction_vectors,
         cell_orientations = rules.orientation_field.output,
     params:

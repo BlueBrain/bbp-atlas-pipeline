@@ -5,7 +5,7 @@ service_token_settings = os.environ["SERVICE_TOKEN_SETTINGS"]
 
 def test_cli():
     working_dir = "tests/working_dir"
-    rule_total = {"push_atlas_datasets": "62"}
+    rule_total = {"push_atlas_datasets": "63"}
 
     for rule, total in rule_total.items():
         cli_command = f"bbp-atlas --target-rule {rule} " \

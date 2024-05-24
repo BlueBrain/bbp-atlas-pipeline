@@ -16,6 +16,7 @@ def create_placement_hints_metadata(ph_dir, files_ext, region_name, output_path)
 shell_command = f"""{snakemake.params.app}  \
     --hierarchy-path {snakemake.input.hierarchy}  \
     --annotation-path {snakemake.input.annotation}  \
+    --metadata-path {snakemake.input.region_filter}  \
     --direction-vectors-path {snakemake.input.direction_vectors}  \
     --algorithm voxel-based  \
     --output-dir {snakemake.output.dir}  \

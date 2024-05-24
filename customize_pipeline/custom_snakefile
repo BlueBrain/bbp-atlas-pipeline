@@ -32,6 +32,7 @@ IS_PROD_ENV = default_pipeline.IS_PROD_ENV
 CELL_COMPOSITION_NAME = default_pipeline.CELL_COMPOSITION_NAME
 CELL_COMPOSITION_SUMMARY_NAME = default_pipeline.CELL_COMPOSITION_SUMMARY_NAME
 CELL_COMPOSITION_VOLUME_NAME = default_pipeline.CELL_COMPOSITION_VOLUME_NAME
+METADATA_PATH = default_pipeline.METADATA_PATH
 
 nexus_dryrun = default_pipeline.nexus_dryrun
 atlas_release_id = default_pipeline.atlas_release_id
