@@ -13,7 +13,7 @@ def test_cli():
             f"{service_token_settings}  -c1  --dryrun'"
         result = os.popen(cli_command).read()
 
-        if "Exception" in result:
+        if any(x in result for x in ["Exception", "Invalid"]):
             print(result)
             assert False
 

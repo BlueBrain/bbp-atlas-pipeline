@@ -228,6 +228,8 @@ run_pipeline:
     run-pipeline
   extends:
     - .deploy_rules_manual
+  needs:
+    - convert_and_deploy
   tags:
     - bb5_map
   before_script:
