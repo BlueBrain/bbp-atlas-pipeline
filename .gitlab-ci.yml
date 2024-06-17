@@ -33,8 +33,11 @@ variables:
   IMAGE_PATH: "$IMAGES_DIR/${CI_PROJECT_NAME}_${REGISTRY_IMAGE_TAG}-${TIMESTAMP}.sif"
   IMAGE_LINK: "${CI_PROJECT_NAME}_${REGISTRY_IMAGE_TAG}.sif"
   IMAGE_LINK_PATH: "${IMAGES_DIR}/${IMAGE_LINK}"
-  TARGET_RULE: "$FINAL_PIPELINE_STEP"  # Useful to change it in the job manual execution
   SERVICE_TOKEN_SETTINGS: "SERVICE_TOKEN=True TOKEN_USERNAME=$SERVICE_TOKEN_USERNAME TOKEN_PASSWORD=$SERVICE_TOKEN_PASSWORD"
+  # Helper vars useful for manual job customization ('False' or '0' would be parsed as a string: "0")
+  EXPORT_MESHES: ""
+  NEXUS_REGISTRATION: ""
+  TARGET_RULE: "$FINAL_PIPELINE_STEP"
 
 .tag_variables: &tag_vars
   CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE
@@ -239,7 +242,7 @@ run_pipeline:
     - set -e
     - export PYTHONPATH=$PIPELINE_REPO:$PYTHONPATH
     - snakemake  --snakefile $CUSTOM_PIPELINE/custom_snakefile  --configfile $PIPELINE_REPO/config.yaml  --config TARGET_RULE=$TARGET_RULE USER_CONFIG=$CUSTOM_PIPELINE/user_config.json REPO_PATH=$PIPELINE_REPO $SERVICE_TOKEN_SETTINGS  --unlock   # in case a previous pipeline failed ("the remaining lock was likely caused by a kill signal or a power loss")
-    - bbp-atlas  --target-rule $TARGET_RULE  --user-config-path $CUSTOM_PIPELINE/user_config.json  --repo-path $PIPELINE_REPO  --service-token  --token-username $SERVICE_TOKEN_USERNAME  --token-password $SERVICE_TOKEN_PASSWORD  --snakemake-options '--configfile $PIPELINE_REPO/config.yaml  --config $SERVICE_TOKEN_SETTINGS WORKING_DIR=$PIPELINE_OUTPUT NEXUS_REGISTRATION=False EXPORT_MESHES=False  --cores $SNAKEMAKE_CORES'
+    - bbp-atlas  --target-rule $TARGET_RULE  --user-config-path $CUSTOM_PIPELINE/user_config.json  --repo-path $PIPELINE_REPO  --service-token  --token-username $SERVICE_TOKEN_USERNAME  --token-password $SERVICE_TOKEN_PASSWORD  --snakemake-options '--configfile $PIPELINE_REPO/config.yaml  --config $SERVICE_TOKEN_SETTINGS WORKING_DIR=$PIPELINE_OUTPUT IS_PROD_ENV=$IS_PROD_ENV EXPORT_MESHES=$EXPORT_MESHES NEXUS_REGISTRATION=$NEXUS_REGISTRATION  --cores $SNAKEMAKE_CORES'
     - EOF
   after_script:
     if [ ! -z "$CI_COMMIT_TAG" ]; then
