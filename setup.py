@@ -13,7 +13,7 @@ setup(
     license="BBP-internal-confidential",
     python_requires=">=3.9",
     install_requires=[
-        "nexusforge>=0.8.1",
+        "nexusforge>=0.8.2",
         "click>=7.0",
         "numpy>=1.19",
         "pynrrd>=0.4.0",
@@ -21,7 +21,7 @@ setup(
         "voxcell",
         "pulp==2.7.0",  # snakemake 7.32.3 breaks with pulp==2.8.0
         "snakemake==7.32.3",
-        "blue-brain-token-fetch==1.0.0",
+        "blue-brain-token-fetch>=1.0.0",
         "blue-cwl",
         "python-gitlab"
     ],
