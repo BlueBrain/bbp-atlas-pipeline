@@ -133,8 +133,8 @@ update_dags:
 # Update Nexus Resources
 nexus-synchronization:
   stage: nexus_synchronization
-  rules:
-    - if: $CI_COMMIT_BRANCH == $DEV_BRANCH
+  extends:
+    - .deploy_rules
   variables:
     NEXUS_STAGING_TOKEN: '$NEXUS_STAGING_TOKEN'
     NEXUS_IDS_PATH: "nexus_ids.json"

@@ -432,7 +432,7 @@ rule fetch_barrel_positions:
     output:
         f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['barrel_positions_25']}"
     params:
-        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["barrel_positions_25"],
+        nexus_id=NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainParcellationDataLayer"]["barrel_positions"],
         app=APPS["bba-data-fetch"],
         token = myTokenFetcher.get_access_token()
     log:
