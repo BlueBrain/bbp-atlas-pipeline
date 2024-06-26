@@ -53,7 +53,7 @@ RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "bba-data-in
 RUN pip install blue-cwl
 
 # module load py-bba-data-push
-RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "bba-data-push>=4.2.0"
+RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "bba-data-push>=4.3.0"
 
 RUN pip install git+https://bbpgitlab.epfl.ch/dke/users/jonathanlurie/atlas_cell_transplant.git@v0.3.1
 
