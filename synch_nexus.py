@@ -8,6 +8,7 @@ from kgforge.core import KnowledgeGraphForge
 from kgforge.core import Resource
 
 nexus_token = os.environ["NEXUS_TOKEN"]
+nexus_token_staging = os.environ["NEXUS_STAGING_TOKEN"]
 nexus_ids_path = os.environ["NEXUS_IDS_PATH"]
 res_tag_sep = "?tag="
 metadata_dir = os.environ["METADATA_DIR"]
@@ -112,7 +113,7 @@ def synch_resource(res_id_tag, forge_prod, res_name, staging_env):
 
     print(f"\tSynchronizing Resource for '{res_name}' with staging version:")
     forge_staging = KnowledgeGraphForge("forge-config.yml",
-        bucket=forge_prod._store.bucket, endpoint=staging_env, token=nexus_token)
+        bucket=forge_prod._store.bucket, endpoint=staging_env, token=nexus_token_staging)
     nexus_staging_string = f"in project '{forge_prod._store.bucket}' (Nexus env: '{forge_staging._store.endpoint}'"
     print(f"\t\tRetrieving Resource for '{res_name}' (Nexus id: '{res_id}', at tag '{res_tag}) {nexus_staging_string}")
     res_staging = forge_staging.retrieve(res_id, version=res_tag)
