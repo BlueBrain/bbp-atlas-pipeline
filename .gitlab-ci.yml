@@ -15,6 +15,8 @@ stages:
   - generate_doc
   - deploy_doc
   - run-pipeline
+  - post_nexus_registration
+  - update_BMO
 
 variables:
   DOC_DIR: "doc"
@@ -31,22 +33,41 @@ variables:
   IMAGE_PATH: "$IMAGES_DIR/${CI_PROJECT_NAME}_${REGISTRY_IMAGE_TAG}-${TIMESTAMP}.sif"
   IMAGE_LINK: "${CI_PROJECT_NAME}_${REGISTRY_IMAGE_TAG}.sif"
   IMAGE_LINK_PATH: "${IMAGES_DIR}/${IMAGE_LINK}"
-  TARGET_RULE: "$FINAL_PIPELINE_STEP"  # Useful to change it in the job manual execution
   SERVICE_TOKEN_SETTINGS: "SERVICE_TOKEN=True TOKEN_USERNAME=$SERVICE_TOKEN_USERNAME TOKEN_PASSWORD=$SERVICE_TOKEN_PASSWORD"
+  # Helper vars useful for manual job customization ('False' or '0' would be parsed as a string: "0")
+  EXPORT_MESHES: ""
+  NEXUS_REGISTRATION: ""
+  TARGET_RULE: "$FINAL_PIPELINE_STEP"
 
+.tag_variables: &tag_vars
+  CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE
+  REGISTRY_IMAGE_TAG: $CI_COMMIT_TAG
+  IS_PROD_ENV: 1
+  NEXUS_TOKEN: '$NEXUS_PROD_TOKEN'
+
+.dev_varibales: &dev_vars
+  CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE
+  REGISTRY_IMAGE_TAG: dev
+  IS_PROD_ENV: ""  # 0 would be parsed as a string: "0"
+  NEXUS_TOKEN: '$NEXUS_STAGING_TOKEN'
 
 .deploy_rules:
   rules:
     - if: $CI_COMMIT_TAG != null
       when: on_success
-      variables:
-        CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE
-        REGISTRY_IMAGE_TAG: $CI_COMMIT_TAG
+      variables: *tag_vars
     - if: $CI_COMMIT_BRANCH == $DEV_BRANCH
       when: on_success
-      variables:
-        CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE
-        REGISTRY_IMAGE_TAG: dev
+      variables: *dev_vars
+
+.deploy_rules_manual:
+  rules:
+    - if: $CI_COMMIT_TAG != null
+      when: manual
+      variables: *tag_vars
+    - if: $CI_COMMIT_BRANCH == $DEV_BRANCH
+      when: manual
+      variables: *dev_vars
 
 .add_staging_SSL:
   script:
@@ -67,8 +88,6 @@ variables:
 unit_test:
   stage: unit-test
   extends: .unit-tests
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   before_script:
     - pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ .[dev]
     - export PYTHONPATH=.:$PYTHONPATH
@@ -79,7 +98,6 @@ unit_test:
     SRC_PROJECT: '$CI_PROJECT_PATH'
     TEST_FOLDER: 'tests'
     NEXUS_STAGING_TOKEN: '$NEXUS_STAGING_TOKEN'
-    SERVICE_TOKEN_SETTINGS: '$SERVICE_TOKEN_SETTINGS'
     KUBERNETES_MEMORY_LIMIT: 8Gi
     KUBERNETES_MEMORY_REQUEST: 8Gi
 
@@ -96,8 +114,8 @@ update_dags:
     - apt-get -y install graphviz
     - pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ .[dev]
     - !reference [.git_setup]
-    - git checkout $CI_COMMIT_BRANCH
   script:
+    - git status
     - echo "Update DAG"
     - snakemake  --config SERVICE_TOKEN=True TOKEN_USERNAME=$SERVICE_TOKEN_USERNAME TOKEN_PASSWORD=$SERVICE_TOKEN_PASSWORD  --dag  $FINAL_PIPELINE_STEP > $DAG_DIR/dag_push_atlas.gv
     - dot -Tsvg $DAG_DIR/dag_push_atlas.gv > $DAG_DIR/dag_push_atlas.svg
@@ -107,15 +125,16 @@ update_dags:
     - echo "Commit updated DAGs"
     - git add $DAG_DIR/dag_push_atlas*
     - git diff-index --quiet HEAD  ||  git commit -m "Update DAGs"
-    - git push -o ci.skip gitlab $CI_COMMIT_BRANCH
+    - git status
+    - git push gitlab HEAD:$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
   allow_failure: true
 
 
 # Update Nexus Resources
 nexus-synchronization:
   stage: nexus_synchronization
-  rules:
-    - !reference [.deploy_rules, rules]
+  extends:
+    - .deploy_rules
   variables:
     NEXUS_STAGING_TOKEN: '$NEXUS_STAGING_TOKEN'
     NEXUS_IDS_PATH: "nexus_ids.json"
@@ -129,15 +148,16 @@ nexus-synchronization:
     - python synch_nexus.py
     - git add $NEXUS_IDS_PATH $METADATA_DIR/$FILE_NEXUS_ID_MAP
     - git diff-index --quiet HEAD  ||  git commit -m "Update $NEXUS_IDS_PATH"
-    - git push -o ci.skip gitlab $DEV_BRANCH
+    - git push gitlab $DEV_BRANCH
   allow_failure: true
 
 # Build image for pipeline
 update-pipeline-image:
   stage: deploy_image
-  extends: .build-image-using-kaniko
-  rules:
-    - !reference [.deploy_rules, rules]
+  extends:
+    - .build-image-using-kaniko
+    - .deploy_rules
+  allow_failure: true
   variables:
     BUILD_PATH: $CI_PROJECT_DIR
     KANIKO_EXTRA_ARGS: "--build-arg CI_JOB_TOKEN=$CI_JOB_TOKEN --build-arg BBP_CA_CERT='$BBP_CA_CERT'"
@@ -150,8 +170,9 @@ update-pipeline-image:
 generate-documentation:
   stage: generate_doc
   rules:
-      - if: $CI_COMMIT_TAG != null  || $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop" || $CI_MERGE_REQUEST_IID || $CI_COMMIT_MESSAGE =~ /DRAFT$/
+      - if: $CI_COMMIT_TAG != null  || $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == $DEV_BRANCH || $CI_MERGE_REQUEST_IID || $CI_COMMIT_MESSAGE =~ /DRAFT$/
         when: on_success
+        allow_failure: true
   script: sphinx-build -T --keep-going -b html -c ./$DOC_DIR/source -D language=en ./$DOC_DIR/source $DOC_DIR/$DOC
   before_script:
     - pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ -r requirements_doc.txt
@@ -173,7 +194,7 @@ deploy-documentation-in-registry:
         when: on_success
         variables:
           CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/sphinx-documentation-prod
-      - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "develop"'
+      - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $DEV_BRANCH'
         when: on_success
         variables:
           CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/sphinx-documentation-dev
@@ -184,11 +205,12 @@ deploy-documentation-in-registry:
     KANIKO_EXTRA_ARGS: "--build-arg CI_PROJECT_DIR=$CI_PROJECT_DIR  --build-arg DOC_DIR=$DOC_DIR  --build-arg DOC_PATH=$DOC"
 
 # Convert Docker to Singularity image and deploy in BB5
-convert_and_deploy_job:
+convert_and_deploy:
   stage:
     convert_and_deployToBB5
-  rules:
-    - !reference [.deploy_rules, rules]
+  extends:
+    - .deploy_rules
+  allow_failure: true
   needs:
     - update-pipeline-image
   when: on_success
@@ -207,7 +229,10 @@ convert_and_deploy_job:
 run_pipeline:
   stage:
     run-pipeline
-  when: manual
+  extends:
+    - .deploy_rules_manual
+  needs:
+    - convert_and_deploy
   tags:
     - bb5_map
   before_script:
@@ -217,10 +242,10 @@ run_pipeline:
     - set -e
     - export PYTHONPATH=$PIPELINE_REPO:$PYTHONPATH
     - snakemake  --snakefile $CUSTOM_PIPELINE/custom_snakefile  --configfile $PIPELINE_REPO/config.yaml  --config TARGET_RULE=$TARGET_RULE USER_CONFIG=$CUSTOM_PIPELINE/user_config.json REPO_PATH=$PIPELINE_REPO $SERVICE_TOKEN_SETTINGS  --unlock   # in case a previous pipeline failed ("the remaining lock was likely caused by a kill signal or a power loss")
-    - bbp-atlas  --target-rule $TARGET_RULE  --user-config-path $CUSTOM_PIPELINE/user_config.json  --repo-path $PIPELINE_REPO  --service-token  --token-username $SERVICE_TOKEN_USERNAME  --token-password $SERVICE_TOKEN_PASSWORD  --snakemake-options '--configfile $PIPELINE_REPO/config.yaml  --config $SERVICE_TOKEN_SETTINGS WORKING_DIR=$PIPELINE_OUTPUT NEXUS_REGISTRATION=False EXPORT_MESHES=False  --cores $SNAKEMAKE_CORES'
+    - bbp-atlas  --target-rule $TARGET_RULE  --user-config-path $CUSTOM_PIPELINE/user_config.json  --repo-path $PIPELINE_REPO  --service-token  --token-username $SERVICE_TOKEN_USERNAME  --token-password $SERVICE_TOKEN_PASSWORD  --snakemake-options '--configfile $PIPELINE_REPO/config.yaml  --config $SERVICE_TOKEN_SETTINGS WORKING_DIR=$PIPELINE_OUTPUT IS_PROD_ENV=$IS_PROD_ENV EXPORT_MESHES=$EXPORT_MESHES NEXUS_REGISTRATION=$NEXUS_REGISTRATION  --cores $SNAKEMAKE_CORES'
     - EOF
   after_script:
-    if [ $CI_COMMIT_TAG != null ]; then
+    if [ ! -z "$CI_COMMIT_TAG" ]; then
       ln -s $PIPELINE_OUTPUT $PIPELINE_RUNS/$CI_COMMIT_TAG
     fi
   timeout: 8 hours
@@ -233,3 +258,37 @@ run_pipeline:
     bb5_memory: 0
     bb5_duration: "8:00:00"
     bb5_exclusive: full
+
+validate_atlas_release:
+  stage: post_nexus_registration
+  rules:
+    - !reference [.deploy_rules, rules]
+    - when: manual
+      allow_failure: true
+  before_script:
+    - pip install "nexusforge>=0.8.1"
+    - pip install -i https://bbpteam.epfl.ch/repository/devpi/simple "bba-data-push>=3.0.1"
+  script:
+    python $TEST_FOLDER/validate_atlas_release.py
+  variables:
+    TEST_FOLDER: 'tests'
+    RESOURCE_TAG: '$RESOURCE_TAG'
+
+create_BMO_MR:
+  stage: update_BMO
+  rules:
+    - if: $RESOURCE_TAG
+    - when: manual
+      allow_failure: true
+  needs:
+    - job: validate_atlas_release
+      optional: true
+  before_script:
+    - pip install python-gitlab
+    - pip install "nexusforge>=0.8.1"
+  script:
+    - python create_BMO_MR.py
+  variables:
+    ATLAS_PARCELLATION_ONTOLOGY_ID_STAGING: "https://bbp.epfl.ch/neurosciencegraph/data/ontologies/34388d3b-0b88-4deb-9686-6fcd9ef8990e"
+    NEXUS_STAGING_TOKEN: '$NEXUS_STAGING_TOKEN'
+    RESOURCE_TAG: '$RESOURCE_TAG'

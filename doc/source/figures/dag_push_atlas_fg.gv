@@ -2,7 +2,7 @@ digraph snakemake_dag {
     graph[bgcolor=white, margin=0];
     node[shape=box, style=rounded, fontname=sans,                 fontsize=10, penwidth=2];
     edge[penwidth=2, color=grey];
-0 [ shape=none, margin=0, label=<<table border="2" color="#D99557" cellspacing="3" cellborder="0">
+0 [ shape=none, margin=0, label=<<table border="2" color="#D9C757" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">push_atlas_datasets</font></b>
 </td></tr>
@@ -12,7 +12,7 @@ digraph snakemake_dag {
 <td align="left"><font face="monospace">leaves_only/pushed_atlas_release.log</font></td>
 </tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/pushed_cellcomposition.log</font></td>
+<td align="left"><font face="monospace">leaves_only/pushed_cellComposition.log</font></td>
 </tr>
 <tr>
 <td align="left"><font face="monospace">leaves_only/pushed_meshes.log</font></td>
@@ -25,12 +25,15 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/pushed_atlas_datasets.log</font></td></tr>
 </table>>]
-1 [ shape=none, margin=0, label=<<table border="2" color="#95D957" cellspacing="3" cellborder="0">
+1 [ shape=none, margin=0, label=<<table border="2" color="#D97857" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">push_atlas_release</font></b>
 </td></tr>
 <hr/>
 <tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
+<tr>
+<td align="left"><font face="monospace">./metadata/PH_layers_regions_map.json</font></td>
+</tr>
 <tr>
 <td align="left"><font face="monospace">leaves_only/annotation_ccfv3_l23split_barrelsplit_validated.nrrd</font></td>
 </tr>
@@ -60,7 +63,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/pushed_atlas_release.log</font></td></tr>
 </table>>]
-2 [ shape=none, margin=0, label=<<table border="2" color="#D98F57" cellspacing="3" cellborder="0">
+2 [ shape=none, margin=0, label=<<table border="2" color="#5767D9" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">export_brain_region</font></b>
 </td></tr>
@@ -71,6 +74,9 @@ digraph snakemake_dag {
 </tr>
 <tr>
 <td align="left"><font face="monospace">leaves_only/hierarchy_ccfv3_l23split_barrelsplit.json</font></td>
+</tr>
+<tr>
+<td align="left"><font face="monospace">leaves_only/regions_layers_map.json</font></td>
 </tr>
 <hr/>
 <tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
@@ -85,7 +91,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/metadata_parcellations.json</font></td></tr>
 </table>>]
-3 [ shape=none, margin=0, label=<<table border="2" color="#57D99B" cellspacing="3" cellborder="0">
+3 [ shape=none, margin=0, label=<<table border="2" color="#57D981" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">split_barrel_ccfv3_l23split</font></b>
 </td></tr>
@@ -107,7 +113,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/hierarchy_ccfv3_l23split_barrelsplit.json</font></td></tr>
 </table>>]
-4 [ shape=none, margin=0, label=<<table border="2" color="#CDD957" cellspacing="3" cellborder="0">
+4 [ shape=none, margin=0, label=<<table border="2" color="#D99A57" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">create_leaves_only_hierarchy_annotation_ccfv3</font></b>
 </td></tr>
@@ -126,7 +132,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/hierarchy_ccfv3_leaves_only.json</font></td></tr>
 </table>>]
-5 [ shape=none, margin=0, label=<<table border="2" color="#57D98A" cellspacing="3" cellborder="0">
+5 [ shape=none, margin=0, label=<<table border="2" color="#57C1D9" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">split_isocortex_layer_23_ccfv3</font></b>
 </td></tr>
@@ -148,7 +154,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/hierarchy_ccfv3_l23split.json</font></td></tr>
 </table>>]
-6 [ shape=none, margin=0, label=<<table border="2" color="#D9C257" cellspacing="3" cellborder="0">
+6 [ shape=none, margin=0, label=<<table border="2" color="#579FD9" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_ccf_brain_region_hierarchy</font></b>
 </td></tr>
@@ -159,7 +165,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/hierarchy.json</font></td></tr>
 </table>>]
-7 [ shape=none, margin=0, label=<<table border="2" color="#D9A657" cellspacing="3" cellborder="0">
+7 [ shape=none, margin=0, label=<<table border="2" color="#D98957" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_brain_parcellation_ccfv3</font></b>
 </td></tr>
@@ -170,7 +176,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/annotation_ccfv3.nrrd</font></td></tr>
 </table>>]
-8 [ shape=none, margin=0, label=<<table border="2" color="#6DD957" cellspacing="3" cellborder="0">
+8 [ shape=none, margin=0, label=<<table border="2" color="#57D997" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">direction_vectors_isocortex_ccfv3</font></b>
 </td></tr>
@@ -187,7 +193,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/direction_vectors/direction_vectors_isocortex_ccfv3.nrrd</font></td></tr>
 </table>>]
-9 [ shape=none, margin=0, label=<<table border="2" color="#5CD957" cellspacing="3" cellborder="0">
+9 [ shape=none, margin=0, label=<<table border="2" color="#81D957" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_barrel_positions</font></b>
 </td></tr>
@@ -198,7 +204,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/barrel_positions_25.feather</font></td></tr>
 </table>>]
-10 [ shape=none, margin=0, label=<<table border="2" color="#D9AC57" cellspacing="3" cellborder="0">
+10 [ shape=none, margin=0, label=<<table border="2" color="#57D97B" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">validate_annotation_v3</font></b>
 </td></tr>
@@ -212,7 +218,18 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/annotation_ccfv3_l23split_barrelsplit_validated.nrrd</font></td></tr>
 </table>>]
-11 [ shape=none, margin=0, label=<<table border="2" color="#9BD957" cellspacing="3" cellborder="0">
+11 [ shape=none, margin=0, label=<<table border="2" color="#57BBD9" cellspacing="3" cellborder="0">
+<tr><td>
+<b><font point-size="18">fetch_regions_layers_map</font></b>
+</td></tr>
+<hr/>
+<tr><td align="left">  </td></tr>
+<hr/>
+<tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
+<tr>
+<td align="left"><font face="monospace">leaves_only/regions_layers_map.json</font></td></tr>
+</table>>]
+12 [ shape=none, margin=0, label=<<table border="2" color="#A2D957" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">create_hemispheres_ccfv3</font></b>
 </td></tr>
@@ -226,7 +243,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/hemispheres_annotation.nrrd</font></td></tr>
 </table>>]
-12 [ shape=none, margin=0, label=<<table border="2" color="#5779D9" cellspacing="3" cellborder="0">
+13 [ shape=none, margin=0, label=<<table border="2" color="#5773D9" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">placement_hints</font></b>
 </td></tr>
@@ -241,6 +258,9 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/hierarchy_ccfv3_l23split_barrelsplit.json</font></td>
 </tr>
+<tr>
+<td align="left"><font face="monospace">leaves_only/isocortex_metadata.json</font></td>
+</tr>
 <hr/>
 <tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
 <tr>
@@ -248,9 +268,20 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/placement_hints/metadata.json</font></td></tr>
 </table>>]
-13 [ shape=none, margin=0, label=<<table border="2" color="#57D9A6" cellspacing="3" cellborder="0">
+14 [ shape=none, margin=0, label=<<table border="2" color="#57D959" cellspacing="3" cellborder="0">
 <tr><td>
-<b><font point-size="18">direction_vectors_placeholder_ccfv3</font></b>
+<b><font point-size="18">fetch_isocortex_metadata</font></b>
+</td></tr>
+<hr/>
+<tr><td align="left">  </td></tr>
+<hr/>
+<tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
+<tr>
+<td align="left"><font face="monospace">leaves_only/isocortex_metadata.json</font></td></tr>
+</table>>]
+15 [ shape=none, margin=0, label=<<table border="2" color="#D9BB57" cellspacing="3" cellborder="0">
+<tr><td>
+<b><font point-size="18">direction_vectors_default_ccfv3</font></b>
 </td></tr>
 <hr/>
 <tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
@@ -267,7 +298,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/direction_vectors/direction_vectors_ccfv3.nrrd</font></td></tr>
 </table>>]
-14 [ shape=none, margin=0, label=<<table border="2" color="#D9B757" cellspacing="3" cellborder="0">
+16 [ shape=none, margin=0, label=<<table border="2" color="#D9CC57" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">orientation_field</font></b>
 </td></tr>
@@ -281,7 +312,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/cell_orientations.nrrd</font></td></tr>
 </table>>]
-15 [ shape=none, margin=0, label=<<table border="2" color="#57D9C8" cellspacing="3" cellborder="0">
+17 [ shape=none, margin=0, label=<<table border="2" color="#57D7D9" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">push_meshes</font></b>
 </td></tr>
@@ -298,7 +329,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/pushed_meshes.log</font></td></tr>
 </table>>]
-16 [ shape=none, margin=0, label=<<table border="2" color="#D98457" cellspacing="3" cellborder="0">
+18 [ shape=none, margin=0, label=<<table border="2" color="#576DD9" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">push_volumetric_datasets</font></b>
 </td></tr>
@@ -321,7 +352,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/pushed_volumetric_datasets.log</font></td></tr>
 </table>>]
-17 [ shape=none, margin=0, label=<<table border="2" color="#57ACD9" cellspacing="3" cellborder="0">
+19 [ shape=none, margin=0, label=<<table border="2" color="#91D957" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">push_masks</font></b>
 </td></tr>
@@ -338,35 +369,12 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/pushed_masks.log</font></td></tr>
 </table>>]
-18 [ shape=none, margin=0, label=<<table border="2" color="#62D957" cellspacing="3" cellborder="0">
+20 [ shape=none, margin=0, label=<<table border="2" color="#D97357" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">push_neuron_glia_densities</font></b>
 </td></tr>
 <hr/>
 <tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/glia_cell_densities_transplant_correctednissl</font></td>
-</tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv3_l23split_barrelsplit.json</font></td>
-</tr>
-<hr/>
-<tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/pushed_neuron_glia_densities.log</font></td></tr>
-</table>>]
-19 [ shape=none, margin=0, label=<<table border="2" color="#D98A57" cellspacing="3" cellborder="0">
-<tr><td>
-<b><font point-size="18">transplant_neuron_glia_cell_densities_correctednissl</font></b>
-</td></tr>
-<hr/>
-<tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv2_l23split_barrelsplit_validated.nrrd</font></td>
-</tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv3_l23split_barrelsplit_validated.nrrd</font></td>
-</tr>
 <tr>
 <td align="left"><font face="monospace">leaves_only/cell_densities_correctednissl_validated</font></td>
 </tr>
@@ -376,183 +384,16 @@ digraph snakemake_dag {
 <hr/>
 <tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/glia_cell_densities_transplant_correctednissl</font></td></tr>
+<td align="left"><font face="monospace">leaves_only/pushed_neuron_glia_densities.log</font></td></tr>
 </table>>]
-20 [ shape=none, margin=0, label=<<table border="2" color="#B7D957" cellspacing="3" cellborder="0">
-<tr><td>
-<b><font point-size="18">validate_annotation_v2</font></b>
-</td></tr>
-<hr/>
-<tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv2_l23split_barrelsplit.nrrd</font></td>
-</tr>
-<hr/>
-<tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv2_l23split_barrelsplit_validated.nrrd</font></td></tr>
-</table>>]
-21 [ shape=none, margin=0, label=<<table border="2" color="#57C8D9" cellspacing="3" cellborder="0">
-<tr><td>
-<b><font point-size="18">split_barrel_ccfv2_l23split</font></b>
-</td></tr>
-<hr/>
-<tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv2_leaves_only.nrrd</font></td>
-</tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/barrel_positions_25.feather</font></td>
-</tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv2_leaves_only.json</font></td>
-</tr>
-<hr/>
-<tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv2_l23split_barrelsplit.nrrd</font></td></tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv2_l23split_barrelsplit.json</font></td></tr>
-</table>>]
-22 [ shape=none, margin=0, label=<<table border="2" color="#D96D57" cellspacing="3" cellborder="0">
-<tr><td>
-<b><font point-size="18">create_leaves_only_hierarchy_annotation_ccfv2</font></b>
-</td></tr>
-<hr/>
-<tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv2_l23split.nrrd</font></td>
-</tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv2_l23split.json</font></td>
-</tr>
-<hr/>
-<tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv2_leaves_only.nrrd</font></td></tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv2_leaves_only.json</font></td></tr>
-</table>>]
-23 [ shape=none, margin=0, label=<<table border="2" color="#C8D957" cellspacing="3" cellborder="0">
-<tr><td>
-<b><font point-size="18">split_isocortex_layer_23_ccfv2</font></b>
-</td></tr>
-<hr/>
-<tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/annotation_v2_withfiber.nrrd</font></td>
-</tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/hierarchy.json</font></td>
-</tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/interpolated_direction_vectors_isocortex_ccfv2.nrrd</font></td>
-</tr>
-<hr/>
-<tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv2_l23split.nrrd</font></td></tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv2_l23split.json</font></td></tr>
-</table>>]
-24 [ shape=none, margin=0, label=<<table border="2" color="#577ED9" cellspacing="3" cellborder="0">
-<tr><td>
-<b><font point-size="18">combine_v2_annotations</font></b>
-</td></tr>
-<hr/>
-<tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv2.nrrd</font></td>
-</tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/fiber_parcellation_ccfv2.nrrd</font></td>
-</tr>
-<hr/>
-<tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/annotation_v2_withfiber.nrrd</font></td></tr>
-</table>>]
-25 [ shape=none, margin=0, label=<<table border="2" color="#57BCD9" cellspacing="3" cellborder="0">
-<tr><td>
-<b><font point-size="18">fetch_brain_parcellation_ccfv2</font></b>
-</td></tr>
-<hr/>
-<tr><td align="left">  </td></tr>
-<hr/>
-<tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv2.nrrd</font></td></tr>
-</table>>]
-26 [ shape=none, margin=0, label=<<table border="2" color="#5762D9" cellspacing="3" cellborder="0">
-<tr><td>
-<b><font point-size="18">fetch_fiber_parcellation_ccfv2</font></b>
-</td></tr>
-<hr/>
-<tr><td align="left">  </td></tr>
-<hr/>
-<tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/fiber_parcellation_ccfv2.nrrd</font></td></tr>
-</table>>]
-27 [ shape=none, margin=0, label=<<table border="2" color="#57D9BC" cellspacing="3" cellborder="0">
-<tr><td>
-<b><font point-size="18">interpolate_direction_vectors_isocortex_ccfv2</font></b>
-</td></tr>
-<hr/>
-<tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/annotation_v2_withfiber.nrrd</font></td>
-</tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/direction_vectors/direction_vectors_isocortex_ccfv2.nrrd</font></td>
-</tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/hierarchy.json</font></td>
-</tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/isocortex_metadata.json</font></td>
-</tr>
-<hr/>
-<tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/interpolated_direction_vectors_isocortex_ccfv2.nrrd</font></td></tr>
-</table>>]
-28 [ shape=none, margin=0, label=<<table border="2" color="#D3D957" cellspacing="3" cellborder="0">
-<tr><td>
-<b><font point-size="18">direction_vectors_isocortex_ccfv2</font></b>
-</td></tr>
-<hr/>
-<tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/annotation_v2_withfiber.nrrd</font></td>
-</tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/hierarchy.json</font></td>
-</tr>
-<hr/>
-<tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/direction_vectors/direction_vectors_isocortex_ccfv2.nrrd</font></td></tr>
-</table>>]
-29 [ shape=none, margin=0, label=<<table border="2" color="#A0D957" cellspacing="3" cellborder="0">
-<tr><td>
-<b><font point-size="18">fetch_isocortex_metadata</font></b>
-</td></tr>
-<hr/>
-<tr><td align="left">  </td></tr>
-<hr/>
-<tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/isocortex_metadata.json</font></td></tr>
-</table>>]
-30 [ shape=none, margin=0, label=<<table border="2" color="#57D973" cellspacing="3" cellborder="0">
+21 [ shape=none, margin=0, label=<<table border="2" color="#57D96A" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">validate_neuron_glia_cell_densities</font></b>
 </td></tr>
 <hr/>
 <tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv2_l23split_barrelsplit_validated.nrrd</font></td>
+<td align="left"><font face="monospace">leaves_only/annotation_ccfv3_l23split_barrelsplit_validated.nrrd</font></td>
 </tr>
 <tr>
 <td align="left"><font face="monospace">leaves_only/cell_densities_correctednissl</font></td>
@@ -564,14 +405,14 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/cell_densities_correctednissl_validated/neuron_density.nrrd</font></td></tr>
 </table>>]
-31 [ shape=none, margin=0, label=<<table border="2" color="#576DD9" cellspacing="3" cellborder="0">
+22 [ shape=none, margin=0, label=<<table border="2" color="#579AD9" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">glia_cell_densities_correctednissl</font></b>
 </td></tr>
 <hr/>
 <tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv2_l23split_barrelsplit_validated.nrrd</font></td>
+<td align="left"><font face="monospace">leaves_only/annotation_ccfv3_l23split_barrelsplit_validated.nrrd</font></td>
 </tr>
 <tr>
 <td align="left"><font face="monospace">leaves_only/astrocyte.nrrd</font></td>
@@ -583,7 +424,7 @@ digraph snakemake_dag {
 <td align="left"><font face="monospace">leaves_only/glia_proportions.json</font></td>
 </tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv2_l23split_barrelsplit.json</font></td>
+<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv3_l23split_barrelsplit.json</font></td>
 </tr>
 <tr>
 <td align="left"><font face="monospace">leaves_only/microglia.nrrd</font></td>
@@ -612,14 +453,14 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/cell_densities_correctednissl/oligodendrocyte_density.nrrd</font></td></tr>
 </table>>]
-32 [ shape=none, margin=0, label=<<table border="2" color="#C2D957" cellspacing="3" cellborder="0">
+23 [ shape=none, margin=0, label=<<table border="2" color="#7BD957" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">validate_cell_density</font></b>
 </td></tr>
 <hr/>
 <tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv2_l23split_barrelsplit_validated.nrrd</font></td>
+<td align="left"><font face="monospace">leaves_only/annotation_ccfv3_l23split_barrelsplit_validated.nrrd</font></td>
 </tr>
 <tr>
 <td align="left"><font face="monospace">leaves_only/overall_cell_density_correctednissl.nrrd</font></td>
@@ -629,17 +470,17 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/overall_cell_density_correctednissl_validated.nrrd</font></td></tr>
 </table>>]
-33 [ shape=none, margin=0, label=<<table border="2" color="#57D968" cellspacing="3" cellborder="0">
+24 [ shape=none, margin=0, label=<<table border="2" color="#8CD957" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">cell_density_correctednissl</font></b>
 </td></tr>
 <hr/>
 <tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv2_l23split_barrelsplit_validated.nrrd</font></td>
+<td align="left"><font face="monospace">leaves_only/annotation_ccfv3_l23split_barrelsplit_validated.nrrd</font></td>
 </tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv2_l23split_barrelsplit.json</font></td>
+<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv3_l23split_barrelsplit.json</font></td>
 </tr>
 <tr>
 <td align="left"><font face="monospace">leaves_only/nissl_corrected_volume.nrrd</font></td>
@@ -652,7 +493,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/overall_cell_density_correctednissl.nrrd</font></td></tr>
 </table>>]
-34 [ shape=none, margin=0, label=<<table border="2" color="#57D995" cellspacing="3" cellborder="0">
+25 [ shape=none, margin=0, label=<<table border="2" color="#5794D9" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_corrected_nissl_stained_volume</font></b>
 </td></tr>
@@ -663,7 +504,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/nissl_corrected_volume.nrrd</font></td></tr>
 </table>>]
-35 [ shape=none, margin=0, label=<<table border="2" color="#D95757" cellspacing="3" cellborder="0">
+26 [ shape=none, margin=0, label=<<table border="2" color="#57D9BE" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_regions_config</font></b>
 </td></tr>
@@ -674,14 +515,14 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/rules_config_dir/regions_groups.json</font></td></tr>
 </table>>]
-36 [ shape=none, margin=0, label=<<table border="2" color="#57B1D9" cellspacing="3" cellborder="0">
+27 [ shape=none, margin=0, label=<<table border="2" color="#D9D257" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">combine_markers</font></b>
 </td></tr>
 <hr/>
 <tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv2_l23split_barrelsplit_validated.nrrd</font></td>
+<td align="left"><font face="monospace">leaves_only/annotation_ccfv3_l23split_barrelsplit_validated.nrrd</font></td>
 </tr>
 <tr>
 <td align="left"><font face="monospace">leaves_only/gene_aldh1l1.nrrd</font></td>
@@ -702,7 +543,7 @@ digraph snakemake_dag {
 <td align="left"><font face="monospace">leaves_only/gene_tmem119.nrrd</font></td>
 </tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv2_l23split_barrelsplit.json</font></td>
+<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv3_l23split_barrelsplit.json</font></td>
 </tr>
 <hr/>
 <tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
@@ -717,7 +558,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/oligodendrocyte.nrrd</font></td></tr>
 </table>>]
-37 [ shape=none, margin=0, label=<<table border="2" color="#57CDD9" cellspacing="3" cellborder="0">
+28 [ shape=none, margin=0, label=<<table border="2" color="#57D95F" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_gene_aldh1l1</font></b>
 </td></tr>
@@ -728,7 +569,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/gene_aldh1l1.nrrd</font></td></tr>
 </table>>]
-38 [ shape=none, margin=0, label=<<table border="2" color="#57A0D9" cellspacing="3" cellborder="0">
+29 [ shape=none, margin=0, label=<<table border="2" color="#5762D9" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_gene_cnp</font></b>
 </td></tr>
@@ -739,7 +580,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/gene_cnp.nrrd</font></td></tr>
 </table>>]
-39 [ shape=none, margin=0, label=<<table border="2" color="#57D9C2" cellspacing="3" cellborder="0">
+30 [ shape=none, margin=0, label=<<table border="2" color="#70D957" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_gene_mbp</font></b>
 </td></tr>
@@ -750,7 +591,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/gene_mbp.nrrd</font></td></tr>
 </table>>]
-40 [ shape=none, margin=0, label=<<table border="2" color="#84D957" cellspacing="3" cellborder="0">
+31 [ shape=none, margin=0, label=<<table border="2" color="#D5D957" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_gene_gfap</font></b>
 </td></tr>
@@ -761,7 +602,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/gene_gfap.nrrd</font></td></tr>
 </table>>]
-41 [ shape=none, margin=0, label=<<table border="2" color="#578FD9" cellspacing="3" cellborder="0">
+32 [ shape=none, margin=0, label=<<table border="2" color="#97D957" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_gene_s100b</font></b>
 </td></tr>
@@ -772,7 +613,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/gene_s100b.nrrd</font></td></tr>
 </table>>]
-42 [ shape=none, margin=0, label=<<table border="2" color="#D97E57" cellspacing="3" cellborder="0">
+33 [ shape=none, margin=0, label=<<table border="2" color="#57D970" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_gene_tmem119</font></b>
 </td></tr>
@@ -783,7 +624,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/gene_tmem119.nrrd</font></td></tr>
 </table>>]
-43 [ shape=none, margin=0, label=<<table border="2" color="#57D9AC" cellspacing="3" cellborder="0">
+34 [ shape=none, margin=0, label=<<table border="2" color="#57D2D9" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">push_inhibitory_neuron_densities</font></b>
 </td></tr>
@@ -793,50 +634,27 @@ digraph snakemake_dag {
 <td align="left"><font face="monospace">leaves_only/hierarchy_ccfv3_l23split_barrelsplit.json</font></td>
 </tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/inhibitory_neuron_densities_linprog_transplant_correctednissl</font></td>
+<td align="left"><font face="monospace">leaves_only/inhibitory_neuron_densities_linprog_correctednissl_validated</font></td>
 </tr>
 <hr/>
 <tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
 <tr>
 <td align="left"><font face="monospace">leaves_only/pushed_inhibitory_neuron_densities.log</font></td></tr>
 </table>>]
-44 [ shape=none, margin=0, label=<<table border="2" color="#7ED957" cellspacing="3" cellborder="0">
-<tr><td>
-<b><font point-size="18">transplant_inhibitory_neuron_densities_linprog_correctednissl</font></b>
-</td></tr>
-<hr/>
-<tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv2_l23split_barrelsplit_validated.nrrd</font></td>
-</tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv3_l23split_barrelsplit_validated.nrrd</font></td>
-</tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv3_l23split_barrelsplit.json</font></td>
-</tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/inhibitory_neuron_densities_linprog_correctednissl_validated</font></td>
-</tr>
-<hr/>
-<tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/inhibitory_neuron_densities_linprog_transplant_correctednissl</font></td></tr>
-</table>>]
-45 [ shape=none, margin=0, label=<<table border="2" color="#D97957" cellspacing="3" cellborder="0">
+35 [ shape=none, margin=0, label=<<table border="2" color="#57D965" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">validate_inhibitory_densities</font></b>
 </td></tr>
 <hr/>
 <tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv2_l23split_barrelsplit_validated.nrrd</font></td>
+<td align="left"><font face="monospace">leaves_only/annotation_ccfv3_l23split_barrelsplit_validated.nrrd</font></td>
 </tr>
 <tr>
 <td align="left"><font face="monospace">leaves_only/cell_densities_correctednissl_validated</font></td>
 </tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv2_l23split_barrelsplit.json</font></td>
+<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv3_l23split_barrelsplit.json</font></td>
 </tr>
 <tr>
 <td align="left"><font face="monospace">leaves_only/inhibitory_neuron_densities_linprog_correctednissl</font></td>
@@ -849,14 +667,14 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/inhibitory_neuron_densities_linprog_correctednissl_validated</font></td></tr>
 </table>>]
-46 [ shape=none, margin=0, label=<<table border="2" color="#57D95C" cellspacing="3" cellborder="0">
+36 [ shape=none, margin=0, label=<<table border="2" color="#75D957" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">inhibitory_neuron_densities_linprog_correctednissl</font></b>
 </td></tr>
 <hr/>
 <tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv2_l23split_barrelsplit_validated.nrrd</font></td>
+<td align="left"><font face="monospace">leaves_only/annotation_ccfv3_l23split_barrelsplit_validated.nrrd</font></td>
 </tr>
 <tr>
 <td align="left"><font face="monospace">leaves_only/cell_densities_correctednissl_validated/neuron_density.nrrd</font></td>
@@ -865,21 +683,21 @@ digraph snakemake_dag {
 <td align="left"><font face="monospace">leaves_only/fitted_densities_correctednissl.csv</font></td>
 </tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv2_l23split_barrelsplit.json</font></td>
+<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv3_l23split_barrelsplit.json</font></td>
 </tr>
 <hr/>
 <tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
 <tr>
 <td align="left"><font face="monospace">leaves_only/inhibitory_neuron_densities_linprog_correctednissl</font></td></tr>
 </table>>]
-47 [ shape=none, margin=0, label=<<table border="2" color="#D9B157" cellspacing="3" cellborder="0">
+37 [ shape=none, margin=0, label=<<table border="2" color="#D9B057" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fit_average_densities_correctednissl</font></b>
 </td></tr>
 <hr/>
 <tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv2_l23split_barrelsplit_validated.nrrd</font></td>
+<td align="left"><font face="monospace">leaves_only/annotation_ccfv3_l23split_barrelsplit_validated.nrrd</font></td>
 </tr>
 <tr>
 <td align="left"><font face="monospace">leaves_only/average_cell_densities_correctednissl.csv</font></td>
@@ -891,7 +709,7 @@ digraph snakemake_dag {
 <td align="left"><font face="monospace">leaves_only/fetched_genes_correctednissl.log</font></td>
 </tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv2_l23split_barrelsplit.json</font></td>
+<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv3_l23split_barrelsplit.json</font></td>
 </tr>
 <tr>
 <td align="left"><font face="monospace">leaves_only/rules_config_dir/fit_average_densities_correctednissl_config.yaml</font></td>
@@ -915,7 +733,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/fitting_maps_correctednissl.json</font></td></tr>
 </table>>]
-48 [ shape=none, margin=0, label=<<table border="2" color="#5773D9" cellspacing="3" cellborder="0">
+38 [ shape=none, margin=0, label=<<table border="2" color="#D98357" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_genes_correctednissl</font></b>
 </td></tr>
@@ -938,7 +756,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/fetched_genes_correctednissl.log</font></td></tr>
 </table>>]
-49 [ shape=none, margin=0, label=<<table border="2" color="#575CD9" cellspacing="3" cellborder="0">
+39 [ shape=none, margin=0, label=<<table border="2" color="#CFD957" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_gene_pv_correctednissl</font></b>
 </td></tr>
@@ -949,7 +767,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/gene_pv_correctednissl.nrrd</font></td></tr>
 </table>>]
-50 [ shape=none, margin=0, label=<<table border="2" color="#57D9B1" cellspacing="3" cellborder="0">
+40 [ shape=none, margin=0, label=<<table border="2" color="#57D9AD" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_gene_sst_correctednissl</font></b>
 </td></tr>
@@ -960,7 +778,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/gene_sst_correctednissl.nrrd</font></td></tr>
 </table>>]
-51 [ shape=none, margin=0, label=<<table border="2" color="#D9BC57" cellspacing="3" cellborder="0">
+41 [ shape=none, margin=0, label=<<table border="2" color="#57C7D9" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_gene_vip_correctednissl</font></b>
 </td></tr>
@@ -971,7 +789,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/gene_vip_correctednissl.nrrd</font></td></tr>
 </table>>]
-52 [ shape=none, margin=0, label=<<table border="2" color="#57B7D9" cellspacing="3" cellborder="0">
+42 [ shape=none, margin=0, label=<<table border="2" color="#D96D57" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_gene_gad67_correctednissl</font></b>
 </td></tr>
@@ -982,7 +800,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/gene_gad67_correctednissl.nrrd</font></td></tr>
 </table>>]
-53 [ shape=none, margin=0, label=<<table border="2" color="#57C2D9" cellspacing="3" cellborder="0">
+43 [ shape=none, margin=0, label=<<table border="2" color="#65D957" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_realigned_slices</font></b>
 </td></tr>
@@ -993,7 +811,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/rules_config_dir/realigned_slices.json</font></td></tr>
 </table>>]
-54 [ shape=none, margin=0, label=<<table border="2" color="#D9A057" cellspacing="3" cellborder="0">
+44 [ shape=none, margin=0, label=<<table border="2" color="#5778D9" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_std_cells</font></b>
 </td></tr>
@@ -1004,20 +822,20 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/rules_config_dir/std_cells.json</font></td></tr>
 </table>>]
-55 [ shape=none, margin=0, label=<<table border="2" color="#57A6D9" cellspacing="3" cellborder="0">
+45 [ shape=none, margin=0, label=<<table border="2" color="#5789D9" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">average_densities_correctednissl</font></b>
 </td></tr>
 <hr/>
 <tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv2_l23split_barrelsplit_validated.nrrd</font></td>
+<td align="left"><font face="monospace">leaves_only/annotation_ccfv3_l23split_barrelsplit_validated.nrrd</font></td>
 </tr>
 <tr>
 <td align="left"><font face="monospace">leaves_only/cell_densities_correctednissl_validated/neuron_density.nrrd</font></td>
 </tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv2_l23split_barrelsplit.json</font></td>
+<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv3_l23split_barrelsplit.json</font></td>
 </tr>
 <tr>
 <td align="left"><font face="monospace">leaves_only/overall_cell_density_correctednissl_validated.nrrd</font></td>
@@ -1030,7 +848,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/average_cell_densities_correctednissl.csv</font></td></tr>
 </table>>]
-56 [ shape=none, margin=0, label=<<table border="2" color="#579BD9" cellspacing="3" cellborder="0">
+46 [ shape=none, margin=0, label=<<table border="2" color="#5783D9" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_measurements</font></b>
 </td></tr>
@@ -1041,7 +859,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/rules_config_dir/measurements.csv</font></td></tr>
 </table>>]
-57 [ shape=none, margin=0, label=<<table border="2" color="#ACD957" cellspacing="3" cellborder="0">
+47 [ shape=none, margin=0, label=<<table border="2" color="#57ABD9" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_homogenous_regions</font></b>
 </td></tr>
@@ -1052,57 +870,34 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/rules_config_dir/homogenous_regions.csv</font></td></tr>
 </table>>]
-58 [ shape=none, margin=0, label=<<table border="2" color="#57D98F" cellspacing="3" cellborder="0">
+48 [ shape=none, margin=0, label=<<table border="2" color="#57D986" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">push_metype_pipeline_datasets</font></b>
 </td></tr>
 <hr/>
 <tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/excitatory_split_transplant</font></td>
+<td align="left"><font face="monospace">leaves_only/excitatory_split_validated</font></td>
 </tr>
 <tr>
 <td align="left"><font face="monospace">leaves_only/hierarchy_ccfv3_l23split_barrelsplit.json</font></td>
 </tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/mtypes_densities_probability_map_transplant</font></td>
+<td align="left"><font face="monospace">leaves_only/mtypes_densities_probability_map_validated</font></td>
 </tr>
 <hr/>
 <tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
 <tr>
 <td align="left"><font face="monospace">leaves_only/pushed_metype_datasets.log</font></td></tr>
 </table>>]
-59 [ shape=none, margin=0, label=<<table border="2" color="#D96857" cellspacing="3" cellborder="0">
-<tr><td>
-<b><font point-size="18">transplant_excitatory_split</font></b>
-</td></tr>
-<hr/>
-<tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv2_l23split_barrelsplit_validated.nrrd</font></td>
-</tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv3_l23split_barrelsplit_validated.nrrd</font></td>
-</tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/excitatory_split_validated</font></td>
-</tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv3_l23split_barrelsplit.json</font></td>
-</tr>
-<hr/>
-<tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/excitatory_split_transplant</font></td></tr>
-</table>>]
-60 [ shape=none, margin=0, label=<<table border="2" color="#D95C57" cellspacing="3" cellborder="0">
+49 [ shape=none, margin=0, label=<<table border="2" color="#6AD957" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">validate_all_ME_densities</font></b>
 </td></tr>
 <hr/>
 <tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv2_l23split_barrelsplit_validated.nrrd</font></td>
+<td align="left"><font face="monospace">leaves_only/annotation_ccfv3_l23split_barrelsplit_validated.nrrd</font></td>
 </tr>
 <tr>
 <td align="left"><font face="monospace">leaves_only/excitatory_split</font></td>
@@ -1117,17 +912,17 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/mtypes_densities_probability_map_validated</font></td></tr>
 </table>>]
-61 [ shape=none, margin=0, label=<<table border="2" color="#5768D9" cellspacing="3" cellborder="0">
+50 [ shape=none, margin=0, label=<<table border="2" color="#57A5D9" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">create_mtypes_densities_from_probability_map</font></b>
 </td></tr>
 <hr/>
 <tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv2_l23split_barrelsplit_validated.nrrd</font></td>
+<td align="left"><font face="monospace">leaves_only/annotation_ccfv3_l23split_barrelsplit_validated.nrrd</font></td>
 </tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv2_l23split_barrelsplit.json</font></td>
+<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv3_l23split_barrelsplit.json</font></td>
 </tr>
 <tr>
 <td align="left"><font face="monospace">leaves_only/inhibitory_neuron_densities_linprog_correctednissl_validated</font></td>
@@ -1158,7 +953,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/mtypes_densities_probability_map</font></td></tr>
 </table>>]
-62 [ shape=none, margin=0, label=<<table border="2" color="#57D9D9" cellspacing="3" cellborder="0">
+51 [ shape=none, margin=0, label=<<table border="2" color="#D9C157" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_probability_map_L1</font></b>
 </td></tr>
@@ -1169,7 +964,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/rules_config_dir/mtypes/probability_map_L1.csv</font></td></tr>
 </table>>]
-63 [ shape=none, margin=0, label=<<table border="2" color="#B1D957" cellspacing="3" cellborder="0">
+52 [ shape=none, margin=0, label=<<table border="2" color="#57D9B9" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_probability_map_L23</font></b>
 </td></tr>
@@ -1180,7 +975,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/rules_config_dir/mtypes/probability_map_L23.csv</font></td></tr>
 </table>>]
-64 [ shape=none, margin=0, label=<<table border="2" color="#57D3D9" cellspacing="3" cellborder="0">
+53 [ shape=none, margin=0, label=<<table border="2" color="#57D9A8" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_probability_map_L4</font></b>
 </td></tr>
@@ -1191,7 +986,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/rules_config_dir/mtypes/probability_map_L4.csv</font></td></tr>
 </table>>]
-65 [ shape=none, margin=0, label=<<table border="2" color="#D96257" cellspacing="3" cellborder="0">
+54 [ shape=none, margin=0, label=<<table border="2" color="#57D9D5" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_probability_map_L5</font></b>
 </td></tr>
@@ -1202,7 +997,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/rules_config_dir/mtypes/probability_map_L5.csv</font></td></tr>
 </table>>]
-66 [ shape=none, margin=0, label=<<table border="2" color="#D97357" cellspacing="3" cellborder="0">
+55 [ shape=none, margin=0, label=<<table border="2" color="#57B6D9" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_probability_map_L6</font></b>
 </td></tr>
@@ -1213,7 +1008,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/rules_config_dir/mtypes/probability_map_L6.csv</font></td></tr>
 </table>>]
-67 [ shape=none, margin=0, label=<<table border="2" color="#8FD957" cellspacing="3" cellborder="0">
+56 [ shape=none, margin=0, label=<<table border="2" color="#57D9C4" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_probability_map_TH_INH</font></b>
 </td></tr>
@@ -1224,7 +1019,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/rules_config_dir/mtypes/probability_map_TH_INH.csv</font></td></tr>
 </table>>]
-68 [ shape=none, margin=0, label=<<table border="2" color="#D9CD57" cellspacing="3" cellborder="0">
+57 [ shape=none, margin=0, label=<<table border="2" color="#B9D957" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">compute_lamp5_density</font></b>
 </td></tr>
@@ -1238,20 +1033,20 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/lamp5_density.nrrd</font></td></tr>
 </table>>]
-69 [ shape=none, margin=0, label=<<table border="2" color="#57D9B7" cellspacing="3" cellborder="0">
+58 [ shape=none, margin=0, label=<<table border="2" color="#57D975" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">excitatory_split</font></b>
 </td></tr>
 <hr/>
 <tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv2_l23split_barrelsplit_validated.nrrd</font></td>
+<td align="left"><font face="monospace">leaves_only/annotation_ccfv3_l23split_barrelsplit_validated.nrrd</font></td>
 </tr>
 <tr>
 <td align="left"><font face="monospace">leaves_only/cell_densities_correctednissl_validated/neuron_density.nrrd</font></td>
 </tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv2_l23split_barrelsplit.json</font></td>
+<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv3_l23split_barrelsplit.json</font></td>
 </tr>
 <tr>
 <td align="left"><font face="monospace">leaves_only/inhibitory_neuron_densities_linprog_correctednissl_validated</font></td>
@@ -1264,7 +1059,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/excitatory_split</font></td></tr>
 </table>>]
-70 [ shape=none, margin=0, label=<<table border="2" color="#BCD957" cellspacing="3" cellborder="0">
+59 [ shape=none, margin=0, label=<<table border="2" color="#57D99D" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">fetch_mapping_cortex_all_to_exc_mtypes</font></b>
 </td></tr>
@@ -1275,32 +1070,9 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/mapping_cortex_all_to_exc_mtypes.csv</font></td></tr>
 </table>>]
-71 [ shape=none, margin=0, label=<<table border="2" color="#D99B57" cellspacing="3" cellborder="0">
+60 [ shape=none, margin=0, label=<<table border="2" color="#D96757" cellspacing="3" cellborder="0">
 <tr><td>
-<b><font point-size="18">transplant_mtypes_densities_from_probability_map</font></b>
-</td></tr>
-<hr/>
-<tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv2_l23split_barrelsplit_validated.nrrd</font></td>
-</tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/annotation_ccfv3_l23split_barrelsplit_validated.nrrd</font></td>
-</tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/hierarchy_ccfv3_l23split_barrelsplit.json</font></td>
-</tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/mtypes_densities_probability_map_validated</font></td>
-</tr>
-<hr/>
-<tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
-<tr>
-<td align="left"><font face="monospace">leaves_only/mtypes_densities_probability_map_transplant</font></td></tr>
-</table>>]
-72 [ shape=none, margin=0, label=<<table border="2" color="#57D979" cellspacing="3" cellborder="0">
-<tr><td>
-<b><font point-size="18">push_cellcomposition</font></b>
+<b><font point-size="18">push_cellComposition</font></b>
 </td></tr>
 <hr/>
 <tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
@@ -1316,9 +1088,9 @@ digraph snakemake_dag {
 <hr/>
 <tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
 <tr>
-<td align="left"><font face="monospace">leaves_only/pushed_cellcomposition.log</font></td></tr>
+<td align="left"><font face="monospace">leaves_only/pushed_cellComposition.log</font></td></tr>
 </table>>]
-73 [ shape=none, margin=0, label=<<table border="2" color="#79D957" cellspacing="3" cellborder="0">
+61 [ shape=none, margin=0, label=<<table border="2" color="#D9AB57" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">create_cellCompositionVolume_payload</font></b>
 </td></tr>
@@ -1332,7 +1104,7 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/cellCompositionVolume_payload_staging.json</font></td></tr>
 </table>>]
-74 [ shape=none, margin=0, label=<<table border="2" color="#5795D9" cellspacing="3" cellborder="0">
+62 [ shape=none, margin=0, label=<<table border="2" color="#59D957" cellspacing="3" cellborder="0">
 <tr><td>
 <b><font point-size="18">create_cellCompositionSummary_payload</font></b>
 </td></tr>
@@ -1354,20 +1126,21 @@ digraph snakemake_dag {
 <tr>
 <td align="left"><font face="monospace">leaves_only/density_distribution_staging.json</font></td></tr>
 </table>>]
-	16 -> 0
-	15 -> 0
-	72 -> 0
+	18 -> 0
+	60 -> 0
 	1 -> 0
-	11 -> 1
-	12 -> 1
-	14 -> 1
+	17 -> 0
+	16 -> 1
 	2 -> 1
-	13 -> 1
+	15 -> 1
 	10 -> 1
+	12 -> 1
+	13 -> 1
 	3 -> 2
+	11 -> 2
 	10 -> 2
-	4 -> 3
 	9 -> 3
+	4 -> 3
 	5 -> 4
 	7 -> 5
 	8 -> 5
@@ -1375,129 +1148,98 @@ digraph snakemake_dag {
 	7 -> 8
 	6 -> 8
 	3 -> 10
-	10 -> 11
-	3 -> 12
-	13 -> 12
 	10 -> 12
-	7 -> 13
-	6 -> 13
-	13 -> 14
-	2 -> 15
-	58 -> 16
-	18 -> 16
-	43 -> 16
-	17 -> 16
+	3 -> 13
+	14 -> 13
+	15 -> 13
+	10 -> 13
+	7 -> 15
+	6 -> 15
+	15 -> 16
 	2 -> 17
-	3 -> 18
+	20 -> 18
 	19 -> 18
-	20 -> 19
-	3 -> 19
-	30 -> 19
-	10 -> 19
+	48 -> 18
+	34 -> 18
+	2 -> 19
+	3 -> 20
 	21 -> 20
 	22 -> 21
-	9 -> 21
+	10 -> 21
+	27 -> 22
+	10 -> 22
+	3 -> 22
 	23 -> 22
-	27 -> 23
+	26 -> 22
+	10 -> 23
 	24 -> 23
-	6 -> 23
+	3 -> 24
 	26 -> 24
+	10 -> 24
 	25 -> 24
+	32 -> 27
+	33 -> 27
+	10 -> 27
+	3 -> 27
+	30 -> 27
 	28 -> 27
-	24 -> 27
-	6 -> 27
 	29 -> 27
-	24 -> 28
-	6 -> 28
-	20 -> 30
-	31 -> 30
-	32 -> 31
-	35 -> 31
-	21 -> 31
-	20 -> 31
-	36 -> 31
-	20 -> 32
-	33 -> 32
-	20 -> 33
-	35 -> 33
-	34 -> 33
-	21 -> 33
+	31 -> 27
+	35 -> 34
+	3 -> 34
+	10 -> 35
+	3 -> 35
+	23 -> 35
+	36 -> 35
+	21 -> 35
+	3 -> 36
 	37 -> 36
 	21 -> 36
-	20 -> 36
-	41 -> 36
-	39 -> 36
-	42 -> 36
-	38 -> 36
-	40 -> 36
-	3 -> 43
-	44 -> 43
-	20 -> 44
-	3 -> 44
-	45 -> 44
-	10 -> 44
-	32 -> 45
-	30 -> 45
-	21 -> 45
-	20 -> 45
+	10 -> 36
+	45 -> 37
+	43 -> 37
+	47 -> 37
+	10 -> 37
+	3 -> 37
+	38 -> 37
+	26 -> 37
+	44 -> 37
+	21 -> 37
+	40 -> 38
+	42 -> 38
+	41 -> 38
+	39 -> 38
 	46 -> 45
-	20 -> 46
-	30 -> 46
-	47 -> 46
-	21 -> 46
-	30 -> 47
-	35 -> 47
-	21 -> 47
-	53 -> 47
-	20 -> 47
-	48 -> 47
-	57 -> 47
-	55 -> 47
-	54 -> 47
-	51 -> 48
-	50 -> 48
-	52 -> 48
+	10 -> 45
+	3 -> 45
+	23 -> 45
+	21 -> 45
 	49 -> 48
-	32 -> 55
-	30 -> 55
-	21 -> 55
-	20 -> 55
-	56 -> 55
+	3 -> 48
+	58 -> 49
+	10 -> 49
+	50 -> 49
+	55 -> 50
+	57 -> 50
+	53 -> 50
+	10 -> 50
+	54 -> 50
+	3 -> 50
+	52 -> 50
+	56 -> 50
+	35 -> 50
+	51 -> 50
+	35 -> 57
 	59 -> 58
+	10 -> 58
 	3 -> 58
-	71 -> 58
-	20 -> 59
-	3 -> 59
-	60 -> 59
-	10 -> 59
-	20 -> 60
+	35 -> 58
+	21 -> 58
+	3 -> 60
 	61 -> 60
-	69 -> 60
-	68 -> 61
-	62 -> 61
-	64 -> 61
-	21 -> 61
-	20 -> 61
-	65 -> 61
-	67 -> 61
-	66 -> 61
-	63 -> 61
-	45 -> 61
-	45 -> 68
-	30 -> 69
-	70 -> 69
-	20 -> 69
-	21 -> 69
-	45 -> 69
-	20 -> 71
-	3 -> 71
-	60 -> 71
-	10 -> 71
-	74 -> 72
-	3 -> 72
-	73 -> 72
-	58 -> 73
-	3 -> 74
-	73 -> 74
-	10 -> 74
+	62 -> 60
+	48 -> 61
+	3 -> 62
+	61 -> 62
+	10 -> 62
 }            

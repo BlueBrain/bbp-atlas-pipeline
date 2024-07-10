@@ -1,0 +1,38 @@
+{
+    "[PH]layer_1.nrrd": {
+        "Isocortex": {
+            "layer_ID": "http://purl.obolibrary.org/obo/UBERON_0005390",
+            "layer_label": "L1"
+        }
+    },
+    "[PH]layer_2.nrrd": {
+        "Isocortex": {
+            "layer_ID": "http://purl.obolibrary.org/obo/UBERON_0005391",
+            "layer_label": "L2"
+        }
+    },
+    "[PH]layer_3.nrrd": {
+        "Isocortex": {
+            "layer_ID": "http://purl.obolibrary.org/obo/UBERON_0005392",
+            "layer_label": "L3"
+        }
+    },
+    "[PH]layer_4.nrrd": {
+        "Isocortex": {
+            "layer_ID": "http://purl.obolibrary.org/obo/UBERON_0005393",
+            "layer_label": "L4"
+        }
+    },
+    "[PH]layer_5.nrrd": {
+        "Isocortex": {
+            "layer_ID": "http://purl.obolibrary.org/obo/UBERON_0005394",
+            "layer_label": "L5"
+        }
+    },
+    "[PH]layer_6.nrrd": {
+        "Isocortex": {
+            "layer_ID": "http://purl.obolibrary.org/obo/UBERON_0005395",
+            "layer_label": "L6"
+        }
+    }
+}

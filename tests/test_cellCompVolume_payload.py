@@ -4,7 +4,7 @@ import logging
 from kgforge.core import KnowledgeGraphForge
 from cellCompVolume_payload import create_payload
 
-from cwl_registry.validation import validate_schema
+from blue_cwl.validation import validate_schema
 
 logging.basicConfig(level=logging.INFO)
 L = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ nexus_proj = "atlas"
 nexus_token = os.environ["NEXUS_STAGING_TOKEN"]
 test_folder = os.environ["TEST_FOLDER"]
 tag = "v0.5.1-rc1"
-expected_densities = 243
+expected_densities = 245
 atlasrelease_id = "https://bbp.epfl.ch/neurosciencegraph/data/brainatlasrelease/c96c71a8-4c0d-4bc1-8a1a-141d9ed6693d"
 
 
