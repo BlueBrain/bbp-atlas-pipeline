@@ -77,6 +77,7 @@ variables:
 
 .git_setup:
   - git remote add gitlab https://ci:$REPO_PUSH_TOKEN@bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline
+  - git fetch gitlab $DEV_BRANCH
   - git config user.name "$COMMIT_SHA"
   - git config user.email "bbp-ou-dke@groupes.epfl.ch"
 
@@ -144,7 +145,7 @@ nexus-synchronization:
     - !reference [.git_setup]
     - git checkout $DEV_BRANCH
   script:
-    - pip install "nexusforge==0.8.1"
+    - pip install "nexusforge>=0.8.2"
     - python synch_nexus.py
     - git add $NEXUS_IDS_PATH $METADATA_DIR/$FILE_NEXUS_ID_MAP
     - git diff-index --quiet HEAD  ||  git commit -m "Update $NEXUS_IDS_PATH"

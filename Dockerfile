@@ -67,7 +67,7 @@ RUN pip install "atlas-direction-vectors"
 
 RUN pip install "atlas-splitter>=0.1.5"
 
-RUN pip install "atlas-placement-hints"
+RUN pip install "atlas-placement-hints<=0.1.2"
 
 RUN pip install "atlas-densities>=0.2.5"
 

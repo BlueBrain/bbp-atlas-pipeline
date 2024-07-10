@@ -1,15 +1,22 @@
 # Release Notes
 
-## v1.0.0 [to be released]
+## v1.1.0
+### Enhancements
+- Add `tag` metadata to the `atlasRelease` property of Atlas Resources ([MR](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_nexus_push/-/merge_requests/56)) 
+
+## v1.0.1
 ### New features
 - Perform densities validation
 - Drop layer requirement for M-types in CellComposition
+- Add CI job for post registration test
+- Automatically Create BMO MR to update the parcellation ontology revision
+- Add brian regions to layers map
 ### Enhancements
 - Replace CCFv2-to-CCFv3 transplant with single CCFv3 augmented annotation and aligned Nissl-stained volume ([Jira](https://bbpteam.epfl.ch/project/issues/browse/MS-5))
   - Updated gene expression volumes
 - Use stable region Ids across annotations ([PR](https://github.com/BlueBrain/atlas-splitter/pull/10))
 ### Bug fixes
-
+- Update PHs metadata input file to account for new barrel cortex acronyms ([PR](https://github.com/BlueBrain/atlas-placement-hints/pull/14)) 
 
 ## v0.6.0
 ### New features
