@@ -411,15 +411,14 @@ rule fetch_brain_parcellation_ccfv3:
 
 orig_annotation_v3 = rules.fetch_brain_parcellation_ccfv3.output
 
-brain_template_id_tag = NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainTemplateDataLayer"]["average_template_25"]
-brain_template_id = brain_template_id_tag.split("?tag=")[0]
+brain_template_id = NEXUS_IDS["VolumetricDataLayer"][RESOLUTION]["BrainTemplateDataLayer"]["average_template_25"]
 
 ##>fetch_brain_template : fetch the CCF v3 brain average template volume in the given resolution
 rule fetch_brain_template:
     output:
         f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['average_template_25']}"
     params:
-        nexus_id=brain_template_id_tag,
+        nexus_id=brain_template_id,
         app=APPS["bba-data-fetch"],
         token = myTokenFetcher.get_access_token()
     log:

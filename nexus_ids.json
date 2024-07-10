@@ -36,7 +36,7 @@
         "corrected_nissl": "https://bbp.epfl.ch/neurosciencegraph/data/35cb6642-db10-49e9-8f9c-46be17a9c376?tag=v1.0.0"
       },
       "BrainTemplateDataLayer": {
-        "average_template_25": "https://bbp.epfl.ch/neurosciencegraph/data/dca40f99-b494-4d2c-9a2f-c407180138b7?tag=v0.1.1"
+        "average_template_25": "https://bbp.epfl.ch/neurosciencegraph/data/dca40f99-b494-4d2c-9a2f-c407180138b7"
       },
       "GeneExpressionVolumetricDataLayer": {
         "aldh1l1": "https://bbp.epfl.ch/neurosciencegraph/data/9e2c3aa7-3b19-4da6-9623-f864368326e6?tag=v1.0.0",
