@@ -118,7 +118,11 @@ def synch_resource(res_id_tag, forge_prod, res_name, staging_env):
     print(f"\t\tRetrieving Resource for '{res_name}' (Nexus id: '{res_id}', at tag '{res_tag}) {nexus_staging_string}")
     res_staging = forge_staging.retrieve(res_id, version=res_tag)
     if not res_staging:
-        raise Exception(f"\t\tNo Resource with id '{res_id}' and tag '{res_tag}' found {nexus_staging_string}")
+        if res_name in ["brain_realigned"]:
+            print("\t\tIgnoring Resource")
+            return
+        else:
+            raise Exception(f"\t\tNo Resource with id '{res_id}' and tag '{res_tag}' found {nexus_staging_string}")
 
     print("\t\tSynchronize Resource distribution")
     if not hasattr(res_staging.distribution.atLocation, "location"):

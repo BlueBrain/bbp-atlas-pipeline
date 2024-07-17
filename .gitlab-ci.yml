@@ -136,6 +136,8 @@ nexus-synchronization:
   stage: nexus_synchronization
   extends:
     - .deploy_rules
+  tags:
+    - bb5_map
   variables:
     NEXUS_STAGING_TOKEN: '$NEXUS_STAGING_TOKEN'
     NEXUS_IDS_PATH: "nexus_ids.json"
@@ -143,13 +145,19 @@ nexus-synchronization:
     FILE_NEXUS_ID_MAP: "file_nexus_map.json"
   before_script:
     - !reference [.git_setup]
-    - git checkout $DEV_BRANCH
+    #- git checkout $DEV_BRANCH
   script:
+    - module load unstable python/3.9.18
+    - python3.9 -m venv venv_python3.9
+    - source venv_python3.9/bin/activate
     - pip install "nexusforge>=0.8.2"
     - python synch_nexus.py
-    - git add $NEXUS_IDS_PATH $METADATA_DIR/$FILE_NEXUS_ID_MAP
-    - git diff-index --quiet HEAD  ||  git commit -m "Update $NEXUS_IDS_PATH"
-    - git push gitlab $DEV_BRANCH
+  after_script:
+    if [ $CI_COMMIT_BRANCH == $DEV_BRANCH ]; then
+      git add $NEXUS_IDS_PATH $METADATA_DIR/$FILE_NEXUS_ID_MAP
+      git diff-index --quiet HEAD  ||  git commit -m "Update $NEXUS_IDS_PATH"
+      git push gitlab $DEV_BRANCH
+    fi
   allow_failure: true
 
 # Build image for pipeline
