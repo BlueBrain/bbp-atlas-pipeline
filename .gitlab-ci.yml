@@ -145,7 +145,6 @@ nexus-synchronization:
     FILE_NEXUS_ID_MAP: "file_nexus_map.json"
   before_script:
     - !reference [.git_setup]
-    #- git checkout $DEV_BRANCH
   script:
     - module load unstable python/3.9.18
     - python3.9 -m venv venv_python3.9
@@ -153,11 +152,13 @@ nexus-synchronization:
     - pip install "nexusforge>=0.8.2"
     - python synch_nexus.py
   after_script:
-    if [ $CI_COMMIT_BRANCH == $DEV_BRANCH ]; then
-      git add $NEXUS_IDS_PATH $METADATA_DIR/$FILE_NEXUS_ID_MAP
-      git diff-index --quiet HEAD  ||  git commit -m "Update $NEXUS_IDS_PATH"
-      git push gitlab $DEV_BRANCH
-    fi
+    - |- 
+      if [ $CI_COMMIT_BRANCH == $DEV_BRANCH ]; then
+        git checkout --track gitlab/$DEV_BRANCH
+        git add $NEXUS_IDS_PATH $METADATA_DIR/$FILE_NEXUS_ID_MAP
+        git diff-index --quiet HEAD  ||  git commit -m "Update $NEXUS_IDS_PATH"
+        git push gitlab $DEV_BRANCH
+      fi
   allow_failure: true
 
 # Build image for pipeline
@@ -254,9 +255,10 @@ run_pipeline:
     - bbp-atlas  --target-rule $TARGET_RULE  --user-config-path $CUSTOM_PIPELINE/user_config.json  --repo-path $PIPELINE_REPO  --service-token  --token-username $SERVICE_TOKEN_USERNAME  --token-password $SERVICE_TOKEN_PASSWORD  --snakemake-options '--configfile $PIPELINE_REPO/config.yaml  --config $SERVICE_TOKEN_SETTINGS WORKING_DIR=$PIPELINE_OUTPUT IS_PROD_ENV=$IS_PROD_ENV EXPORT_MESHES=$EXPORT_MESHES RESOURCE_TAG=$RESOURCE_TAG NEXUS_REGISTRATION=$NEXUS_REGISTRATION  --cores $SNAKEMAKE_CORES'
     - EOF
   after_script:
-    if [ ! -z "$CI_COMMIT_TAG" ]; then
-      ln -s $PIPELINE_OUTPUT $PIPELINE_RUNS/$CI_COMMIT_TAG
-    fi
+    - |- 
+      if [ ! -z "$CI_COMMIT_TAG" ]; then
+        ln -s $PIPELINE_OUTPUT $PIPELINE_RUNS/$CI_COMMIT_TAG
+      fi
   timeout: 8 hours
   variables:
     PIPELINE_REPO: /pipeline/$CI_PROJECT_NAME  # set in the Dockerfile
