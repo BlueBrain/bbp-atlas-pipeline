@@ -64,7 +64,7 @@
   },
   "metadata": {
     "regions_layers_map": "https://bbp.epfl.ch/data/bbp/atlas/dc319646-fc39-4cf2-aa87-d2e885b9a14e?tag=v0.1.0",
-    "isocortex": "https://bbp.epfl.ch/neurosciencegraph/data/6a593672-9e7d-45aa-8740-19d79da9b3d3?tag=v0.2.0",
+    "isocortex": "https://bbp.epfl.ch/neurosciencegraph/data/6a593672-9e7d-45aa-8740-19d79da9b3d3?tag=v0.2.1",
     "isocortex_23": "https://bbp.epfl.ch/neurosciencegraph/data/6b711d4c-ff0b-4e87-89b7-5390fc0fc4d0?tag=v0.1.2",
     "regions_configuration": "https://bbp.epfl.ch/data/bbp/atlas/d5c83a1f-222d-4b15-a18d-cc66de3dc548?tag=v0.2.0",
     "measurements": "https://bbp.epfl.ch/neurosciencegraph/data/ff5eb1d8-d085-47fb-9951-a3d331c2cfa8?tag=v1.0.0",
