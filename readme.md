@@ -432,22 +432,20 @@ It is possible to override the config variables at runtime using the snakemake a
 `--config <VAR_NAME>=<VALUE>`
 
 ### Additional information
+The release notes are available [here](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/-/blob/develop/doc/release_notes.md).
+
 More information about The Blue Brain Atlas Pipeline (BBAP) are available in its [confluence documentation](https://bbpteam.epfl.ch/project/spaces/display/BBKG/Atlas+Pipeline).  
 This space contains several documentation pages describing:  
 The Allen Mouse CCF Compatible Data : [https://bbpteam.epfl.ch/project/spaces/display/BBKG/Allen+Mouse+CCF+Compatible+Data](https://bbpteam.epfl.ch/project/spaces/display/BBKG/Allen+Mouse+CCF+Compatible+Data)   
 The Atlas Modules : [https://bbpteam.epfl.ch/project/spaces/display/BBKG/Atlas+Modules](https://bbpteam.epfl.ch/project/spaces/display/BBKG/Atlas+Modules)
 
 
-## Authors and Contributors
+## Funding & Acknowledgment
+The development of this software was supported by funding to the Blue Brain Project, a 
+research center of the École polytechnique fédérale de Lausanne (EPFL), from the Swiss 
+government’s ETH Board of the Swiss Federal Institutes of Technology.
 
-* Leonardo Cristella: <leonardo.cristella@epfl.ch>
-* Nabil Alibou: <nabil.alibou@epfl.ch>
-* Jonathan Lurie: <jonathan.lurie@epfl.ch>
-
-The BBAP is currently maintained by the BlueBrain DKE team: <bbp-ou-dke@groupes.epfl.ch>.
-If you face any issue using the BBAP, please send an e-mail to one of the contributors.
-
-The release notes are available [here](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/-/blob/develop/doc/release_notes.md).
+Copyright © 2020-2024 Blue Brain Project/EPFL
 
 
 ## Appendix
