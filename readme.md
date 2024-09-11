@@ -3,9 +3,9 @@
 ## Table of Contents
 - [**Introduction**](#introduction)
 - [**Installation**](#installation)
+  - [Git repository](#git-repository)
   - [Singularity image on BB5](#singularity-image-on-bb5)
   - [Docker image](#docker-image)
-  - [Git repository](#git-repository)
 - [**Run the pipeline**](#run-the-pipeline)
   - [Running the reference Atlas pipeline](#running-the-reference-atlas-pipeline)
   - [Customize a pipeline rule](#customize-a-pipeline-rule)
@@ -16,6 +16,7 @@
   - [Additional information](#additional-information)
 - [**Appendix**](#appendix)
   - [Placement hints data catalog json format](#placement-hints-data-catalog-json-format)
+- [**Acknowledgment**](#funding--acknowledgment)
 
 
 ## Introduction
@@ -33,9 +34,9 @@ To view the command for creating the Atlas as it is pushed to Nexus and consumed
 ## Installation
 
 The Blue Brain Atlas Pipeline (BBAP) can be installed in three different ways:
+- via this [Git repository](#git-repository),
 - via a [Singularity image](#singularity-image-on-bb5) (recommended),
-- via a [Docker image](#docker-image),
-- via this [Git repository](#git-repository).
+- via a [Docker image](#docker-image).
 
 For computation time reason and ease of installation, it is recommended to run the pipeline 
 on the BB5 cluster via the Singularity image described [hereafter](#singularity-image-on-bb5).
@@ -44,6 +45,44 @@ You can log in to the cluster with
 and your Gaspar password, or via the [OpenOnDemand service](https://bbpteam.epfl.ch/project/spaces/display/SDKB/JupyterHub+on+BB5).
 
 Once the installation step is completed, go to [Run the pipeline](#run-the-pipeline) for the instructions to run the pipeline.
+
+### Git repository
+The BBAP can be installed directly from the `setup.py` file available in this repository:
+
+1. `git clone https://github.com/BlueBrain/bbp-atlas-pipeline.git`
+2. `pip install blue_brain_atlas_pipeline/`
+3. `cd blue_brain_atlas_pipeline`
+
+#### Dependencies
+Each package run as part of the pipeline is considered a pipeline dependency:
+
+- [token-fetch](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_token_fetch)
+- [nexusforge](https://github.com/BlueBrain/nexus-forge)
+- [bba-datafetch](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-fetch)
+- [atlas-direction-vectors](https://github.com/BlueBrain/atlas-direction-vectors)
+- [atlas-splitter](https://github.com/BlueBrain/atlas-splitter)
+- [atlas-placement-hints](https://github.com/BlueBrain/atlas-placement-hints)
+- [atlas-densities](https://github.com/BlueBrain/atlas-densities)
+- [parcellationexport](https://bbpteam.epfl.ch/project/spaces/display/BBKG/parcellationexport)
+- [bba-data-integrity-check](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-check)
+- [bba-data-push](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-push)
+
+On BB5, most packages are available also as modules:
+```
+module load unstable \
+snakemake \
+py-token-fetch \
+py-nexusforge \
+py-bba-datafetch \
+py-atlas-building-tools \
+py-bba-webexporter \
+py-data-integrity-check \
+py-bba-data-push
+```
+Or they can be installed following the ‘Installation’ section in their Confluence documentation page.
+
+Now you can go to [Run the pipeline](#run-the-pipeline) for the instructions to run the pipeline.
+
 
 ### Singularity image on BB5
 A Singularity image (created from the [Docker image](#docker-image)) is available on BB5 in:  
@@ -81,44 +120,6 @@ or converted into an **Apptainer** image with
 
 A benchmark of the resources to provision as required by the different pipeline steps 
 is available [here](#profiling).
-
-Now you can go to [Run the pipeline](#run-the-pipeline) for the instructions to run the pipeline.
-
-
-### Git repository
-The BBAP can be installed directly from the `setup.py` file available in this repository:
-
-1. `git clone https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline.git`
-2. `pip install blue_brain_atlas_pipeline/`
-3. `cd blue_brain_atlas_pipeline`
-
-#### Dependencies
-Each package run as part of the pipeline is considered a pipeline dependency:
-
-- [token-fetch](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_token_fetch)
-- [nexusforge](https://github.com/BlueBrain/nexus-forge)
-- [bba-datafetch](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-fetch)
-- [atlas-direction-vectors](https://github.com/BlueBrain/atlas-direction-vectors)
-- [atlas-splitter](https://github.com/BlueBrain/atlas-splitter)
-- [atlas-placement-hints](https://github.com/BlueBrain/atlas-placement-hints)
-- [atlas-densities](https://github.com/BlueBrain/atlas-densities)
-- [parcellationexport](https://bbpteam.epfl.ch/project/spaces/display/BBKG/parcellationexport)
-- [bba-data-integrity-check](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-check)
-- [bba-data-push](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-push)
-
-On BB5, most packages are available also as modules:
-```
-module load unstable \
-snakemake \
-py-token-fetch \
-py-nexusforge \
-py-bba-datafetch \
-py-atlas-building-tools \
-py-bba-webexporter \
-py-data-integrity-check \
-py-bba-data-push
-```
-Or they can be installed following the ‘Installation’ section in their Confluence documentation page.
 
 Now you can go to [Run the pipeline](#run-the-pipeline) for the instructions to run the pipeline.
 
@@ -440,14 +441,6 @@ The Allen Mouse CCF Compatible Data : [https://bbpteam.epfl.ch/project/spaces/di
 The Atlas Modules : [https://bbpteam.epfl.ch/project/spaces/display/BBKG/Atlas+Modules](https://bbpteam.epfl.ch/project/spaces/display/BBKG/Atlas+Modules)
 
 
-## Funding & Acknowledgment
-The development of this software was supported by funding to the Blue Brain Project, a 
-research center of the École polytechnique fédérale de Lausanne (EPFL), from the Swiss 
-government’s ETH Board of the Swiss Federal Institutes of Technology.
-
-Copyright © 2020-2024 Blue Brain Project/EPFL
-
-
 ## Appendix
 
 ### Brain region layers
@@ -558,3 +551,11 @@ as follows:
   }
 }
 ```
+
+
+## Funding & Acknowledgment
+The development of this software was supported by funding to the Blue Brain Project, a 
+research center of the École polytechnique fédérale de Lausanne (EPFL), from the Swiss 
+government’s ETH Board of the Swiss Federal Institutes of Technology.
+
+Copyright © 2020-2024 Blue Brain Project/EPFL
