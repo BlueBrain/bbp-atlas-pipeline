@@ -1524,7 +1524,8 @@ rule excitatory_split:
         hierarchy = hierarchy_v3,
         annotation = annotation_v3,
         neuron_density = neuron_density,
-        mapping_cortex_all_to_exc_mtypes = rules.fetch_mapping_cortex_all_to_exc_mtypes.output
+        mapping_cortex_all_to_exc_mtypes = rules.fetch_mapping_cortex_all_to_exc_mtypes.output,
+        metadata = rules.fetch_isocortex_metadata.output
     output:
         directory(f"{PUSH_DATASET_CONFIG_FILE['GeneratedDatasetPath']['VolumetricFile']['excitatory_split']}")
     params:
@@ -1538,6 +1539,7 @@ rule excitatory_split:
             --neuron-density {input.neuron_density} \
             --inhibitory-density """ + marker_density_map["gad67"] + """ \
             --cortex-all-to-exc-mtypes {input.mapping_cortex_all_to_exc_mtypes} \
+            --metadata-path {input.metadata} \
             --output-dir {output} \
             2>&1 | tee {log}
         """
