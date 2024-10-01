@@ -110,6 +110,7 @@ update_dags:
           - snakefile
         #compare_to: 'refs/heads/develop'
       when: manual
+    - when: manual
   before_script:
     - apt update
     - apt-get -y install graphviz

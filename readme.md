@@ -95,8 +95,7 @@ The folder contains
 
 One can spawn the corresponding container with (example with dev) 
 1. `module load unstable singularityce`
-2. `singularity shell /gpfs/bbp.cscs.ch/data/project/proj84/atlas_singularity_images/blue_brain_atlas_pipeline_dev.sif`
-
+2. `singularity shell /gpfs/bbp.cscs.ch/data/project/proj84/atlas_singularity_images/blue_brain_atlas_pipeline_dev.sif`  
 and run the following commands to copy the pipeline files in a path (e.g `$HOME`) where snakemake can write:  
 3. `cp -r /pipeline/blue_brain_atlas_pipeline $HOME`  
 4. `cd blue_brain_atlas_pipeline`  
