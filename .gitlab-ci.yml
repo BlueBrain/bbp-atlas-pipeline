@@ -23,6 +23,7 @@ variables:
   DAG_DIR: "$DOC_DIR/source/figures"
   DOC: "generated/html"
   DEV_BRANCH: "develop"
+  REPO_PUSH_TOKEN: $REPO_PUSH_TOKEN
   COMMIT_SHA: $CI_COMMIT_SHA
   FINAL_PIPELINE_STEP: "push_atlas_datasets"
   PROJ84_GPFS: "/gpfs/bbp.cscs.ch/data/project/proj84"
@@ -75,6 +76,7 @@ variables:
     - export SSL_CERT_FILE=$CA_BUNDLE
 
 .git_setup:
+  - echo "REPO_PUSH_TOKEN = $REPO_PUSH_TOKEN"
   - git remote add gitlab https://$REPO_PUSH_TOKEN@bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline
   - git fetch gitlab $DEV_BRANCH
   - git config user.name "$COMMIT_SHA"
