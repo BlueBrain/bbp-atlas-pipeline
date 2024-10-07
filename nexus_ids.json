@@ -72,11 +72,11 @@
     "realigned_slices": "https://bbp.epfl.ch/neurosciencegraph/data/ab591ed4-3377-43c1-9038-253eeb107dc9?tag=v0.1.1",
     "std_cells": "https://bbp.epfl.ch/neurosciencegraph/data/09e98630-78d1-4595-bf48-8631dd0bafbd?tag=v0.1.1",
     "mapping_cortex_all_to_exc_mtypes": "https://bbp.epfl.ch/neurosciencegraph/data/6419ac24-9d62-494f-b405-56f00743fcde?tag=v0.2.0",
-    "probability_map_L1": "https://bbp.epfl.ch/data/bbp/atlas/9fd549be-28ec-4575-8cfb-845e0a53757b?tag=v0.1.0",
-    "probability_map_L23": "https://bbp.epfl.ch/data/bbp/atlas/d1784af1-f5d5-4a28-bc56-fcfdbc5b2787?tag=v0.1.1",
-    "probability_map_L4": "https://bbp.epfl.ch/data/bbp/atlas/c3e00c57-e400-481b-8da8-9b0dbb497b41?tag=v0.1.0",
-    "probability_map_L5": "https://bbp.epfl.ch/data/bbp/atlas/750e0aa9-d511-4042-bd7a-cac34ca5600d?tag=v0.1.0",
-    "probability_map_L6": "https://bbp.epfl.ch/data/bbp/atlas/233213c4-3fd6-46b6-ab4a-b967b639d741?tag=v0.1.0",
-    "probability_map_TH_INH": "https://bbp.epfl.ch/data/bbp/atlas/7271c82d-c207-44de-89e0-87d5d66720f3?tag=v0.5.0"
+    "probability_map_L1": "https://bbp.epfl.ch/data/bbp/atlas/9fd549be-28ec-4575-8cfb-845e0a53757b?tag=v0.2.0",
+    "probability_map_L23": "https://bbp.epfl.ch/data/bbp/atlas/d1784af1-f5d5-4a28-bc56-fcfdbc5b2787?tag=v0.2.0",
+    "probability_map_L4": "https://bbp.epfl.ch/data/bbp/atlas/c3e00c57-e400-481b-8da8-9b0dbb497b41?tag=v0.2.0",
+    "probability_map_L5": "https://bbp.epfl.ch/data/bbp/atlas/750e0aa9-d511-4042-bd7a-cac34ca5600d?tag=v0.2.0",
+    "probability_map_L6": "https://bbp.epfl.ch/data/bbp/atlas/233213c4-3fd6-46b6-ab4a-b967b639d741?tag=v0.2.0",
+    "probability_map_TH_INH": "https://bbp.epfl.ch/data/bbp/atlas/7271c82d-c207-44de-89e0-87d5d66720f3?tag=v0.6.0"
   }
 }
