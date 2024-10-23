@@ -1,4 +1,4 @@
-region,molecular_type,synapse_class,Rt_RC|TH_cAD-noscltb,Rt_RC|TH_cNAD-noscltb,VPL_IN|TH_bAC
+region,molecular_type,synapse_class,Rt_RC|TH_cAD_noscltb,Rt_RC|TH_cNAD_noscltb,VPL_IN|TH_bAC
 AD,gad67,INH,0,0,1
 AMd,gad67,INH,0,0,1
 AMv,gad67,INH,0,0,1

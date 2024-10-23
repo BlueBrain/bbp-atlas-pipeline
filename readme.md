@@ -3,9 +3,9 @@
 ## Table of Contents
 - [**Introduction**](#introduction)
 - [**Installation**](#installation)
+  - [Git repository](#git-repository)
   - [Singularity image on BB5](#singularity-image-on-bb5)
   - [Docker image](#docker-image)
-  - [Git repository](#git-repository)
 - [**Run the pipeline**](#run-the-pipeline)
   - [Running the reference Atlas pipeline](#running-the-reference-atlas-pipeline)
   - [Customize a pipeline rule](#customize-a-pipeline-rule)
@@ -16,6 +16,7 @@
   - [Additional information](#additional-information)
 - [**Appendix**](#appendix)
   - [Placement hints data catalog json format](#placement-hints-data-catalog-json-format)
+- [**Acknowledgment**](#funding--acknowledgment)
 
 
 ## Introduction
@@ -33,9 +34,9 @@ To view the command for creating the Atlas as it is pushed to Nexus and consumed
 ## Installation
 
 The Blue Brain Atlas Pipeline (BBAP) can be installed in three different ways:
+- via this [Git repository](#git-repository),
 - via a [Singularity image](#singularity-image-on-bb5) (recommended),
-- via a [Docker image](#docker-image),
-- via this [Git repository](#git-repository).
+- via a [Docker image](#docker-image).
 
 For computation time reason and ease of installation, it is recommended to run the pipeline 
 on the BB5 cluster via the Singularity image described [hereafter](#singularity-image-on-bb5).
@@ -45,50 +46,10 @@ and your Gaspar password, or via the [OpenOnDemand service](https://bbpteam.epfl
 
 Once the installation step is completed, go to [Run the pipeline](#run-the-pipeline) for the instructions to run the pipeline.
 
-### Singularity image on BB5
-A Singularity image (created from the [Docker image](#docker-image)) is available on BB5 in:  
-`/gpfs/bbp.cscs.ch/data/project/proj84/atlas_singularity_images/`
-
-The folder contains
-- `blue_brain_atlas_pipeline_dev.sif`: development image regularly updated,
-- `blue_brain_atlas_pipeline_<tag>.sif`: production image corresponding to a repository [tag](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/-/tags)
-  (such as `v0.5.2`).
-
-One can spawn the corresponding container with (example with dev) 
-1. `module load unstable singularityce`
-2. `singularity shell /gpfs/bbp.cscs.ch/data/project/proj84/atlas_singularity_images/blue_brain_atlas_pipeline_dev.sif`
-
-and run the following commands to copy the pipeline files in a path (e.g `$HOME`) where snakemake can write:  
-3. `cp -r /pipeline/blue_brain_atlas_pipeline $HOME`  
-4. `cd blue_brain_atlas_pipeline`  
-
-Now you can go to [Run the pipeline](#run-the-pipeline) for the instructions to run the pipeline.
-
-
-### Docker image
-A [Docker](https://docs.docker.com/reference) image containing all the pipeline dependencies is available in the Git [registry](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/container_registry/159):  
-`bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:<tag>`  
-where `<tag>` = `dev` or a repository tag. 
-
-It can be pulled and run with  
-1. `docker login bbpgitlab.epfl.ch:5050 -u <your-Gaspar-username> -p <your-Gaspar-password>`
-2. `docker pull bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:<tag>`
-3. `docker run -it bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:<tag> bash`
-4. `cd blue_brain_atlas_pipeline`
-
-or converted into an **Apptainer** image with  
-`apptainer pull --docker-login docker://bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:<tag>`
-
-A benchmark of the resources to provision as required by the different pipeline steps 
-is available [here](#profiling).
-
-Now you can go to [Run the pipeline](#run-the-pipeline) for the instructions to run the pipeline.
-
-
 ### Git repository
 The BBAP can be installed directly from the `setup.py` file available in this repository:
 
-1. `git clone https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline.git`
+1. `git clone https://github.com/BlueBrain/bbp-atlas-pipeline.git`
 2. `pip install blue_brain_atlas_pipeline/`
 3. `cd blue_brain_atlas_pipeline`
 
@@ -119,6 +80,45 @@ py-data-integrity-check \
 py-bba-data-push
 ```
 Or they can be installed following the ‘Installation’ section in their Confluence documentation page.
+
+Now you can go to [Run the pipeline](#run-the-pipeline) for the instructions to run the pipeline.
+
+
+### Singularity image on BB5
+A Singularity image (created from the [Docker image](#docker-image)) is available on BB5 in:  
+`/gpfs/bbp.cscs.ch/data/project/proj84/atlas_singularity_images/`
+
+The folder contains
+- `blue_brain_atlas_pipeline_dev.sif`: development image regularly updated,
+- `blue_brain_atlas_pipeline_<tag>.sif`: production image corresponding to a repository [tag](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/-/tags)
+  (such as `v0.5.2`).
+
+One can spawn the corresponding container with (example with dev) 
+1. `module load unstable singularityce`
+2. `singularity shell /gpfs/bbp.cscs.ch/data/project/proj84/atlas_singularity_images/blue_brain_atlas_pipeline_dev.sif`  
+and run the following commands to copy the pipeline files in a path (e.g `$HOME`) where snakemake can write:  
+3. `cp -r /pipeline/blue_brain_atlas_pipeline $HOME`  
+4. `cd blue_brain_atlas_pipeline`  
+
+Now you can go to [Run the pipeline](#run-the-pipeline) for the instructions to run the pipeline.
+
+
+### Docker image
+A [Docker](https://docs.docker.com/reference) image containing all the pipeline dependencies is available in the Git [registry](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/container_registry/159):  
+`bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:<tag>`  
+where `<tag>` = `dev` or a repository tag. 
+
+It can be pulled and run with  
+1. `docker login bbpgitlab.epfl.ch:5050 -u <your-Gaspar-username> -p <your-Gaspar-password>`
+2. `docker pull bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:<tag>`
+3. `docker run -it bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:<tag> bash`
+4. `cd blue_brain_atlas_pipeline`
+
+or converted into an **Apptainer** image with  
+`apptainer pull --docker-login docker://bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:<tag>`
+
+A benchmark of the resources to provision as required by the different pipeline steps 
+is available [here](#profiling).
 
 Now you can go to [Run the pipeline](#run-the-pipeline) for the instructions to run the pipeline.
 
@@ -432,22 +432,12 @@ It is possible to override the config variables at runtime using the snakemake a
 `--config <VAR_NAME>=<VALUE>`
 
 ### Additional information
+The release notes are available [here](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/-/blob/develop/doc/release_notes.md).
+
 More information about The Blue Brain Atlas Pipeline (BBAP) are available in its [confluence documentation](https://bbpteam.epfl.ch/project/spaces/display/BBKG/Atlas+Pipeline).  
 This space contains several documentation pages describing:  
 The Allen Mouse CCF Compatible Data : [https://bbpteam.epfl.ch/project/spaces/display/BBKG/Allen+Mouse+CCF+Compatible+Data](https://bbpteam.epfl.ch/project/spaces/display/BBKG/Allen+Mouse+CCF+Compatible+Data)   
 The Atlas Modules : [https://bbpteam.epfl.ch/project/spaces/display/BBKG/Atlas+Modules](https://bbpteam.epfl.ch/project/spaces/display/BBKG/Atlas+Modules)
-
-
-## Authors and Contributors
-
-* Leonardo Cristella: <leonardo.cristella@epfl.ch>
-* Nabil Alibou: <nabil.alibou@epfl.ch>
-* Jonathan Lurie: <jonathan.lurie@epfl.ch>
-
-The BBAP is currently maintained by the BlueBrain DKE team: <bbp-ou-dke@groupes.epfl.ch>.
-If you face any issue using the BBAP, please send an e-mail to one of the contributors.
-
-The release notes are available [here](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/-/blob/develop/doc/release_notes.md).
 
 
 ## Appendix
@@ -560,3 +550,11 @@ as follows:
   }
 }
 ```
+
+
+## Funding & Acknowledgment
+The development of this software was supported by funding to the Blue Brain Project, a 
+research center of the École polytechnique fédérale de Lausanne (EPFL), from the Swiss 
+government’s ETH Board of the Swiss Federal Institutes of Technology.
+
+Copyright © 2020-2024 Blue Brain Project/EPFL

@@ -1,5 +1,15 @@
 # Release Notes
 
+## v1.2.0
+### New features
+- Apply open-source guidelines
+- Add Download_Atlas notebook
+### Enhancements
+- Add `tag` metadata to the `atlasRelease` property of Atlas Resources
+- Update probability maps to populate barrel layers in densities
+### Bug fixes
+- Correctly filter barrel-split region acronyms in PHs
+
 ## v1.1.0
 ### Enhancements
 - Add `tag` metadata to the `atlasRelease` property of Atlas Resources ([MR](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_nexus_push/-/merge_requests/56)) 

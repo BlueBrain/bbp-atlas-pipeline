@@ -8,7 +8,7 @@
     },
     "layers": {
         "names": ["layer_1", "layer_2", "layer_3", "layer_4", "layer_5", "layer_6"],
-        "queries": ["@^(?!SSp-bfd-[A-Z][0-9]$).*1$", "@^(?!SSp-bfd-[A-Z][0-9]$).*2$", "@^(?!SSp-bfd-[A-Z][0-9]$).*3$", "@^(?!SSp-bfd-[A-Z][0-9]$).*4$", "@^(?!SSp-bfd-[A-Z][0-9]$).*5$", "@^(?!SSp-bfd-[A-Z][0-9]$).*6[ab]$"],
+        "queries": ["@^(?!SSp-bfd-[A-Z][0-9]$).*1$", "@^(?!SSp-bfd-[A-Z][0-9]$).*2$", "@^(?!SSp-bfd-[A-Z][0-9]$).*[^/]3$", "@^(?!SSp-bfd-[A-Z][0-9]$).*4$", "@^(?!SSp-bfd-[A-Z][0-9]$).*5$", "@^(?!SSp-bfd-[A-Z][0-9]$).*6[ab]?$"],
         "attribute": "acronym",
         "with_descendants": true
     }

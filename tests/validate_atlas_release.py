@@ -14,7 +14,7 @@ nexus_token = os.environ["NEXUS_TOKEN"]
 is_prod_env = os.environ.get("IS_PROD_ENV", False)
 nexus_tag = os.environ["RESOURCE_TAG"]
 if not nexus_tag:
-    nexus_tag = "v1.0.0"
+    nexus_tag = "v1.1.0"
 
 pipeline_config = yaml.safe_load(open("config.yaml").read().strip())
 if is_prod_env:
