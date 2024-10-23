@@ -83,7 +83,7 @@ variables:
 
 .load_singularity_module:
   - echo "Load the singularity module:"
-  - module load unstable singularityce
+  - module load archive/2024-08 singularityce
 
 
 unit_test:
