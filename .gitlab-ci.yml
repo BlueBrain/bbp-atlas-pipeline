@@ -242,8 +242,6 @@ run_pipeline:
     run-pipeline
   extends:
     - .deploy_rules_manual
-  needs:
-    - convert_and_deploy
   tags:
     - bb5_map
   before_script:
@@ -253,12 +251,12 @@ run_pipeline:
     - set -e
     - export PYTHONPATH=$PIPELINE_REPO:$PYTHONPATH
     - snakemake  --snakefile $CUSTOM_PIPELINE/custom_snakefile  --configfile $PIPELINE_REPO/config.yaml  --config TARGET_RULE=$TARGET_RULE USER_CONFIG=$CUSTOM_PIPELINE/user_config.json REPO_PATH=$PIPELINE_REPO $SERVICE_TOKEN_SETTINGS  --unlock   # in case a previous pipeline failed ("the remaining lock was likely caused by a kill signal or a power loss")
-    - bbp-atlas  --target-rule $TARGET_RULE  --user-config-path $CUSTOM_PIPELINE/user_config.json  --repo-path $PIPELINE_REPO  --service-token  --token-username $SERVICE_TOKEN_USERNAME  --token-password $SERVICE_TOKEN_PASSWORD  --snakemake-options '--configfile $PIPELINE_REPO/config.yaml  --config $SERVICE_TOKEN_SETTINGS WORKING_DIR=$PIPELINE_OUTPUT IS_PROD_ENV=$IS_PROD_ENV EXPORT_MESHES=$EXPORT_MESHES RESOURCE_TAG=$RESOURCE_TAG NEXUS_REGISTRATION=$NEXUS_REGISTRATION  --cores $SNAKEMAKE_CORES'
+    - bbp-atlas  --target-rule $TARGET_RULE  --user-config-path $CUSTOM_PIPELINE/user_config.json  --repo-path $PIPELINE_REPO  --service-token  --token-username $SERVICE_TOKEN_USERNAME  --token-password $SERVICE_TOKEN_PASSWORD  --snakemake-options '--configfile $PIPELINE_REPO/config.yaml  --config $SERVICE_TOKEN_SETTINGS WORKING_DIR=$PIPELINE_OUTPUT IS_PROD_ENV=$IS_PROD_ENV EXPORT_MESHES=$EXPORT_MESHES RESOURCE_TAG=$RESOURCE_TAG NEXUS_REGISTRATION=$NEXUS_REGISTRATION  --cores $SNAKEMAKE_CORES  $EXTRA_SNAKEMAKE_OPTIONS'
     - EOF
   after_script:
     - |- 
       if [ ! -z "$CI_COMMIT_TAG" ]; then
-        ln -s $PIPELINE_OUTPUT $PIPELINE_RUNS/$CI_COMMIT_TAG
+        ln -s -r $PIPELINE_OUTPUT $PIPELINE_RUNS/$CI_COMMIT_TAG
       fi
   timeout: 8 hours
   variables:
