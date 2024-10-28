@@ -242,6 +242,7 @@ run_pipeline:
     run-pipeline
   extends:
     - .deploy_rules_manual
+  needs: []  # Allows the job to start without waiting for prior stages
   tags:
     - bb5_map
   before_script:
