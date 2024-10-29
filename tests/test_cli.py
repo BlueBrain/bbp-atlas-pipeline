@@ -20,10 +20,5 @@ def test_cli():
         lines = result.splitlines()
         for line in lines:
             if line.startswith("total"):
-                if total in line:
-                    # Found the expected total number of rules
-                    break
-                else:
-                    print(f"Unexpected total number of rules for '{rule}':")
-                    print(result)
-                    assert False
+                assert total in line, (f"Unexpected total number of rules for '{rule}' (expected: {total}):\n"
+                                       f"{result}")

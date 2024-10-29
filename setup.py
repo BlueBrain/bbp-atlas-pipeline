@@ -21,12 +21,11 @@ setup(
         "voxcell",
         "pulp==2.7.0",  # snakemake 7.32.3 breaks with pulp==2.8.0
         "snakemake==7.32.3",
-        "blue-brain-token-fetch>=1.0.0",
         "blue-cwl",
         "python-gitlab"
     ],
     extras_require={
-        "dev": ["pytest>=4.3", "pytest-cov>=2.8.0"],
+        "dev": ["pytest>=4.3", "pytest-cov>=2.8.0", "blue-brain-token-fetch>=1.0.0"],
         "docs": ["sphinx==7.1.2", "sphinx-bluebrain-theme", "myst-parser"]
     },
     packages=find_packages(),
