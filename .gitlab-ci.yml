@@ -90,7 +90,7 @@ unit_test:
   stage: unit-test
   extends: .unit-tests
   before_script:
-    - pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ .[dev]
+    - pip install .[dev]
     - export PYTHONPATH=.:$PYTHONPATH
   script:
     #- !reference [.add_staging_SSL, script]
@@ -114,7 +114,7 @@ update_dags:
   before_script:
     - apt update
     - apt-get -y install graphviz
-    - pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ .[dev]
+    - pip install .[dev]
     - !reference [.git_setup]
   script:
     - git status
@@ -185,7 +185,7 @@ generate-documentation:
         when: on_success
         allow_failure: true
   before_script:
-    - pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ -r requirements_doc.txt
+    - pip install -r requirements_doc.txt
   script: sphinx-build -T --keep-going -b html -c ./$DOC_DIR/source -D language=en ./$DOC_DIR/source $DOC_DIR/$DOC
   artifacts:
     paths:
