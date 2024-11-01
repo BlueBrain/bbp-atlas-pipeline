@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 from setuptools import setup, find_packages
 
+with open("readme.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
+
 setup(
     name="bba_pipeline",
     author="Blue Brain Project, EPFL",
@@ -10,7 +13,10 @@ setup(
         "Package defining a SnakeMake pipeline to create the Blue Brain Atlas datasets"
         "and push them into Nexus."
     ),
-    license="BBP-internal-confidential",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/BlueBrain/bbp-atlas-pipeline",
+    license="Apache-2.0",
     python_requires=">=3.9",
     install_requires=[
         "nexusforge>=0.8.2",
