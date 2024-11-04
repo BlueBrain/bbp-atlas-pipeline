@@ -5,7 +5,7 @@ with open("readme.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="bba_pipeline",
+    name="blue_brain_atlas_pipeline",
     author="Blue Brain Project, EPFL",
     use_scm_version=True,
     setup_requires=["setuptools_scm"],
