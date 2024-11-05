@@ -17,7 +17,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/BlueBrain/bbp-atlas-pipeline",
     license="Apache-2.0",
-    python_requires=">=3.9",
+    python_requires=">=3.10",
     install_requires=[
         "nexusforge>=0.8.2",
         "click>=7.0",
