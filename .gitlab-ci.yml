@@ -278,7 +278,7 @@ validate_atlas_release:
       allow_failure: true
   before_script:
     - pip install "nexusforge>=0.8.1"
-    - pip install -i https://bbpteam.epfl.ch/repository/devpi/simple "bba-data-push>=3.0.1"
+    - pip install "blue-brain-data-push>=3.0.1"
   script:
     python $TEST_FOLDER/validate_atlas_release.py
   variables:
