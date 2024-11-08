@@ -4,7 +4,6 @@
 - [**Introduction**](#introduction)
 - [**Installation**](#installation)
   - [Git repository](#git-repository)
-  - [Singularity image on BB5](#singularity-image-on-bb5)
   - [Docker image](#docker-image)
 - [**Run the pipeline**](#run-the-pipeline)
   - [Running the reference Atlas pipeline](#running-the-reference-atlas-pipeline)
@@ -35,14 +34,7 @@ To view the command for creating the Atlas as it is pushed to Nexus and consumed
 
 The Blue Brain Atlas Pipeline (BBAP) can be installed in three different ways:
 - via this [Git repository](#git-repository),
-- via a [Singularity image](#singularity-image-on-bb5) (recommended),
 - via a [Docker image](#docker-image).
-
-For computation time reason and ease of installation, it is recommended to run the pipeline 
-on the BB5 cluster via the Singularity image described [hereafter](#singularity-image-on-bb5).
-You can log in to the cluster with  
-`ssh -l <your-Gaspar-username> bbpv1.epfl.ch`  
-and your Gaspar password, or via the [OpenOnDemand service](https://bbpteam.epfl.ch/project/spaces/display/SDKB/JupyterHub+on+BB5).
 
 Once the installation step is completed, go to [Run the pipeline](#run-the-pipeline) for the instructions to run the pipeline.
 
@@ -67,55 +59,12 @@ Each package run as part of the pipeline is considered a pipeline dependency:
 - [bba-data-integrity-check](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-check)
 - [bba-data-push](https://bbpteam.epfl.ch/project/spaces/display/BBKG/bba-data-push)
 
-On BB5, most packages are available also as modules:
-```
-module load unstable \
-snakemake \
-py-token-fetch \
-py-nexusforge \
-py-bba-datafetch \
-py-atlas-building-tools \
-py-bba-webexporter \
-py-data-integrity-check \
-py-bba-data-push
-```
-Or they can be installed following the ‘Installation’ section in their Confluence documentation page.
-
-Now you can go to [Run the pipeline](#run-the-pipeline) for the instructions to run the pipeline.
-
-
-### Singularity image on BB5
-A Singularity image (created from the [Docker image](#docker-image)) is available on BB5 in:  
-`/gpfs/bbp.cscs.ch/data/project/proj84/atlas_singularity_images/`
-
-The folder contains
-- `blue_brain_atlas_pipeline_dev.sif`: development image regularly updated,
-- `blue_brain_atlas_pipeline_<tag>.sif`: production image corresponding to a repository [tag](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/-/tags)
-  (such as `v0.5.2`).
-
-One can spawn the corresponding container with (example with dev) 
-1. `module load unstable singularityce`
-2. `singularity shell /gpfs/bbp.cscs.ch/data/project/proj84/atlas_singularity_images/blue_brain_atlas_pipeline_dev.sif`  
-and run the following commands to copy the pipeline files in a path (e.g `$HOME`) where snakemake can write:  
-3. `cp -r /pipeline/blue_brain_atlas_pipeline $HOME`  
-4. `cd blue_brain_atlas_pipeline`  
-
 Now you can go to [Run the pipeline](#run-the-pipeline) for the instructions to run the pipeline.
 
 
 ### Docker image
-A [Docker](https://docs.docker.com/reference) image containing all the pipeline dependencies is available in the Git [registry](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_pipeline/container_registry/159):  
-`bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:<tag>`  
-where `<tag>` = `dev` or a repository tag. 
-
-It can be pulled and run with  
-1. `docker login bbpgitlab.epfl.ch:5050 -u <your-Gaspar-username> -p <your-Gaspar-password>`
-2. `docker pull bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:<tag>`
-3. `docker run -it bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:<tag> bash`
-4. `cd blue_brain_atlas_pipeline`
-
-or converted into an **Apptainer** image with  
-`apptainer pull --docker-login docker://bbpgitlab.epfl.ch:5050/dke/apps/blue_brain_atlas_pipeline:<tag>`
+A [Docker](https://docs.docker.com/reference) image containing all the pipeline dependencies
+can be generated from the [`Dockerfile`](https://github.com/BlueBrain/bbp-atlas-pipeline/blob/develop/Dockerfile) provided in this repository.
 
 A benchmark of the resources to provision as required by the different pipeline steps 
 is available [here](#profiling).
