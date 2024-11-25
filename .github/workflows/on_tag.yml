@@ -31,7 +31,7 @@ jobs:
   deploy_docker_image:
     env:
       CI_REGISTRY_IMAGE: bluebrain/bbp-atlas-pipeline
-      REGISTRY_IMAGE_TAG: ${{ vars.GITHUB_REF_NAME }}
+      REGISTRY_IMAGE_TAG: ${{ GITHUB_REF_NAME }}
       REGISTRY_IMAGE_TAG_: $GITHUB_REF_NAME
     runs-on: ubuntu-latest
     steps:
@@ -45,7 +45,7 @@ jobs:
           password: ${{ secrets.BBPBUILDBOT_DOCKERHUB_PASSWORD }}
 
       - name: debug
-        run: echo "GITHUB_REF_NAME is $GITHUB_REF_NAME (with vars $vars.GITHUB_REF_NAME) and REGISTRY_IMAGE_TAG is $REGISTRY_IMAGE_TAG (_ is $REGISTRY_IMAGE_TAG_). CI_REGISTRY_IMAGE is $CI_REGISTRY_IMAGE"
+        run: echo "GITHUB_REF_NAME is $GITHUB_REF_NAME and REGISTRY_IMAGE_TAG is $REGISTRY_IMAGE_TAG (_ is $REGISTRY_IMAGE_TAG_). CI_REGISTRY_IMAGE is $CI_REGISTRY_IMAGE"
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
