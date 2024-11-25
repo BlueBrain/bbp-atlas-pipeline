@@ -43,8 +43,11 @@ jobs:
           username: ${{ vars.BBPBUILDBOT_DOCKERHUB_USER }}
           password: ${{ secrets.BBPBUILDBOT_DOCKERHUB_PASSWORD }}
 
+      - name: debug
+        run: echo "GITHUB_REF_NAME is $GITHUB_REF_NAME (with vars $vars.GITHUB_REF_NAME) and REGISTRY_IMAGE_TAG is $REGISTRY_IMAGE_TAG"
+
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: $CI_REGISTRY_IMAGE:${{ env.REGISTRY_IMAGE_TAG }}
+          tags: ${{ env.CI_REGISTRY_IMAGE }}:{{ env.REGISTRY_IMAGE_TAG }}
