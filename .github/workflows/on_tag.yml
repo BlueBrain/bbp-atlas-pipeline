@@ -47,4 +47,4 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: "bluebrain/bbp-atlas-pipeline:$REGISTRY_IMAGE_TAG"
+          tags: ${{ bluebrain/bbp-atlas-pipeline:env.REGISTRY_IMAGE_TAG }}
