@@ -1,8 +1,5 @@
 FROM python:3.10-slim
 
-ARG CI_JOB_TOKEN
-ARG BBP_CA_CERT
-
 RUN apt-get update && \
         DEBIAN_FRONTEND="noninteractive" TZ="Europe/Zurich" apt-get install -y tzdata && \
         apt-get install -y --no-install-recommends \
@@ -27,39 +24,25 @@ COPY .. .
 #	export PATH=$PATH:$PWD/build/bin
 
 # Install the pipeline repository (along with the bbp-atlas CLI)
-RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ blue_brain_atlas_pipeline/
+RUN pip install blue_brain_atlas_pipeline/
 
-# For install dependencies
-RUN git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/".insteadOf https://bbpgitlab.epfl.ch/
+# Install dependencies
 
 # module load py-token-fetch
-RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "blue-brain-token-fetch>=1.0.0"
+RUN pip install "blue-brain-token-fetch>=1.0.0"
 
 # module load py-bba-datafetch
-RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "bba-data-fetch>=0.3.0"
-
-# densities validation
-RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "densities-validation>=0.1.1"
-
-# leaves-only
-RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "cell-densities>=0.2.1"
+RUN pip install git+https://github.com/BlueBrain/bbp-atlas-data-fetch.git@v0.3.0
 
 # module load py-bba-webexporter
-RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "blue-brain-atlas-web-exporter>=3.0.0"
-
-# module load py-data-integrity-check
-RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "bba-data-integrity-check>=0.2.0"
+RUN pip install git+https://github.com/BlueBrain/bbp-atlas-web-exporter.git@v3.0.0
 
 RUN pip install blue-cwl
 
 # module load py-bba-data-push
-RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "bba-data-push>=4.3.0"
+RUN pip install "blue-brain-data-push>=4.3.0"
 
-RUN pip install git+https://bbpgitlab.epfl.ch/dke/users/jonathanlurie/atlas_cell_transplant.git@v0.3.1
-
-RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "pipeline-validator>=0.3.1"
-
-RUN git config --global --remove-section url."https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/"
+RUN pip install "bbp-atlas-pipeline-validator>=0.3.1"
 
 RUN pip install "atlas-commons>=0.1.5"
 
@@ -72,3 +55,15 @@ RUN pip install "atlas-placement-hints>=0.1.4"
 RUN pip install "atlas-densities>=0.2.5"
 
 RUN pip install "snakemake==7.32.3"
+
+
+ARG CI_JOB_TOKEN
+RUN git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/".insteadOf https://bbpgitlab.epfl.ch/
+
+# densities validation
+RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "densities-validation>=0.1.1"
+
+# leaves-only
+RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "cell-densities>=0.2.1"
+
+RUN git config --global --remove-section url."https://gitlab-ci-token:${CI_JOB_TOKEN}@bbpgitlab.epfl.ch/"
