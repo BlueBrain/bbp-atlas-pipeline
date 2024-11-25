@@ -31,8 +31,8 @@ jobs:
   deploy_docker_image:
     env:
       CI_REGISTRY_IMAGE: bluebrain/bbp-atlas-pipeline
-      REGISTRY_IMAGE_TAG: ${{ env.GITHUB_REF_NAME }}
-      REGISTRY_IMAGE_TAG_: $GITHUB_REF_NAME
+      REGISTRY_IMAGE_TAG: ${{ vars.GITHUB_REF_NAME }}
+      REGISTRY_IMAGE_TAG_: ${{ github.ref_name }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
