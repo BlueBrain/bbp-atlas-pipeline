@@ -1,13 +1,10 @@
-pytest
-pytest-cov
-pyyaml
 nexusforge>=0.8.2
-sphinx
-sphinx-bluebrain-theme
-myst-parser
-numpy
-voxcell
 click
+numpy
+pynrrd
+pyyaml
+voxcell
+pulp==2.7.0  # snakemake 7.32.3 breaks with pulp==2.8.0
+snakemake==7.32.3
 blue-cwl
-pipeline-validator>=0.3.1
 python-gitlab

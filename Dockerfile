@@ -24,7 +24,7 @@ COPY .. .
 #	export PATH=$PATH:$PWD/build/bin
 
 # Install the pipeline repository (along with the bbp-atlas CLI)
-RUN pip install .
+RUN pip install -r requirements.txt
 
 # Install dependencies
 
