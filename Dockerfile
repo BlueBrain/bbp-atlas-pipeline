@@ -14,9 +14,7 @@ RUN apt-get -y install pip git vim
 
 WORKDIR /pipeline
 
-RUN ls
 COPY .. .
-RUN ls
 
 # Regiodesics
 #RUN git clone https://bbpgitlab.epfl.ch/nse/archive/regiodesics  && \
@@ -26,8 +24,7 @@ RUN ls
 #	export PATH=$PATH:$PWD/build/bin
 
 # Install the pipeline repository (along with the bbp-atlas CLI)
-RUN ls blue_brain_atlas_pipeline/
-RUN pip install blue_brain_atlas_pipeline/
+RUN pip install .
 
 # Install dependencies
 
