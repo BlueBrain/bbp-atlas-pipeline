@@ -1,4 +1,4 @@
-name: Publish sdist tarball to PyPi
+name: Publish sdist tarball to PyPi and docker image to docker hub
  
 on:
   push:
