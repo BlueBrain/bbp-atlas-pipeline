@@ -47,4 +47,4 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: ${{ env.CI_REGISTRY_IMAGE:env.REGISTRY_IMAGE_TAG }}
+          tags: ${{ env.CI_REGISTRY_IMAGE\:env.REGISTRY_IMAGE_TAG }}
