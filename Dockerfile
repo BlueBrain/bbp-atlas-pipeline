@@ -40,7 +40,7 @@ RUN pip install git+https://github.com/BlueBrain/bbp-atlas-data-fetch.git@v0.3.0
 #RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "densities-validation>=0.1.1"
 
 # leaves-only
-RUN pip install git+https://github.com/BlueBrain/cell-density-validations@v0.2.1
+RUN pip install git+https://github.com/BlueBrain/cell-density-validations.git #@v0.2.1
 
 # module load py-bba-webexporter
 RUN pip install git+https://github.com/BlueBrain/bbp-atlas-web-exporter.git@v3.0.0
