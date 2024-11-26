@@ -11,10 +11,14 @@ RUN apt-get update && \
         libopenscenegraph-dev
 
 RUN apt-get -y install pip git vim
-
+RUN pwd
+RUN ls
 WORKDIR /pipeline
-
+RUN pwd
+RUN ls
 COPY .. .
+RUN pwd
+RUN ls
 
 # Regiodesics
 #RUN git clone https://bbpgitlab.epfl.ch/nse/archive/regiodesics  && \
@@ -24,7 +28,7 @@ COPY .. .
 #	export PATH=$PATH:$PWD/build/bin
 
 # Install the pipeline repository (along with the bbp-atlas CLI)
-RUN pip install -r requirements.txt
+RUN pip install .
 
 # Install dependencies
 
