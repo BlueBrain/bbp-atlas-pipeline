@@ -171,7 +171,7 @@ update-pipeline-image:
   allow_failure: true
   variables:
     BUILD_PATH: $CI_PROJECT_DIR
-    KANIKO_EXTRA_ARGS: "--build-arg CI_JOB_TOKEN=$CI_JOB_TOKEN --build-arg BBP_CA_CERT='$BBP_CA_CERT'"
+    KANIKO_EXTRA_ARGS: "--build-arg REF_NAME=$REGISTRY_IMAGE_TAG"
     KUBERNETES_MEMORY_LIMIT: 4Gi
     KUBERNETES_MEMORY_REQUEST: 4Gi
   before_script:
