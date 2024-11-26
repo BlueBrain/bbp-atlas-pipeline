@@ -14,17 +14,13 @@ RUN apt-get update && \
 
 RUN apt-get -y install pip git vim
 
-RUN pwd
-RUN ls -a
-RUN git clone https://github.com/BlueBrain/bbp-atlas-pipeline.git@${REF_NAME} /pipeline
-RUN pwd
-RUN ls -a
-WORKDIR /pipeline
-RUN pwd
-RUN ls -a
-#COPY .. .
 #RUN pwd
 #RUN ls -a
+#RUN git clone https://github.com/BlueBrain/bbp-atlas-pipeline.git@ /pipeline
+
+WORKDIR /pipeline
+
+COPY .. .
 
 # Regiodesics
 #RUN git clone https://bbpgitlab.epfl.ch/nse/archive/regiodesics  && \
@@ -35,7 +31,7 @@ RUN ls -a
 
 
 # Install the pipeline repository (along with the bbp-atlas CLI)
-RUN pip install .
+RUN pip install git+https://github.com/BlueBrain/bbp-atlas-pipeline.git${REF_NAME}
 
 # Install dependencies
 
