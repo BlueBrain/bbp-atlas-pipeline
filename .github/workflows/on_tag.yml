@@ -36,8 +36,6 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Docker Hub Login
         uses: docker/login-action@v3
@@ -50,3 +48,5 @@ jobs:
         with:
           push: true
           tags: ${{ env.CI_REGISTRY_IMAGE }}:${{ env.REGISTRY_IMAGE_TAG }}
+          build-args: |
+            REF_NAME=${{ env.REGISTRY_IMAGE_TAG }}

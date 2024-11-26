@@ -1,5 +1,7 @@
 FROM python:3.10-slim
 
+ARG REF_NAME=main  # Default to 'main' if REF_NAME is not passed
+
 RUN apt-get update && \
         DEBIAN_FRONTEND="noninteractive" TZ="Europe/Zurich" apt-get install -y tzdata && \
         apt-get install -y --no-install-recommends \
@@ -12,17 +14,17 @@ RUN apt-get update && \
 
 RUN apt-get -y install pip git vim
 
-#RUN pwd
-#RUN ls -a
-#RUN git clone https://github.com/BlueBrain/bbp-atlas-pipeline.git@ /pipeline
+RUN pwd
+RUN ls -a
+RUN git clone https://github.com/BlueBrain/bbp-atlas-pipeline.git@${REF_NAME} /pipeline
 RUN pwd
 RUN ls -a
 WORKDIR /pipeline
 RUN pwd
 RUN ls -a
-COPY .. .
-RUN pwd
-RUN ls -a
+#COPY .. .
+#RUN pwd
+#RUN ls -a
 
 # Regiodesics
 #RUN git clone https://bbpgitlab.epfl.ch/nse/archive/regiodesics  && \
