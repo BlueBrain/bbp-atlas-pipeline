@@ -31,7 +31,7 @@ COPY .. .
 
 
 # Install the pipeline repository (along with the bbp-atlas CLI)
-RUN pip install git+https://github.com/BlueBrain/bbp-atlas-pipeline.git${REF_NAME}
+RUN pip install git+https://github.com/BlueBrain/bbp-atlas-pipeline.git@${REF_NAME}
 
 # Install dependencies
 
