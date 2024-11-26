@@ -12,6 +12,11 @@ RUN apt-get update && \
 
 RUN apt-get -y install pip git vim
 
+#RUN pwd
+#RUN ls -a
+#RUN git clone https://github.com/BlueBrain/bbp-atlas-pipeline.git@ /pipeline
+RUN pwd
+RUN ls -a
 WORKDIR /pipeline
 RUN pwd
 RUN ls -a
@@ -26,7 +31,6 @@ RUN ls -a
 #	cmake ..  &&  make -j  &&  cd ..  && \
 #	export PATH=$PATH:$PWD/build/bin
 
-RUN pip install --upgrade pip setuptools wheel
 
 # Install the pipeline repository (along with the bbp-atlas CLI)
 RUN pip install .
