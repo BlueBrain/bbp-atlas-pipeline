@@ -40,7 +40,8 @@ RUN pip install git+https://github.com/BlueBrain/bbp-atlas-data-fetch.git@v0.3.0
 RUN pip install git+https://github.com/BlueBrain/molsys-cell-atlas.git@v1.0.0
 
 # leaves-only
-RUN pip install git+https://github.com/BlueBrain/cell-density-validations.git@v0.2.1
+RUN git clone --branch v0.2.1 https://github.com/BlueBrain/cell-density-validations.git cell-density-validation
+RUN pip install cell-density-validation/cell-densities/
 
 # module load py-bba-webexporter
 RUN pip install git+https://github.com/BlueBrain/bbp-atlas-web-exporter.git@v3.0.0
