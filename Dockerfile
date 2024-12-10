@@ -37,7 +37,7 @@ RUN pip install "blue-brain-token-fetch>=1.0.0"
 RUN pip install git+https://github.com/BlueBrain/bbp-atlas-data-fetch.git@v0.3.0
 
 # densities validation
-#RUN pip install -i https://bbpteam.epfl.ch/repository/devpi/simple/ "densities-validation>=0.1.1"
+RUN pip install git+https://github.com/BlueBrain/molsys-cell-atlas.git@v1.0.0
 
 # leaves-only
 RUN pip install git+https://github.com/BlueBrain/cell-density-validations.git@v0.2.1
